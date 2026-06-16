@@ -86,6 +86,15 @@ test('classify: M6.7 shallow near Palu => HIGH with tsunami CAUTION despite "no 
   assert.match(msg.body, /tidak berpotensi tsunami/i); // still reports the official status
 });
 
+test('classify: M4.2 near Palu => LOW (new below-5.0 heads-up level)', () => {
+  const e = new Event({ source: 'BMKG', id: 'x', time: new Date(), magnitude: 4.2, depthKm: 10, lat: -1.0, lon: 120.0, tsunamiFlag: false });
+  const [m] = clusterEvents([e]);
+  assert.equal(classify(m).level, 'LOW');
+  const msg = buildMessage(m);
+  assert.match(msg.subject, /🟢/);
+  assert.match(msg.body, /heads-up/i);
+});
+
 test('classify: official tsunami warning => CRITICAL', () => {
   const e = new Event({ source: 'BMKG', id: 'x', time: new Date(), magnitude: 7.4, depthKm: 10, lat: -1.0, lon: 119.8, tsunamiFlag: true });
   const [m] = clusterEvents([e]);

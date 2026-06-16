@@ -4,6 +4,7 @@
 import { haversineKm } from './geo.js';
 import {
   PALU,
+  MIN_MAGNITUDE,
   STRONG_MAGNITUDE,
   TSUNAMI_MAG,
   SHALLOW_KM,
@@ -194,7 +195,8 @@ export function classify(m) {
   let level;
   if (mag >= 7 || tsunami === 'warning') level = 'CRITICAL';
   else if (strong || tsunami === 'caution') level = 'HIGH';
-  else level = 'MODERATE';
+  else if (mag >= MIN_MAGNITUDE) level = 'MODERATE';
+  else level = 'LOW'; // below MIN_MAGNITUDE: minor/heads-up tier
 
   return { dist, shallow, strong, tsunami, level };
 }
@@ -212,7 +214,7 @@ export function witaString(date) {
   )}:${pad(d.getUTCMinutes())} WITA`;
 }
 
-const ICON = { CRITICAL: '🔴', HIGH: '🟠', MODERATE: '🟡' };
+const ICON = { CRITICAL: '🔴', HIGH: '🟠', MODERATE: '🟡', LOW: '🟢' };
 
 // Returns { subject, body }. Body is bilingual (Bahasa Indonesia + English)
 // because recipients may include relatives who don't read English.
@@ -246,6 +248,10 @@ export function buildMessage(m) {
     action =
       'Berlindung (merunduk, lindungi kepala), jauhi bangunan/jendela, siap untuk gempa susulan. ' +
       '/ Take cover, stay clear of buildings/windows, expect aftershocks.';
+  } else if (c.level === 'LOW') {
+    action =
+      'Gempa kecil — dampak minim, ini hanya info. Tetap waspada. ' +
+      '/ Minor quake — little expected impact, just a heads-up. Stay aware.';
   } else {
     action =
       'Tetap tenang dan waspada gempa susulan. / Stay calm and watch for aftershocks.';

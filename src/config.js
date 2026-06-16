@@ -24,7 +24,10 @@ export const PALU = {
 
 // --- What counts as alert-worthy -------------------------------------------
 export const ALERT_RADIUS_KM = num('ALERT_RADIUS_KM', 350); // only events this close to Palu
-export const MIN_MAGNITUDE = num('MIN_MAGNITUDE', 5.0); // below this: log only, no alert
+export const MIN_MAGNITUDE = num('MIN_MAGNITUDE', 5.0); // boundary: below this => LOW level
+export const INFO_MAGNITUDE = num('INFO_MAGNITUDE', 4.0); // alert floor; below this: log only
+// (Set INFO_MAGNITUDE=2.5 to be alerted about every minor quake the feeds report
+//  — expect many during an aftershock sequence; risk of alert fatigue.)
 export const STRONG_MAGNITUDE = num('STRONG_MAGNITUDE', 6.0); // likely strongly felt nearby
 export const TSUNAMI_MAG = num('TSUNAMI_MAG', 6.5); // precautionary high-ground threshold
 export const SHALLOW_KM = num('SHALLOW_KM', 70); // shallow quakes shake/displace water more

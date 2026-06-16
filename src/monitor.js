@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import {
   ALERT_RADIUS_KM,
-  MIN_MAGNITUDE,
+  INFO_MAGNITUDE,
   MAX_EVENT_AGE_HOURS,
   ESCALATION_DELTA,
   POLL_SECONDS,
@@ -123,7 +123,7 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
 
   const merged = clusterEvents(events)
     .filter((m) => m.distanceToPalu() <= ALERT_RADIUS_KM)
-    .filter((m) => m.magnitude >= MIN_MAGNITUDE)
+    .filter((m) => m.magnitude >= INFO_MAGNITUDE)
     .filter((m) => ignoreAge || now - m.time.getTime() <= maxAgeMs)
     .sort((a, b) => a.time - b.time);
 
