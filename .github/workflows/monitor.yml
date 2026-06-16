@@ -1,0 +1,55 @@
+# ALWAYS-ON BACKUP runtime: free on a PRIVATE repo, zero infrastructure.
+#
+# Role: the home PC monitor polls every 45s (fast primary). This runs every
+# 30 min as the backup that keeps watching when the PC is off.
+#
+# Why 30 min: GitHub Free gives private repos 2,000 Actions-min/month, billed
+# at 1-min minimum per run. 30-min cadence = ~1,440 min/month, safely free.
+# (5-min cadence would be ~8,640 min/month and exceed the free tier.)
+#
+# Honest caveats:
+#   * Scheduled runs can be DELAYED under GitHub load (not minute-accurate).
+#   * GitHub auto-DISABLES scheduled workflows after 60 days of repo inactivity.
+#   * Filesystem is ephemeral; dedup state is persisted via actions/cache
+#     (best-effort) so the same quake isn't re-alerted each run.
+#
+# Setup: add these repository secrets (Settings -> Secrets -> Actions):
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_IDS, HEARTBEAT_URL  (and TWILIO_* if used)
+
+name: palu-quake-monitor
+on:
+  schedule:
+    - cron: '*/30 * * * *' # every 30 min — stays within the free tier (see above)
+  workflow_dispatch: {} # lets you trigger a run manually from the Actions tab
+
+concurrency:
+  group: palu-quake-monitor
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Restore dedup state
+        uses: actions/cache@v4
+        with:
+          path: state.json
+          key: quake-state-${{ github.run_id }}
+          restore-keys: quake-state-
+      - name: Poll once
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_IDS: ${{ secrets.TELEGRAM_CHAT_IDS }}
+          TWILIO_SID: ${{ secrets.TWILIO_SID }}
+          TWILIO_TOKEN: ${{ secrets.TWILIO_TOKEN }}
+          TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
+          TWILIO_TO: ${{ secrets.TWILIO_TO }}
+          HEARTBEAT_URL: ${{ secrets.HEARTBEAT_URL }}
+          # Look back 2h: covers the 30-min gap plus any delayed/skipped runs,
+          # so a quake isn't missed between cycles. Dedup prevents repeats.
+          MAX_EVENT_AGE_HOURS: '2'
+        run: node run.js --once

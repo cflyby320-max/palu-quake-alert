@@ -1,0 +1,17 @@
+{
+  "name": "palu-quake-alert",
+  "version": "1.0.0",
+  "description": "Rapid earthquake & tsunami-caution alerts for family in Palu, Indonesia. Dual-source (BMKG + USGS), zero dependencies.",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node --env-file=.env run.js",
+    "once": "node --env-file=.env run.js --once",
+    "selftest": "node --env-file=.env run.js --selftest",
+    "demo": "node run.js --test",
+    "test": "node --test"
+  },
+  "private": true
+}
