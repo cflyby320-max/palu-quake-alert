@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palu Earthquake Alerts — Tentang, Ketentuan & Privasi</title>
+<meta name="description" content="Proyek komunitas tidak resmi: peringatan cepat gempa & potensi tsunami untuk Palu. Bukan peringatan dini. Selalu ikuti BMKG.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0C2A30;
+    --ink-soft:#3D5C61;
+    --paper:#EEF3F2;
+    --card:#FBFCFB;
+    --line:#D3DEDC;
+    --teal:#0F4C5C;
+    --teal-deep:#0A3742;
+    --amber:#C77B0A;
+    --green:#2E7D52;
+    --yellow:#D9A406;
+    --orange:#CC6B27;
+    --red:#B5362B;
+    --maxw:880px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    font-size:16px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;}
+
+  /* seismic hairline */
+  .seismic{display:block;width:100%;height:22px;color:var(--teal);opacity:.5;}
+  .seismic path{fill:none;stroke:currentColor;stroke-width:2;}
+
+  header.masthead{
+    background:linear-gradient(160deg,var(--teal-deep),var(--teal));
+    color:#EAF4F3;
+    padding:38px 0 30px;
+  }
+  .badge{
+    display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;color:#0A3742;background:#FAD56A;
+    padding:5px 12px;border-radius:999px;margin-bottom:16px;
+  }
+  h1{
+    font-family:'Archivo',sans-serif;font-weight:800;line-height:1.08;
+    font-size:clamp(28px,6vw,44px);margin:0 0 8px;letter-spacing:-.01em;
+  }
+  .sub{font-size:15px;color:#B9D6D3;max-width:46ch;margin:0;}
+  .updated{margin-top:18px;font-size:13px;color:#9CC4C1;}
+
+  main{padding:8px 0 60px;}
+  section{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:26px 26px 22px;margin:22px 0;
+  }
+  .eyebrow{
+    font-family:'Archivo',sans-serif;font-size:12px;font-weight:700;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:0 0 4px;
+  }
+  h2{
+    font-family:'Archivo',sans-serif;font-weight:700;
+    font-size:22px;margin:0 0 16px;color:var(--teal-deep);letter-spacing:-.01em;
+  }
+  h2 .en{display:block;font-size:14px;font-weight:500;color:var(--ink-soft);
+    font-family:'Inter',sans-serif;letter-spacing:0;text-transform:none;margin-top:2px;}
+
+  /* bilingual two-column */
+  .bi{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .bi .lang-label{font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink-soft);border-bottom:1px solid var(--line);padding-bottom:4px;margin-bottom:10px;}
+  .bi p{margin:0 0 10px;}
+  .bi ol,.bi ul{margin:0;padding-left:20px;}
+  .bi li{margin-bottom:9px;}
+
+  /* critical safety call-out — the one bold element */
+  .critical{
+    background:#fff;border:2px solid var(--red);border-left:8px solid var(--red);
+    border-radius:14px;padding:22px 24px;margin:22px 0;
+  }
+  .critical .eyebrow{color:var(--red);}
+  .critical h2{color:var(--red);}
+  .critical strong{color:var(--red);}
+
+  /* severity legend */
+  .levels{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:4px;}
+  .lvl{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:10px;
+    background:var(--paper);border:1px solid var(--line);}
+  .dot{flex:0 0 14px;width:14px;height:14px;border-radius:50%;margin-top:5px;}
+  .lvl b{font-family:'Archivo',sans-serif;font-size:13px;letter-spacing:.04em;}
+  .lvl span{display:block;font-size:13px;color:var(--ink-soft);}
+  .g{background:var(--green);} .y{background:var(--yellow);}
+  .o{background:var(--orange);} .r{background:var(--red);}
+
+  .how{display:flex;gap:16px;align-items:flex-start;margin-bottom:14px;}
+  .how .num{flex:0 0 34px;height:34px;border-radius:50%;background:var(--teal);
+    color:#fff;font-family:'Archivo',sans-serif;font-weight:700;font-size:16px;
+    display:flex;align-items:center;justify-content:center;}
+  .how p{margin:3px 0 0;}
+
+  .src{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
+  .chip{font-size:13px;font-weight:600;color:var(--teal-deep);background:var(--paper);
+    border:1px solid var(--line);border-radius:999px;padding:6px 14px;text-decoration:none;}
+  .chip:hover{border-color:var(--teal);}
+
+  a{color:var(--teal);}
+  .ph{background:#FFF3D6;border-bottom:1px dashed var(--amber);
+    padding:0 3px;border-radius:2px;font-weight:600;color:#7A4E00;}
+
+  footer{border-top:1px solid var(--line);padding:26px 0 50px;color:var(--ink-soft);font-size:13px;}
+  footer .deferral{font-weight:600;color:var(--ink);margin-bottom:6px;}
+  footer a{margin-right:16px;display:inline-block;margin-top:4px;}
+
+  @media (max-width:680px){
+    .bi{grid-template-columns:1fr;gap:14px;}
+    .levels{grid-template-columns:1fr;}
+    section{padding:22px 18px;}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+  a:focus-visible,.chip:focus-visible{outline:3px solid var(--amber);outline-offset:2px;}
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <span class="badge">Proyek Komunitas · Tidak Resmi</span>
+    <h1>Palu Earthquake Alerts</h1>
+    <p class="sub">Peringatan cepat gempa &amp; potensi tsunami untuk Palu. Bukan peringatan dini, bukan pengganti BMKG. / Rapid quake &amp; tsunami-caution alerts for Palu. Not early warning; not a substitute for BMKG.</p>
+    <p class="updated">Terakhir diperbarui / Last updated: <span class="ph">17 Juni 2026</span></p>
+  </div>
+</header>
+
+<svg class="seismic" viewBox="0 0 880 22" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 11 H120 l8 -8 8 16 8 -14 8 11 H300 l10 -9 9 9 H440 l7 -16 8 16 7 -6 8 6 H640 l9 -11 9 11 H880"/>
+</svg>
+
+<main class="wrap">
+
+  <section>
+    <p class="eyebrow">Tentang · About</p>
+    <h2>Apa ini — dan apa yang BUKAN<span class="en">What this is — and what it is not</span></h2>
+    <div class="bi">
+      <div>
+        <div class="lang-label">Bahasa Indonesia</div>
+        <p>Layanan komunitas yang mengirim peringatan cepat saat terjadi gempa di sekitar Palu, Sulawesi Tengah. Sumber: BMKG/InaTEWS dan USGS. Peringatan biasanya tiba <strong>2–5 menit setelah</strong> gempa dipublikasikan.</p>
+        <p>Ini <strong>BUKAN peringatan dini</strong> (tidak ada peringatan sebelum guncangan). Nilai sebenarnya: untuk gempa dekat, pesan bisa tiba sebelum tsunami atau gempa susulan mencapai Anda.</p>
+        <p>Dijalankan sukarela oleh warga, gratis selamanya, tidak komersial.</p>
+      </div>
+      <div>
+        <div class="lang-label">English</div>
+        <p>A community service that sends rapid alerts when an earthquake occurs near Palu, Central Sulawesi. Sources: BMKG/InaTEWS and USGS. Alerts usually arrive <strong>2–5 minutes after</strong> a quake is published.</p>
+        <p>This is <strong>NOT early warning</strong> (no alert before shaking). The real value: for a nearby quake, the message may arrive before a tsunami or aftershocks reach you.</p>
+        <p>Run voluntarily by residents, free forever, non-commercial.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="critical">
+    <p class="eyebrow">Aturan Keselamatan Utama · Critical Safety Rule</p>
+    <h2>Guncangan kuat di dekat pantai? Segera ke tempat tinggi.</h2>
+    <div class="bi">
+      <div>
+        <div class="lang-label">Bahasa Indonesia</div>
+        <p>Jika Anda merasakan <strong>guncangan kuat di dekat pantai</strong>, langsung menuju tempat tinggi — <strong>jangan menunggu</strong> peringatan, pesan bot ini, atau pernyataan "aman". Tsunami 2018 dipicu longsor, tidak terprediksi, dan peringatan resmi sempat dicabut lebih awal. "Tidak ada potensi tsunami" <strong>tidak berarti aman</strong>.</p>
+      </div>
+      <div>
+        <div class="lang-label">English</div>
+        <p>If you feel <strong>strong shaking near the coast</strong>, move to high ground immediately — <strong>do not wait</strong> for any warning, this bot's message, or an "all clear." The 2018 tsunami was landslide-driven, unpredicted, and the official warning was lifted early. "No tsunami potential" <strong>does not mean safe</strong>.</p>
+      </div>
+    </div>
+  </div>
+
+  <section>
+    <p class="eyebrow">Cara Pakai · How to Use</p>
+    <h2>Dua hal yang perlu Anda tahu<span class="en">Two things you need to know</span></h2>
+    <div class="how">
+      <div class="num">1</div>
+      <p><strong>Bergabung &amp; terima notifikasi.</strong> Ikuti channel/bot lewat tautan undangan, lalu aktifkan notifikasi Telegram agar pesan terlihat segera. / <em>Join &amp; turn on notifications.</em> Follow the channel/bot via the invite link, then enable Telegram notifications so alerts are seen right away.</p>
+    </div>
+    <div class="how">
+      <div class="num">2</div>
+      <p><strong>Anggap sebagai pelengkap, bukan andalan utama.</strong> Bertindaklah berdasarkan apa yang Anda rasakan dan instruksi BMKG/petugas lebih dulu; gunakan bot sebagai informasi tambahan. / <em>Treat it as a supplement, not your primary source.</em> Act on what you feel and on BMKG/officials first; use the bot as added information.</p>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Tingkat Peringatan · Severity Levels</p>
+    <h2>Arti warna peringatan<span class="en">What the alert colors mean</span></h2>
+    <div class="levels">
+      <div class="lvl"><span class="dot g"></span><div><b>🟢 LOW</b><span>M4.0–4.9 — info awal / heads-up.</span></div></div>
+      <div class="lvl"><span class="dot y"></span><div><b>🟡 MODERATE</b><span>M5.0–5.9 — kemungkinan terasa / may be felt.</span></div></div>
+      <div class="lvl"><span class="dot o"></span><div><b>🟠 HIGH</b><span>≥M6.0 dekat (≤200 km) atau kewaspadaan tsunami / strong nearby or tsunami caution.</span></div></div>
+      <div class="lvl"><span class="dot r"></span><div><b>🔴 CRITICAL</b><span>≥M7.0 atau peringatan tsunami resmi / official tsunami warning.</span></div></div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Ketentuan · Terms &amp; Disclaimer</p>
+    <h2>Ketentuan penggunaan<span class="en">Terms of use</span></h2>
+    <div class="bi">
+      <div>
+        <div class="lang-label">Bahasa Indonesia</div>
+        <ol>
+          <li>Bersifat informasi saja, bersumber dari BMKG &amp; USGS; dapat tertunda, tidak lengkap, atau direvisi. Tidak ada jaminan atas keakuratan, ketepatan waktu, atau keberhasilan pengiriman.</li>
+          <li><strong>BUKAN peringatan resmi dan BUKAN peringatan dini.</strong> Selalu utamakan BMKG, sirene, dan petugas setempat.</li>
+          <li><strong>Tsunami:</strong> jika merasakan guncangan kuat di dekat pantai, segera ke tempat tinggi — jangan menunggu konfirmasi apa pun.</li>
+          <li>Layanan disediakan "sebagaimana adanya" (as is), tanpa jaminan, dan digunakan atas risiko Anda sendiri. Sepanjang diizinkan hukum, pengelola tidak bertanggung jawab atas kerugian yang timbul dari penggunaan atau ketidaktersediaan layanan.</li>
+          <li>Gratis dan non-komersial. Dapat berubah atau berhenti sewaktu-waktu tanpa pemberitahuan.</li>
+        </ol>
+      </div>
+      <div>
+        <div class="lang-label">English</div>
+        <ol>
+          <li>Informational only; sourced from BMKG &amp; USGS; may be delayed, incomplete, or revised. No guarantee of accuracy, timeliness, or delivery.</li>
+          <li><strong>NOT an official warning and NOT early warning.</strong> Always prioritize BMKG, sirens, and local authorities.</li>
+          <li><strong>Tsunami:</strong> if you feel strong shaking near the coast, move to high ground immediately — do not wait for any confirmation.</li>
+          <li>Provided "as is," without warranty, used at your own risk. To the fullest extent permitted by law, the operator is not liable for any loss arising from use or unavailability of the service.</li>
+          <li>Free and non-commercial. May change or stop at any time without notice.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Privasi · Privacy</p>
+    <h2>Data Anda<span class="en">Your data</span></h2>
+    <div class="bi">
+      <div>
+        <div class="lang-label">Bahasa Indonesia</div>
+        <ul>
+          <li><strong>Yang dikumpulkan:</strong> tidak ada data pribadi. Anda menerima peringatan dengan bergabung ke channel Telegram; keanggotaan dikelola oleh Telegram, bukan oleh kami.</li>
+          <li><strong>Yang kami lihat:</strong> hanya jumlah anggota — bukan nama, ID, nomor telepon, atau lokasi Anda.</li>
+          <li><strong>Tidak dibagikan/dijual</strong> ke pihak mana pun. Kami tidak menyimpan maupun mempublikasikan daftar anggota.</li>
+          <li><strong>Berhenti kapan saja:</strong> cukup keluar dari channel. Tidak ada data yang perlu kami hapus karena kami memang tidak menyimpan apa pun.</li>
+          <li><strong>Pengelola:</strong> <span class="ph">[Nama community leader / pengelola]</span>, kontak di bawah.</li>
+        </ul>
+      </div>
+      <div>
+        <div class="lang-label">English</div>
+        <ul>
+          <li><strong>What we collect:</strong> no personal data. You receive alerts by joining the Telegram channel; membership is managed by Telegram, not by us.</li>
+          <li><strong>What we can see:</strong> member count only — not your name, ID, phone number, or location.</li>
+          <li><strong>Never shared or sold</strong> to anyone. We do not keep or publish a member list.</li>
+          <li><strong>Leave anytime:</strong> just leave the channel. There is nothing for us to delete because we store nothing.</li>
+          <li><strong>Data controller:</strong> <span class="ph">[Community leader / operator name]</span>, contact below.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Sumber · Sources</p>
+    <h2>Data peringatan berasal dari<span class="en">Alert data comes from</span></h2>
+    <p style="margin-top:0;color:var(--ink-soft);font-size:14px;">Peringatan resmi tetap milik dan tanggung jawab BMKG. / Official warnings remain the responsibility of BMKG.</p>
+    <div class="src">
+      <a class="chip" href="https://inatews.bmkg.go.id/" target="_blank" rel="noopener">BMKG / InaTEWS ↗</a>
+      <a class="chip" href="https://earthquake.usgs.gov/" target="_blank" rel="noopener">USGS ↗</a>
+    </div>
+  </section>
+
+  <section>
+    <p class="eyebrow">Kontak · Contact</p>
+    <h2>Hubungi &amp; laporkan<span class="en">Contact &amp; report</span></h2>
+    <div class="bi">
+      <div>
+        <div class="lang-label">Bahasa Indonesia</div>
+        <p>Pertanyaan, koreksi, atau laporan masalah:</p>
+        <ul>
+          <li>Instagram komunitas: <span class="ph">@nama_komunitas</span></li>
+          <li>Penggagas: <span class="ph">@instagram_kamu</span></li>
+          <li>Community leader: <span class="ph">@instagram_leader</span></li>
+          <li>Email: <span class="ph">kontak@contoh.com</span></li>
+        </ul>
+      </div>
+      <div>
+        <div class="lang-label">English</div>
+        <p>Questions, corrections, or to report a problem:</p>
+        <ul>
+          <li>Community Instagram: <span class="ph">@community_handle</span></li>
+          <li>Initiator: <span class="ph">@your_instagram</span></li>
+          <li>Community leader: <span class="ph">@leader_instagram</span></li>
+          <li>Email: <span class="ph">contact@example.com</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="deferral">Dalam keadaan darurat, selalu ikuti BMKG, sirene, dan petugas setempat. / In an emergency, always follow BMKG, sirens, and local authorities.</p>
+    <p>Proyek komunitas tidak resmi · Gratis &amp; non-komersial. / Unofficial community project · Free &amp; non-commercial.</p>
+    <a href="https://inatews.bmkg.go.id/" target="_blank" rel="noopener">BMKG InaTEWS</a>
+    <a href="https://t.me/Palu_quake_alert_bot" target="_blank" rel="noopener">Telegram bot</a>
+  </div>
+</footer>
+
+</body>
+</html>
