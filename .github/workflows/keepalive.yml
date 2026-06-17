@@ -1,0 +1,26 @@
+# Keep-alive: prevents GitHub from auto-disabling the scheduled monitor after
+# 60 days of repository inactivity. Pushes a tiny EMPTY commit weekly, which
+# counts as repo activity and resets the 60-day clock. No third-party actions.
+#
+# Note: commits pushed by GITHUB_TOKEN don't trigger other workflows, so this
+# won't cause loops or fire the monitor.
+name: keepalive
+on:
+  schedule:
+    - cron: '17 6 * * 1' # weekly, Monday ~06:17 UTC
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Empty commit to keep the repo active
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "chore: keepalive (prevent 60-day workflow disable)"
+          git push
