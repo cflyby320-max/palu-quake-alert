@@ -1,11 +1,10 @@
-# ALWAYS-ON BACKUP runtime: free on a PRIVATE repo, zero infrastructure.
+# ALWAYS-ON BACKUP runtime: free, zero infrastructure.
 #
 # Role: the home PC monitor polls every 45s (fast primary). This runs every
-# 30 min as the backup that keeps watching when the PC is off.
+# 5 min as the backup that keeps watching when the PC is off.
 #
-# Why 30 min: GitHub Free gives private repos 2,000 Actions-min/month, billed
-# at 1-min minimum per run. 30-min cadence = ~1,440 min/month, safely free.
-# (5-min cadence would be ~8,640 min/month and exceed the free tier.)
+# Cadence: 5 min = GitHub's scheduled minimum. The repo is PUBLIC, so Actions
+# minutes are unlimited/free — no quota to throttle against.
 #
 # Honest caveats:
 #   * Scheduled runs can be DELAYED under GitHub load (not minute-accurate).
@@ -19,7 +18,7 @@
 name: palu-quake-monitor
 on:
   schedule:
-    - cron: '*/30 * * * *' # every 30 min — stays within the free tier (see above)
+    - cron: '*/5 * * * *' # every 5 min (GitHub minimum); free because the repo is public
   workflow_dispatch: {} # lets you trigger a run manually from the Actions tab
 
 concurrency:
