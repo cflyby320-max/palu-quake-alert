@@ -76,7 +76,13 @@ async function sendTwilio(cfg, body, whatsapp) {
 // sends (console + file only) — used for tests and the offline demo.
 export async function notifyAll({ subject, body }, { dryRun = false } = {}) {
   log('ALERT', subject);
-  appendFileSync(LOG_FILE, body + '\n---\n');
+  // Guard the log write: a transient file lock (e.g. cloud-sync) must NEVER
+  // abort the actual alert delivery below.
+  try {
+    appendFileSync(LOG_FILE, body + '\n---\n');
+  } catch {
+    /* ignore — delivery is what matters */
+  }
 
   if (dryRun) {
     console.log('\n----- ALERT (dry-run, not sent externally) -----\n' + body + '\n');
