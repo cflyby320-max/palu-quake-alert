@@ -77,9 +77,9 @@ BMKG fields are free-text Indonesian strings whose format occasionally changes (
 
 ## Deployment
 
-- **Recommended production runtime:** the long-lived loop on an always-on host (Docker / VPS / Raspberry Pi). The `Dockerfile` points `STATE_FILE`/`LOG_FILE` at a `/data` volume so dedup state survives restarts; there is no `npm install` in the build.
-- **Free backup:** `.github/workflows/monitor.yml` runs `node run.js --once` on a 5-min cron (GitHub's minimum; free because the repo is public), persisting `state.json` via `actions/cache`. Caveats: scheduled runs can be delayed, and GitHub auto-disables scheduled workflows after 60 days of repo inactivity — `keepalive.yml` exists to counter that. Credentials live in repository Secrets, never in the repo.
-- **Heartbeat:** set `HEARTBEAT_URL` (e.g. healthchecks.io) so a silently dead watcher is detected.
+- **Recommended production runtime:** the long-lived loop on an always-on host. Use `docker compose up -d --build` (see `docker-compose.yml`) on a VPS/Pi, or `fly.toml` on Fly.io. The `Dockerfile` points `STATE_FILE`/`LOG_FILE` at a `/data` volume so dedup state survives restarts; there is no `npm install` in the build.
+- **Free backup only:** `.github/workflows/monitor.yml` runs `node run.js --once` on a 5-min cron. In practice GitHub drops/delays most scheduled runs (observed multi-hour gaps), and `keepalive.yml` exists because GitHub also disables scheduled workflows after 60 days of inactivity. This is NOT a reliable primary watcher — see the next point.
+- **Heartbeat:** set `HEARTBEAT_URL` (e.g. healthchecks.io) so a silently dead watcher is detected. `heartbeat()` is only called after a healthy cycle, and only pings if the env var is set in *that* runtime. Known footgun: if `HEARTBEAT_URL` is not added to the GitHub Actions Secrets, the cloud backup never pings — so the healthcheck reflects only the always-on host (or, if there is none, only whenever a developer's PC happens to be running the loop). Also note `runOnce` returns early *before* the heartbeat when both sources fail.
 
 ## Configuration
 
