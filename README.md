@@ -99,21 +99,38 @@ Reuses your Twilio credentials. Set `TWILIO_WHATSAPP_FROM` and
 
 ### Recommended: always-on (Docker / VPS / Raspberry Pi)
 A long-lived process polling every ~45s, with dedup state on a persistent
-volume. This is the right runtime for a safety tool.
+volume. **This is the right runtime for a safety tool** — it is the only setup
+that gives reliable coverage and a heartbeat that does not depend on your PC
+being on.
 
+Simplest, with `docker compose` (any VPS or a Raspberry Pi):
+```bash
+cp .env.example .env     # fill in TELEGRAM_* and HEARTBEAT_URL
+docker compose up -d --build
+docker compose logs -f   # expect a "cycle ok" line every ~45s
+```
+
+Or plain Docker:
 ```bash
 docker build -t palu-alert .
 docker run -d --restart=always --env-file .env -v palu_state:/data palu-alert
 ```
 
-Cheap hosts that work well: Fly.io, Railway, a small VPS, Oracle Cloud free
-tier, or a Raspberry Pi at a relative's house (bonus: local to Palu).
+On **Fly.io** (free-tier friendly, always-on, persistent volume): see
+`fly.toml` for the one-time `fly volumes create` / `fly secrets set` / `fly
+deploy` steps. Other good hosts: Railway, a small VPS, Oracle Cloud free tier,
+or a Raspberry Pi at a relative's house (bonus: local to Palu).
 
 ### Fallback: GitHub Actions (free, zero infra)
-`.github/workflows/monitor.yml` runs `--once` on a cron. **Caveat:** GitHub's
-minimum cron is 5 minutes and can be delayed — slower than BMKG publishes. Fine
-to get started; move to the always-on runtime for production. Put credentials in
-repository **Secrets**, not in the repo.
+`.github/workflows/monitor.yml` runs `--once` on a cron. **Caveats — important:**
+GitHub's minimum cron is 5 minutes, but in practice GitHub **silently drops and
+delays the vast majority of scheduled runs** (observed gaps of several hours).
+Combined with `MAX_EVENT_AGE_HOURS`, a quake that happens inside a gap can be
+older than the staleness window by the time a run finally fires, and is then
+skipped entirely. Treat this strictly as a backup, not a primary watcher. Put
+credentials in repository **Secrets**, not in the repo — and note that the
+heartbeat only fires from a runtime where `HEARTBEAT_URL` is actually set, so if
+you rely on the cron, add `HEARTBEAT_URL` to the repository Secrets too.
 
 ### Heartbeat (do this!)
 The scariest failure for a safety tool is dying silently. Create a free check at

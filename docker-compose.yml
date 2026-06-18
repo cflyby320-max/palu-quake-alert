@@ -1,0 +1,23 @@
+# Always-on runtime for a VPS or Raspberry Pi.
+#
+#   1. cp .env.example .env   # then fill in TELEGRAM_* and HEARTBEAT_URL
+#   2. docker compose up -d --build
+#   3. docker compose logs -f         # watch it; expect a "cycle ok" line every ~45s
+#
+# The long-lived process polls every POLL_SECONDS (45s) and pings HEARTBEAT_URL
+# after every healthy cycle, so the healthcheck stays solidly UP and is no longer
+# tied to your PC being on. Dedup state lives on the named volume below, so a
+# restart never re-spams recent quakes. `restart: always` brings it back after a
+# crash or host reboot.
+
+services:
+  palu-alert:
+    build: .
+    restart: always
+    env_file: .env
+    volumes:
+      - palu_state:/data
+    # STATE_FILE/LOG_FILE already point at /data in the Dockerfile.
+
+volumes:
+  palu_state:

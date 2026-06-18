@@ -1,0 +1,36 @@
+# Fly.io always-on deployment (free-tier friendly).
+#
+# This runs the alerter as a long-lived WORKER — it makes only outbound calls
+# (BMKG/USGS/Telegram/heartbeat), so there is no [http_service] and no public
+# port. The machine stays running 24/7 and polls every POLL_SECONDS.
+#
+# One-time setup (from this directory, with the `fly` CLI installed):
+#   fly launch --no-deploy --copy-config --name palu-quake-alert
+#   fly volumes create palu_state --region sin --size 1
+#   fly secrets set TELEGRAM_BOT_TOKEN=... TELEGRAM_CHAT_IDS=... HEARTBEAT_URL=...
+#   fly deploy
+#
+# Verify:   fly logs        # expect a "cycle ok" line every ~45s
+#
+# Region "sin" (Singapore) is the closest Fly region to Palu — lowest latency to
+# the BMKG feed. Secrets are set via `fly secrets`, NOT committed here.
+
+app = "palu-quake-alert"
+primary_region = "sin"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  STATE_FILE = "/data/state.json"
+  LOG_FILE = "/data/quake_alert.log"
+
+[mounts]
+  source = "palu_state"
+  destination = "/data"
+
+# Single instance only — two loops would double-send and race on state.
+# (The PID lockfile guards against this too, but keep the count at 1.)
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
