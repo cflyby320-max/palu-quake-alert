@@ -16,6 +16,12 @@ function list(key) {
     .filter(Boolean);
 }
 
+function bool(key, fallback) {
+  const v = process.env[key];
+  if (v === undefined || v === '') return fallback;
+  return /^(1|true|yes|on)$/i.test(v.trim());
+}
+
 // --- Who we are protecting: Palu city center -------------------------------
 export const PALU = {
   lat: num('PALU_LAT', -0.8917),
@@ -34,6 +40,21 @@ export const SHALLOW_KM = num('SHALLOW_KM', 70); // shallow quakes shake/displac
 export const MAX_EVENT_AGE_HOURS = num('MAX_EVENT_AGE_HOURS', 6); // max age for a real-time push; dedup makes a wider window safe, and the twice-daily digest catches anything older
 export const SHAKEMAP_MIN_MAG = num('SHAKEMAP_MIN_MAG', 5.5); // attach BMKG shakemap image at/above this magnitude
 export const SEQUENCE_WINDOW_HOURS = num('SEQUENCE_WINDOW_HOURS', 24); // lookback for the "Nth quake near Palu" aftershock-context line
+
+// --- Seismic Activity Outlook (aftershock-probability heads-up) -------------
+// See OUTLOOK_DESIGN.md for the model, parameter sources, and safety framing.
+export const OUTLOOK_ENABLED = bool('OUTLOOK_ENABLED', true); // kill-switch; posts after a qualifying mainshock
+export const OUTLOOK_TRIGGER_MAG = num('OUTLOOK_TRIGGER_MAG', 5.5); // mainshock magnitude that triggers an Outlook
+export const OUTLOOK_FELT_MAG = num('OUTLOOK_FELT_MAG', 4.0); // "felt aftershock" threshold reported in the Outlook
+export const OUTLOOK_STRONG_MAG = num('OUTLOOK_STRONG_MAG', 6.0); // "strong/damaging aftershock" threshold
+// Reasenberg-Jones / modified-Omori generic parameters (approximate, configurable).
+export const AFTERSHOCK_A = num('AFTERSHOCK_A', -1.67); // productivity (more negative = fewer aftershocks)
+export const AFTERSHOCK_B = num('AFTERSHOCK_B', 1.0); // Gutenberg-Richter b-value default
+export const AFTERSHOCK_P = num('AFTERSHOCK_P', 1.07); // Omori-Utsu decay exponent
+export const AFTERSHOCK_C = num('AFTERSHOCK_C', 0.05); // Omori-Utsu time offset (days)
+export const B_MIN_SAMPLE = num('B_MIN_SAMPLE', 50); // min events before trusting a locally-fitted b-value
+export const CATALOG_MIN_MAG = num('CATALOG_MIN_MAG', 3.5); // accumulate near-Palu events at/above this into the catalog
+export const CATALOG_RETENTION_DAYS = num('CATALOG_RETENTION_DAYS', 60); // how long the local catalog is kept
 
 // --- Cross-source correlation (treat 2 feeds' versions as 1 physical quake) -
 export const SAME_EVENT_SECONDS = num('SAME_EVENT_SECONDS', 90);

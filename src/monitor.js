@@ -12,6 +12,16 @@ import {
   STATE_FILE,
   HEARTBEAT_URL,
   HTTP_TIMEOUT_MS,
+  OUTLOOK_ENABLED,
+  OUTLOOK_TRIGGER_MAG,
+  OUTLOOK_FELT_MAG,
+  OUTLOOK_STRONG_MAG,
+  CATALOG_MIN_MAG,
+  AFTERSHOCK_A,
+  AFTERSHOCK_B,
+  AFTERSHOCK_P,
+  AFTERSHOCK_C,
+  B_MIN_SAMPLE,
   activeChannelNames,
   channels,
 } from './config.js';
@@ -23,8 +33,21 @@ import {
   buildMessage,
   buildDigest,
   sequenceOrdinal,
+  bValueMLE,
+  outlookStats,
+  buildOutlook,
 } from './core.js';
-import { loadState, saveState, findPriorAlert, recordAlert, pruneState } from './state.js';
+import {
+  loadState,
+  saveState,
+  findPriorAlert,
+  recordAlert,
+  pruneState,
+  appendCatalog,
+  pruneCatalog,
+  findPriorOutlook,
+  recordOutlook,
+} from './state.js';
 import { notifyAll, sendTelegramTo, log } from './notify.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -108,6 +131,24 @@ function allChannelsFailed(res) {
   return Boolean(res && !res.dryRun && res.results.length > 0 && res.results.every((r) => !r.ok));
 }
 
+// After a qualifying mainshock alert, post the Seismic Activity Outlook once
+// (deduped). Uses a locally-fitted b-value when the catalog is rich enough,
+// otherwise the configured default. Best-effort: never throws into the cycle.
+async function maybeSendOutlook(state, m, dryRun) {
+  if (!OUTLOOK_ENABLED || m.magnitude < OUTLOOK_TRIGGER_MAG) return;
+  if (findPriorOutlook(state, m)) return;
+  try {
+    const localB = bValueMLE((state.catalog || []).map((a) => a.mag), CATALOG_MIN_MAG, 0.1, B_MIN_SAMPLE);
+    const params = { a: AFTERSHOCK_A, b: localB ?? AFTERSHOCK_B, p: AFTERSHOCK_P, c: AFTERSHOCK_C };
+    const stats = outlookStats(m.magnitude, params, { feltMag: OUTLOOK_FELT_MAG, strongMag: OUTLOOK_STRONG_MAG });
+    await notifyAll(buildOutlook(m, stats), { dryRun });
+    recordOutlook(state, m);
+    log('INFO', `outlook posted for M${m.magnitude.toFixed(1)} (b=${params.b.toFixed(2)} ${localB ? 'local' : 'default'})`);
+  } catch (e) {
+    log('ERROR', `outlook failed (alert already sent): ${e && e.stack ? e.stack : e}`);
+  }
+}
+
 // One full cycle. Returns number of alerts sent.
 export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge = false } = {}) {
   let events = [];
@@ -137,8 +178,13 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
   const now = Date.now();
   const maxAgeMs = MAX_EVENT_AGE_HOURS * 3600 * 1000;
 
-  const merged = clusterEvents(events)
-    .filter((m) => m.distanceToPalu() <= ALERT_RADIUS_KM)
+  // All near-Palu quakes this cycle. Accumulate the local catalog first (incl.
+  // sub-alert-floor events, regardless of age) so the Outlook model has data;
+  // then the alert pipeline applies the magnitude floor and freshness window.
+  const nearPalu = clusterEvents(events).filter((m) => m.distanceToPalu() <= ALERT_RADIUS_KM);
+  for (const m of nearPalu) appendCatalog(state, m, CATALOG_MIN_MAG);
+
+  const merged = nearPalu
     .filter((m) => m.magnitude >= INFO_MAGNITUDE)
     .filter((m) => ignoreAge || now - m.time.getTime() <= maxAgeMs)
     .sort((a, b) => a.time - b.time);
@@ -155,6 +201,7 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
       const res = await notifyAll(msg, { dryRun });
       if (allChannelsFailed(res)) deliveryFailed = true;
       recordAlert(state, m);
+      await maybeSendOutlook(state, m, dryRun);
       sent++;
     } else if (m.magnitude - prior.mag >= ESCALATION_DELTA) {
       // Preliminary magnitude was revised upward — re-alert as an escalation.
@@ -166,11 +213,14 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
       const res = await notifyAll(msg, { dryRun });
       if (allChannelsFailed(res)) deliveryFailed = true;
       prior.mag = m.magnitude;
+      // An upward revision may push the event over the Outlook trigger.
+      await maybeSendOutlook(state, m, dryRun);
       sent++;
     }
   }
 
   pruneState(state);
+  pruneCatalog(state);
   saveState(STATE_FILE, state);
   // Dead-man's-switch integrity: only signal "alive" to the heartbeat monitor if
   // delivery actually worked. A cycle that detected a quake but failed to send it
@@ -242,6 +292,47 @@ async function runDigest(hours, dryRun) {
   }
 }
 
+// Renders (and optionally posts) the Seismic Activity Outlook for the most recent
+// qualifying mainshock near Palu. Manual + unconditional (no dedup), so an
+// operator can preview or re-post: `node run.js --outlook [--dry-run]`.
+async function runOutlook(dryRun) {
+  const [bmkg, usgs] = await Promise.allSettled([fetchBmkg(), fetchUsgs()]);
+  const events = [];
+  if (bmkg.status === 'fulfilled') events.push(...bmkg.value);
+  else log('ERROR', `outlook BMKG fetch failed: ${bmkg.reason}`);
+  if (usgs.status === 'fulfilled') events.push(...usgs.value);
+  else log('ERROR', `outlook USGS fetch failed: ${usgs.reason}`);
+
+  const cutoff = Date.now() - 7 * 24 * 3600 * 1000;
+  const mainshock = clusterEvents(events)
+    .filter((m) => m.distanceToPalu() <= ALERT_RADIUS_KM)
+    .filter((m) => m.magnitude >= OUTLOOK_TRIGGER_MAG)
+    .filter((m) => m.time.getTime() >= cutoff)
+    .sort((a, b) => b.time - a.time)[0];
+  if (!mainshock) {
+    log('INFO', `No qualifying mainshock (>= M${OUTLOOK_TRIGGER_MAG}) near Palu in the last 7 days.`);
+    return;
+  }
+
+  const state = loadState(STATE_FILE);
+  const localB = bValueMLE((state.catalog || []).map((a) => a.mag), CATALOG_MIN_MAG, 0.1, B_MIN_SAMPLE);
+  const params = { a: AFTERSHOCK_A, b: localB ?? AFTERSHOCK_B, p: AFTERSHOCK_P, c: AFTERSHOCK_C };
+  const stats = outlookStats(mainshock.magnitude, params, { feltMag: OUTLOOK_FELT_MAG, strongMag: OUTLOOK_STRONG_MAG });
+  const { subject, body } = buildOutlook(mainshock, stats);
+  log('INFO', `outlook for M${mainshock.magnitude.toFixed(1)} (b=${params.b.toFixed(2)} ${localB ? 'local' : 'default'})`);
+  if (dryRun) {
+    console.log('\n----- OUTLOOK (dry-run, not sent) -----\n' + body + '\n');
+    return;
+  }
+  const channelId = channels.telegram.chatIds.find((id) => id.startsWith('-100'));
+  if (channelId) {
+    await sendTelegramTo(channelId, body);
+    log('INFO', `outlook posted to channel ${channelId}`);
+  } else {
+    await notifyAll({ subject, body }, { dryRun: false });
+  }
+}
+
 export async function main() {
   const args = new Set(process.argv.slice(2));
   if (args.has('--help')) {
@@ -254,6 +345,7 @@ export async function main() {
         '  node run.js --testsend   send a REAL test message to your channels',
         '  node run.js --test       offline demo using captured real data (dry-run)',
         '  node run.js --digest [h] post a recap of recent quakes to the channel (default 24h)',
+        '  node run.js --outlook    post an aftershock-probability Outlook for the latest mainshock',
         '  --dry-run                log alerts but do not send externally',
       ].join('\n')
     );
@@ -276,6 +368,8 @@ export async function main() {
     const hoursArg = process.argv.slice(2).find((a) => /^\d+$/.test(a));
     return runDigest(hoursArg ? Number(hoursArg) : 24, args.has('--dry-run'));
   }
+
+  if (args.has('--outlook')) return runOutlook(args.has('--dry-run'));
 
   const dryRun = args.has('--dry-run') || args.has('--test');
   const useFixtures = args.has('--test');

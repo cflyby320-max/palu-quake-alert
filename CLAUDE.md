@@ -20,6 +20,7 @@ npm test                  # run the offline unit tests (node --test); no network
 # Live operation (needs a configured .env):
 node --env-file=.env run.js          # continuous monitoring loop (polls every POLL_SECONDS)
 node --env-file=.env run.js --once   # single cycle, for cron / GitHub Actions
+node --env-file=.env run.js --outlook # post an aftershock-probability Outlook for the latest mainshock (add --dry-run to preview)
 node run.js --dry-run                # log alerts but never send externally
 ```
 
@@ -40,9 +41,11 @@ The entry point `run.js` calls `main()` in `src/monitor.js`, which dispatches on
 fetch BMKG + USGS (parallel, Promise.allSettled — one source failing is tolerated)
   → parse each into normalised Event objects
   → clusterEvents(): merge the two feeds' versions of the same quake into MergedEvent
+  → accumulate near-Palu events (>= CATALOG_MIN_MAG) into the local catalog (for the Outlook)
   → filter: within ALERT_RADIUS_KM, magnitude >= INFO_MAGNITUDE, not stale (MAX_EVENT_AGE_HOURS)
   → dedup against persisted state (findPriorAlert)
   → classify() + buildMessage() → notifyAll() across all configured channels
+  → if mainshock >= OUTLOOK_TRIGGER_MAG: buildOutlook() → notifyAll() (deduped, once)
   → prune + save state, then heartbeat ping
 ```
 
@@ -50,8 +53,8 @@ fetch BMKG + USGS (parallel, Promise.allSettled — one source failing is tolera
 
 - **`src/config.js`** — all tunables come from env vars (with defaults) via helpers `num()` / `list()`. Defines the `channels` object and `activeChannelNames()`. A channel is "active" only if its credentials are present, so the same code runs with Telegram, Twilio, both, or neither configured.
 - **`src/sources.js`** — network I/O only. `fetchJson()` wraps `fetch` with timeout + retry. `fetchBmkg()` combines `autogempa.json` (latest single event) with `gempaterkini.json` (recent list) and dedups; BMKG has no server-side geo filter. `fetchUsgs()` uses the USGS FDSN API's server-side radius filter around Palu.
-- **`src/core.js`** — **pure** (no network, no I/O), therefore fully unit-testable. Contains parsing (`parseBmkgEntry`, `parseUsgsFeature`), the `Event` and `MergedEvent` classes, `clusterEvents`, `classify`, and `buildMessage`. Most domain logic and safety rules live here.
-- **`src/state.js`** — JSON-file dedup memory (`state.json`). `findPriorAlert` matches by the same time+distance window used for cross-source merging, so a quake is recognised even if it gained a second source between polls. `pruneState` drops entries older than `STATE_RETENTION_DAYS`.
+- **`src/core.js`** — **pure** (no network, no I/O), therefore fully unit-testable. Contains parsing (`parseBmkgEntry`, `parseUsgsFeature`), the `Event` and `MergedEvent` classes, `clusterEvents`, `classify`, `buildMessage`/`buildDigest`, the per-alert context helpers (`compass`, `mapLink`, `sequenceOrdinal`), and the **Seismic Activity Outlook** math (`expectedAftershocks`, `probAtLeastOne`, `bValueMLE`, `probBucket`, `outlookStats`, `buildOutlook` — see `OUTLOOK_DESIGN.md`). Most domain logic and safety rules live here.
+- **`src/state.js`** — JSON-file memory (`state.json`) holding three arrays: `alerted` (dedup), `catalog` (the local event history that feeds the Outlook), and `outlooks` (Outlook dedup). `findPriorAlert`/`findPriorOutlook` match by the same time+distance window used for cross-source merging, so a quake is recognised even if it gained a second source between polls. `pruneState` drops `alerted`/`outlooks` older than `STATE_RETENTION_DAYS`; `pruneCatalog` keeps the catalog for `CATALOG_RETENTION_DAYS`.
 - **`src/notify.js`** — multi-channel, multi-recipient delivery. Console + file log always run. External channels run only when configured; each send is independent so one failing never blocks the others. `dryRun` skips external sends.
 - **`src/geo.js`** — `haversineKm` great-circle distance.
 - **`src/monitor.js`** — orchestration, the CLI dispatch, the continuous loop, fixture loading for `--test`, the heartbeat ping, and a PID-lockfile single-instance guard (prevents double-sends when both a manual run and a logon-autostart run start a loop).
@@ -64,6 +67,7 @@ These encode hard-won lessons from the 2018 Palu tsunami (which was landslide-ge
 2. **Conservative source merging for tsunami status** (`MergedEvent.tsunamiFlag`): warn if ANY source warns.
 3. **Honest framing.** This is rapid *notification* (~2–5 min after an event), not P-wave "early warning," and it does **not** replace BMKG/sirens/authorities. Keep this in any user-facing copy.
 4. **Bilingual (ID + EN), WITA time, calm tone.** Messages are Indonesian-first then English. Palu is WITA (UTC+8); time is computed from the UTC timestamp in `witaString` — do not use BMKG's WIB (`Jam`) field. The M4.0 default alert floor (`INFO_MAGNITUDE`) exists to avoid alert fatigue.
+5. **Seismic Activity Outlook framing** (`buildOutlook`; full rules in `OUTLOOK_DESIGN.md` §5). The aftershock-probability message is STRICTLY an "elevated probability over the next N hours," NEVER a deterministic prediction and NEVER an "all-clear." It must always: state the small-but-real chance of a *larger* quake, keep the high-ground rule, show coarse buckets/ranges (no false-precision percentages), note the model can be wrong (2018 was atypical), and defer to BMKG. These are enforced by tests in `test/offline.test.js`.
 
 Severity levels (`classify`): 🟢 LOW (below `MIN_MAGNITUDE`) · 🟡 MODERATE (>= `MIN_MAGNITUDE`) · 🟠 HIGH (strong nearby, or tsunami caution) · 🔴 CRITICAL (M>=7 or official tsunami warning).
 
@@ -83,7 +87,7 @@ BMKG fields are free-text Indonesian strings whose format occasionally changes (
 
 ## Configuration
 
-All config is env-driven; see `.env.example` for the full annotated list and `src/config.js` for defaults. Key knobs: `PALU_LAT`/`PALU_LON`, `ALERT_RADIUS_KM` (350), `INFO_MAGNITUDE` (4.0), `MIN_MAGNITUDE` (5.0), `STRONG_MAGNITUDE` (6.0), `TSUNAMI_MAG` (6.5), `SHALLOW_KM` (70), `MAX_EVENT_AGE_HOURS` (6), `POLL_SECONDS` (45), `ESCALATION_DELTA` (0.5, re-alert when a preliminary magnitude is revised up by this much), `SHAKEMAP_MIN_MAG` (5.5, attach the BMKG shakemap image to alerts at/above this magnitude), `SEQUENCE_WINDOW_HOURS` (24, lookback for the "Nth quake near Palu" aftershock-context line). Secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_IDS`, `TWILIO_*`) belong in `.env` (gitignored) or host secret stores — never committed.
+All config is env-driven; see `.env.example` for the full annotated list and `src/config.js` for defaults. Key knobs: `PALU_LAT`/`PALU_LON`, `ALERT_RADIUS_KM` (350), `INFO_MAGNITUDE` (4.0), `MIN_MAGNITUDE` (5.0), `STRONG_MAGNITUDE` (6.0), `TSUNAMI_MAG` (6.5), `SHALLOW_KM` (70), `MAX_EVENT_AGE_HOURS` (6), `POLL_SECONDS` (45), `ESCALATION_DELTA` (0.5, re-alert when a preliminary magnitude is revised up by this much), `SHAKEMAP_MIN_MAG` (5.5, attach the BMKG shakemap image to alerts at/above this magnitude), `SEQUENCE_WINDOW_HOURS` (24, lookback for the "Nth quake near Palu" aftershock-context line). **Seismic Activity Outlook** (see `OUTLOOK_DESIGN.md`): `OUTLOOK_ENABLED` (true, kill-switch), `OUTLOOK_TRIGGER_MAG` (5.5), `OUTLOOK_FELT_MAG` (4.0), `OUTLOOK_STRONG_MAG` (6.0), `AFTERSHOCK_A/B/P/C` (Reasenberg-Jones generic params), `CATALOG_MIN_MAG` (3.5), `CATALOG_RETENTION_DAYS` (60). Secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_IDS`, `TWILIO_*`) belong in `.env` (gitignored) or host secret stores — never committed.
 
 ## Known limitation: the bot is SEND-ONLY
 

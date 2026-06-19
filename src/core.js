@@ -13,6 +13,13 @@ import {
   WITA_OFFSET_HOURS,
   SHAKEMAP_MIN_MAG,
   SEQUENCE_WINDOW_HOURS,
+  AFTERSHOCK_A,
+  AFTERSHOCK_B,
+  AFTERSHOCK_P,
+  AFTERSHOCK_C,
+  B_MIN_SAMPLE,
+  OUTLOOK_FELT_MAG,
+  OUTLOOK_STRONG_MAG,
 } from './config.js';
 
 // A single earthquake observation from one source, normalised.
@@ -377,6 +384,126 @@ export function buildDigest(list, { hours, minMag, radiusKm }) {
     `Total: ${list.length} kejadian / events.`,
     'ℹ️ Rekap susulan (mungkin terlambat), BUKAN peringatan real-time. Selalu utamakan BMKG, sirene & petugas.',
     'A delayed recap, not a real-time alert — always follow BMKG & authorities.',
+  ].join('\n');
+  return { subject, body };
+}
+
+// --- Seismic Activity Outlook (aftershock probability) ----------------------
+// Operational aftershock-forecasting math (Reasenberg-Jones: modified Omori-Utsu
+// decay x Gutenberg-Richter scaling, Poisson probabilities). PURE. The full
+// derivation, parameter sources, and the MANDATORY safety-framing rules are in
+// OUTLOOK_DESIGN.md. Output is deliberately coarse (word buckets + rounded
+// ranges): this is an elevated-probability heads-up, NEVER a prediction.
+
+// ∫_S^T (t+c)^(-p) dt — the Omori-Utsu time integral (days), with the p==1 branch.
+export function omoriIntegral(S, T, p, c) {
+  if (Math.abs(p - 1) < 1e-9) return Math.log(T + c) - Math.log(S + c);
+  return ((T + c) ** (1 - p) - (S + c) ** (1 - p)) / (1 - p);
+}
+
+// Expected number of aftershocks of magnitude >= M in [S,T] days after a
+// mainshock of magnitude Mm.
+export function expectedAftershocks(Mm, M, S, T, params = {}) {
+  const { a = AFTERSHOCK_A, b = AFTERSHOCK_B, p = AFTERSHOCK_P, c = AFTERSHOCK_C } = params;
+  return 10 ** (a + b * (Mm - M)) * omoriIntegral(S, T, p, c);
+}
+
+// Poisson probability of at least one such event given the expected count.
+export function probAtLeastOne(expected) {
+  return 1 - Math.exp(-Math.max(0, expected));
+}
+
+// Aki (1965) max-likelihood Gutenberg-Richter b-value from magnitudes >= mc.
+// Returns null when the sample is too small or the fit is out of a sane range,
+// so callers fall back to the configured default rather than a noisy estimate.
+export function bValueMLE(magnitudes, mc, dM = 0.1, minSample = B_MIN_SAMPLE) {
+  const m = (magnitudes || []).filter((x) => Number.isFinite(x) && x >= mc - 1e-9);
+  if (m.length < minSample) return null;
+  const mean = m.reduce((s, x) => s + x, 0) / m.length;
+  const denom = mean - (mc - dM / 2);
+  if (!(denom > 0)) return null;
+  const b = Math.LOG10E / denom;
+  return b >= 0.5 && b <= 1.5 ? b : null;
+}
+
+// Coarse probability -> { id, en, range }: a bilingual word bucket plus a rounded
+// range string. We never surface a precise percentage (framing rule #2) — the
+// buckets/ranges absorb the real parameter uncertainty.
+const PROB_BUCKETS = [
+  { max: 0.1, id: 'RENDAH', en: 'LOW' },
+  { max: 0.33, id: 'SEDANG', en: 'MODERATE' },
+  { max: 0.67, id: 'TINGGI', en: 'HIGH' },
+  { max: Infinity, id: 'SANGAT TINGGI', en: 'VERY HIGH' },
+];
+const PROB_RANGES = [
+  [0.01, '<1%'],
+  [0.05, '~1–5%'],
+  [0.1, '~5–10%'],
+  [0.2, '~10–20%'],
+  [0.4, '~20–40%'],
+  [0.6, '~40–60%'],
+  [0.8, '~60–80%'],
+  [0.95, '~80–95%'],
+  [Infinity, '>95%'],
+];
+export function probBucket(p) {
+  const bucket = PROB_BUCKETS.find((x) => p < x.max);
+  const range = PROB_RANGES.find(([hi]) => p < hi)[1];
+  return { id: bucket.id, en: bucket.en, range };
+}
+
+// Headline probabilities for a mainshock of magnitude Mm: a felt aftershock and
+// a strong aftershock in the next 24 h, and a LARGER-than-mainshock quake in the
+// next 24 h and 7 days (the foreshock caveat). `params` carries the resolved
+// {a,b,p,c}; `opts` overrides the felt/strong thresholds.
+export function outlookStats(Mm, params = {}, opts = {}) {
+  const feltMag = opts.feltMag ?? OUTLOOK_FELT_MAG;
+  const strongMag = opts.strongMag ?? OUTLOOK_STRONG_MAG;
+  const P = (M, S, T) => probAtLeastOne(expectedAftershocks(Mm, M, S, T, params));
+  return {
+    Mm,
+    feltMag,
+    strongMag,
+    b: params.b ?? AFTERSHOCK_B,
+    felt24: P(feltMag, 0, 1),
+    strong24: P(strongMag, 0, 1),
+    larger24: P(Mm, 0, 1),
+    larger7: P(Mm, 0, 7),
+  };
+}
+
+// Build the bilingual Outlook message. MUST satisfy every framing rule in
+// OUTLOOK_DESIGN.md §5; the offline tests assert their presence.
+export function buildOutlook(m, stats) {
+  const mag = m.magnitude.toFixed(1);
+  const wita = witaString(m.time);
+  const felt = probBucket(stats.felt24);
+  const strong = probBucket(stats.strong24);
+  const larger = probBucket(stats.larger24);
+  const larger7 = probBucket(stats.larger7);
+  const fM = stats.feltMag.toFixed(1);
+  const sM = stats.strongMag.toFixed(1);
+
+  const subject = `📈 Prakiraan gempa susulan / Aftershock Outlook — M${mag} dekat Palu`;
+  const body = [
+    subject,
+    '',
+    `Setelah gempa M${mag} dekat Palu (${wita}), kemungkinan gempa susulan MENINGKAT untuk sementara. Ini perkiraan statistik, BUKAN ramalan gempa.`,
+    '',
+    'Dalam 24 jam ke depan (perkiraan kasar):',
+    `• Gempa susulan terasa (≥M${fM}): ${felt.id} (${felt.range})`,
+    `• Gempa susulan kuat (≥M${sM}): ${strong.id} (${strong.range})`,
+    `• Gempa LEBIH BESAR dari tadi: ${larger.id} (${larger.range}) — kecil tapi nyata`,
+    `7 hari ke depan, peluang gempa lebih besar: ${larger7.range}.`,
+    '',
+    'Peluang ini paling tinggi SEKARANG dan menurun seiring waktu.',
+    'Jika guncangan kuat di dekat pantai: JANGAN menunggu — segera ke tempat tinggi.',
+    'Utamakan BMKG, sirene & petugas. Model ini bisa keliru; kejadian luar biasa (seperti 2018) tidak selalu tercakup.',
+    '',
+    '— English —',
+    `After the M${mag} near Palu, aftershocks are temporarily MORE LIKELY. This is a statistical estimate, NOT a prediction of a specific quake.`,
+    `Next 24 h (rough): felt aftershock (≥M${fM}) ${felt.en} (${felt.range}) · strong (≥M${sM}) ${strong.en} (${strong.range}) · an even LARGER quake ${larger.en} (${larger.range}), small but real. Over 7 days the larger-quake chance is ${larger7.range}.`,
+    "The chance is highest NOW and decays with time. Strong shaking near the coast → move to high ground now, don't wait. Always follow BMKG & authorities; this model can be wrong and unusual events (like 2018) may not be captured.",
   ].join('\n');
   return { subject, body };
 }

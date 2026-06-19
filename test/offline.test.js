@@ -17,6 +17,13 @@ import {
   witaString,
   sequenceOrdinal,
   compass,
+  omoriIntegral,
+  expectedAftershocks,
+  probAtLeastOne,
+  bValueMLE,
+  probBucket,
+  outlookStats,
+  buildOutlook,
   Event,
 } from '../src/core.js';
 import { haversineKm, bearingDeg } from '../src/geo.js';
@@ -170,6 +177,70 @@ test('shakemap image is parsed and attached only at/above the magnitude threshol
   const small = parseBmkgEntry(fx('bmkg_autogempa.json').Infogempa.gempa); // M4.7, has Shakemap
   assert.ok(small.shakemap, 'shakemap URL parsed even for a small quake');
   assert.equal(buildMessage(clusterEvents([small])[0]).photo, null); // below 5.5 -> not attached
+});
+
+// --- Seismic Activity Outlook (Tier 3) -------------------------------------
+
+test('omoriIntegral handles both the p==1 and p!=1 branches', () => {
+  // p==1: ∫_0^(e-1) (t+1)^-1 dt = ln(e) - ln(1) = 1
+  assert.ok(Math.abs(omoriIntegral(0, Math.E - 1, 1, 1) - 1) < 1e-9);
+  // p==2,c==1,T==1: ((2)^-1 - (1)^-1)/(-1) = 0.5
+  assert.ok(Math.abs(omoriIntegral(0, 1, 2, 1) - 0.5) < 1e-9);
+});
+
+test('expectedAftershocks + probAtLeastOne match hand-computed values', () => {
+  // a=0,b=1,Mm=M -> 10^0 = 1; times omoriIntegral(0,1,2,1)=0.5
+  const n = expectedAftershocks(5, 5, 0, 1, { a: 0, b: 1, p: 2, c: 1 });
+  assert.ok(Math.abs(n - 0.5) < 1e-9);
+  assert.ok(Math.abs(probAtLeastOne(0.5) - (1 - Math.exp(-0.5))) < 1e-12);
+  assert.equal(probAtLeastOne(0), 0);
+});
+
+test('aftershock probabilities are monotonic in the expected directions', () => {
+  const p = { a: -1.67, b: 1.0, p: 1.07, c: 0.05 };
+  assert.ok(expectedAftershocks(7.0, 5.0, 0, 1, p) > expectedAftershocks(6.0, 5.0, 0, 1, p)); // bigger mainshock
+  assert.ok(expectedAftershocks(6.5, 4.0, 0, 1, p) > expectedAftershocks(6.5, 6.0, 0, 1, p)); // lower target M
+  assert.ok(expectedAftershocks(6.5, 5.0, 0, 7, p) > expectedAftershocks(6.5, 5.0, 0, 1, p)); // longer window
+});
+
+test('bValueMLE recovers a known b, and refuses small/insane samples', () => {
+  // Construct a sample whose mean gives b=1.0 for mc=3.0, dM=0.1:
+  // mean = (mc - dM/2) + log10(e)/b = 2.95 + 0.4342944819 = 3.3842944819
+  const mags = [...Array(5).fill(3.0), ...Array(5).fill(3.7685889639)];
+  assert.ok(Math.abs(bValueMLE(mags, 3.0, 0.1, 10) - 1.0) < 1e-6);
+  assert.equal(bValueMLE([3.0, 3.5], 3.0, 0.1, 10), null); // too few events
+  assert.equal(bValueMLE(Array(20).fill(10), 3.0, 0.1, 10), null); // b would be ~0.06 (out of range)
+});
+
+test('probBucket gives coarse word buckets + rounded ranges (no false precision)', () => {
+  assert.equal(probBucket(0.001).range, '<1%');
+  assert.deepEqual(probBucket(0.07), { id: 'RENDAH', en: 'LOW', range: '~5–10%' });
+  assert.deepEqual(probBucket(0.15), { id: 'SEDANG', en: 'MODERATE', range: '~10–20%' });
+  assert.deepEqual(probBucket(0.99), { id: 'SANGAT TINGGI', en: 'VERY HIGH', range: '>95%' });
+});
+
+test('buildOutlook obeys every safety-framing invariant', () => {
+  const e = new Event({ source: 'BMKG', id: 'ms', time: new Date('2026-06-16T03:27:44Z'), magnitude: 6.7, depthKm: 10, lat: -1.04, lon: 120.23, tsunamiFlag: false });
+  const [m] = clusterEvents([e]);
+  const stats = outlookStats(6.7, { a: -1.67, b: 1.0, p: 1.07, c: 0.05 }, { feltMag: 4.0, strongMag: 6.0 });
+  const { body } = buildOutlook(m, stats);
+
+  assert.match(body, /BUKAN ramalan/); // probabilistic, not a prediction (ID)
+  assert.match(body, /NOT a prediction/i); // (EN)
+  assert.match(body, /LEBIH BESAR/); // the larger-quake caveat, stated plainly (ID)
+  assert.match(body, /LARGER/); // (EN)
+  assert.match(body, /tempat tinggi/); // high-ground rule kept (ID)
+  assert.match(body, /high ground/i); // (EN)
+  assert.match(body, /menurun seiring waktu/); // decay honesty (ID)
+  assert.match(body, /decays with time/i); // (EN)
+  assert.match(body, /BMKG/); // defer to authorities
+  assert.match(body, /2018/); // model humility
+  assert.doesNotMatch(body, /\d+\.\d+%/); // NEVER a false-precision percentage
+
+  // sanity of the headline figures for a M6.7
+  assert.ok(stats.felt24 > 0.95, 'felt aftershock should read near-certain');
+  assert.ok(stats.larger24 < 0.2, 'a larger quake should read small');
+  assert.ok(stats.larger7 > stats.larger24, '7-day larger-quake chance exceeds 24h');
 });
 
 test('buildDigest formats a recap with count + safety note', () => {
