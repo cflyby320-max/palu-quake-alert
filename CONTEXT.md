@@ -54,7 +54,7 @@ recent **AND** not already alerted (dedup). All values are env-overridable.
 | `TSUNAMI_MAG` | 6.5 | large shallow quakes ≥ this get a high-ground caution |
 | `SHALLOW_KM` | 70 | "shallow" depth threshold |
 | `ALERT_RADIUS_KM` | 350 | distance from Palu considered |
-| `MAX_EVENT_AGE_HOURS` | 2 | ignore stale events (no startup spam) |
+| `MAX_EVENT_AGE_HOURS` | 6 | ignore stale events (no startup spam); older events only appear in the recap |
 
 **Severity levels:** 🟢 LOW (4.0–4.9, heads-up) · 🟡 MODERATE (5.0–5.9) ·
 🟠 HIGH (≥6.0 within 200 km, or tsunami caution) · 🔴 CRITICAL (≥7.0 or official

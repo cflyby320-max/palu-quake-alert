@@ -48,7 +48,8 @@ jobs:
           TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
           TWILIO_TO: ${{ secrets.TWILIO_TO }}
           HEARTBEAT_URL: ${{ secrets.HEARTBEAT_URL }}
-          # Look back 2h: covers the 30-min gap plus any delayed/skipped runs,
-          # so a quake isn't missed between cycles. Dedup prevents repeats.
-          MAX_EVENT_AGE_HOURS: '2'
+          # Look back 6h so an event that occurs during a multi-hour GitHub
+          # scheduling gap (observed 3–5h) still gets a real-time push, not just
+          # a line in the twice-daily recap. Dedup prevents repeats across runs.
+          MAX_EVENT_AGE_HOURS: '6'
         run: node run.js --once

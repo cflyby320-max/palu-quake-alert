@@ -31,7 +31,7 @@ export const INFO_MAGNITUDE = num('INFO_MAGNITUDE', 4.0); // alert floor; below 
 export const STRONG_MAGNITUDE = num('STRONG_MAGNITUDE', 6.0); // likely strongly felt nearby
 export const TSUNAMI_MAG = num('TSUNAMI_MAG', 6.5); // precautionary high-ground threshold
 export const SHALLOW_KM = num('SHALLOW_KM', 70); // shallow quakes shake/displace water more
-export const MAX_EVENT_AGE_HOURS = num('MAX_EVENT_AGE_HOURS', 2); // ignore stale events at startup
+export const MAX_EVENT_AGE_HOURS = num('MAX_EVENT_AGE_HOURS', 6); // max age for a real-time push; dedup makes a wider window safe, and the twice-daily digest catches anything older
 
 // --- Cross-source correlation (treat 2 feeds' versions as 1 physical quake) -
 export const SAME_EVENT_SECONDS = num('SAME_EVENT_SECONDS', 90);

@@ -88,7 +88,7 @@ Reuses your Twilio credentials. Set `TWILIO_WHATSAPP_FROM` and
 | `STRONG_MAGNITUDE` | 6.0 | Likely strongly felt nearby |
 | `TSUNAMI_MAG` | 6.5 | Large shallow quakes ≥ this get a high-ground caution |
 | `SHALLOW_KM` | 70 | "Shallow" threshold for tsunami caution |
-| `MAX_EVENT_AGE_HOURS` | 2 | Ignore stale events (prevents startup spam) |
+| `MAX_EVENT_AGE_HOURS` | 6 | Max age for a real-time push; older events appear only in the recap |
 | `POLL_SECONDS` | 45 | Loop interval (continuous mode) |
 | `HEARTBEAT_URL` | — | Dead-man's-switch ping (see below) |
 | `STATE_FILE` / `LOG_FILE` | state.json / quake_alert.log | Persistence paths |
@@ -125,9 +125,10 @@ or a Raspberry Pi at a relative's house (bonus: local to Palu).
 `.github/workflows/monitor.yml` runs `--once` on a cron. **Caveats — important:**
 GitHub's minimum cron is 5 minutes, but in practice GitHub **silently drops and
 delays the vast majority of scheduled runs** (observed gaps of several hours).
-Combined with `MAX_EVENT_AGE_HOURS`, a quake that happens inside a gap can be
-older than the staleness window by the time a run finally fires, and is then
-skipped entirely. Treat this strictly as a backup, not a primary watcher. Put
+Combined with `MAX_EVENT_AGE_HOURS` (6h), a quake that happens inside a longer
+gap can be older than the staleness window by the time a run finally fires; the
+twice-daily recap is the backstop that still surfaces it. Treat this strictly as
+a backup, not a primary watcher. Put
 credentials in repository **Secrets**, not in the repo — and note that the
 heartbeat only fires from a runtime where `HEARTBEAT_URL` is actually set, so if
 you rely on the cron, add `HEARTBEAT_URL` to the repository Secrets too.
