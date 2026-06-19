@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="MODERATE severity">
+  <!-- 🟡 MODERATE (M5.0–5.9) — medium-amplitude trace -->
+  <circle cx="64" cy="64" r="60" fill="#D9A406"/>
+  <circle cx="64" cy="64" r="57" fill="none" stroke="#9E7800" stroke-width="3" opacity="0.5"/>
+  <path d="M28 64 H47 L54 50 62 80 70 46 77 64 H100" fill="none"
+        stroke="#9E7800" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M28 64 H47 L54 50 62 80 70 46 77 64 H100" fill="none"
+        stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

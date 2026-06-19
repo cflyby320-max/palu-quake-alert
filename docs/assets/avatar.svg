@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="Palu Earthquake Alerts">
+  <!-- Palu Earthquake Alerts — bot avatar.
+       Brand: deep-teal medallion, a protective shield whose lower point reads as a
+       map pin, crossed by a seismic waveform with a single amber alert peak.
+       No text (must read at ~40px). Palette matches docs/index.html. -->
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0A3742"/>
+      <stop offset="1" stop-color="#0F4C5C"/>
+    </linearGradient>
+    <linearGradient id="shield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBFCFB"/>
+      <stop offset="1" stop-color="#E3ECEA"/>
+    </linearGradient>
+  </defs>
+
+  <!-- full-bleed background (square corners get cropped to a circle by Telegram) -->
+  <rect width="512" height="512" fill="url(#bg)"/>
+
+  <!-- radiating seismic rings, subtle, behind the shield -->
+  <g fill="none" stroke="#7FB7B8" stroke-width="6">
+    <circle cx="256" cy="256" r="156" opacity="0.10"/>
+    <circle cx="256" cy="256" r="212" opacity="0.07"/>
+  </g>
+
+  <!-- protective shield; the bottom point doubles as a location pin -->
+  <path d="M256 118
+           L372 158
+           V268
+           C372 338 322 386 256 416
+           C190 386 140 338 140 268
+           V158 Z"
+        fill="url(#shield)" stroke="#0A3742" stroke-width="6" stroke-linejoin="round"/>
+
+  <!-- seismic waveform across the shield -->
+  <path d="M168 268 H200 L214 250 232 300 256 176 282 312 300 256 314 268 H346"
+        fill="none" stroke="#0A3742" stroke-width="20"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- amber alert peak (the central spike) drawn over the base trace -->
+  <path d="M232 300 256 176 282 312"
+        fill="none" stroke="#C77B0A" stroke-width="20"
+        stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- pin focus dot at the shield tip -->
+  <circle cx="256" cy="372" r="13" fill="#0A3742"/>
+</svg>
