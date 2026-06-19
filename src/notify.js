@@ -37,16 +37,55 @@ async function postForm(url, form, headers = {}) {
   }
 }
 
-async function sendTelegram(text) {
-  const { token, chatIds } = channels.telegram;
-  const results = [];
-  for (const chatId of chatIds) {
+const TELEGRAM_CAPTION_MAX = 1024; // Telegram's hard limit for a photo caption.
+
+async function tgSendMessage(chatId, text) {
+  await postForm(`https://api.telegram.org/bot${channels.telegram.token}/sendMessage`, {
+    chat_id: chatId,
+    text,
+    disable_web_page_preview: 'true',
+  });
+}
+
+async function tgSendPhoto(chatId, photo, caption) {
+  await postForm(`https://api.telegram.org/bot${channels.telegram.token}/sendPhoto`, {
+    chat_id: chatId,
+    photo,
+    caption,
+  });
+}
+
+// Deliver one alert to one chat. The TEXT must always get through, so a broken
+// or unreachable shakemap image never blocks it: when a photo+caption fits we
+// send that single rich message but fall back to plain text if Telegram can't
+// fetch the image; when the body is too long for a caption we send the full
+// text first and add the image as a best-effort extra.
+async function deliverTelegram(chatId, { subject, body, photo }) {
+  if (photo && body.length <= TELEGRAM_CAPTION_MAX) {
     try {
-      await postForm(`https://api.telegram.org/bot${token}/sendMessage`, {
-        chat_id: chatId,
-        text,
-        disable_web_page_preview: 'true',
-      });
+      await tgSendPhoto(chatId, photo, body);
+      return;
+    } catch (e) {
+      log('WARN', `telegram shakemap photo failed (${chatId}); sending text only: ${e}`);
+      await tgSendMessage(chatId, body);
+      return;
+    }
+  }
+  await tgSendMessage(chatId, body);
+  if (photo) {
+    try {
+      await tgSendPhoto(chatId, photo, subject);
+    } catch (e) {
+      log('WARN', `telegram shakemap photo failed (${chatId}): ${e}`);
+    }
+  }
+}
+
+async function sendTelegram(msg) {
+  const results = [];
+  for (const chatId of channels.telegram.chatIds) {
+    try {
+      await deliverTelegram(chatId, msg);
       results.push({ channel: 'telegram', to: chatId, ok: true });
     } catch (e) {
       results.push({ channel: 'telegram', to: chatId, ok: false, error: String(e) });
@@ -55,13 +94,9 @@ async function sendTelegram(text) {
   return results;
 }
 
-// Send one message to a single chat (used by the digest to post to the channel).
+// Send one plain message to a single chat (used by the digest to post a recap).
 export async function sendTelegramTo(chatId, text) {
-  await postForm(`https://api.telegram.org/bot${channels.telegram.token}/sendMessage`, {
-    chat_id: chatId,
-    text,
-    disable_web_page_preview: 'true',
-  });
+  await tgSendMessage(chatId, text);
 }
 
 async function sendTwilio(cfg, body, whatsapp) {
@@ -83,7 +118,8 @@ async function sendTwilio(cfg, body, whatsapp) {
 
 // Sends one alert across every configured channel. `dryRun` skips external
 // sends (console + file only) — used for tests and the offline demo.
-export async function notifyAll({ subject, body }, { dryRun = false } = {}) {
+export async function notifyAll(msg, { dryRun = false } = {}) {
+  const { subject, body, photo } = msg;
   log('ALERT', subject);
   // Guard the log write: a transient file lock (e.g. cloud-sync) must NEVER
   // abort the actual alert delivery below.
@@ -94,12 +130,17 @@ export async function notifyAll({ subject, body }, { dryRun = false } = {}) {
   }
 
   if (dryRun) {
-    console.log('\n----- ALERT (dry-run, not sent externally) -----\n' + body + '\n');
+    console.log(
+      '\n----- ALERT (dry-run, not sent externally) -----\n' +
+        body +
+        (photo ? `\n[+ shakemap image attached: ${photo}]` : '') +
+        '\n'
+    );
     return { dryRun: true, results: [] };
   }
 
   const tasks = [];
-  if (channels.telegram.token && channels.telegram.chatIds.length) tasks.push(sendTelegram(body));
+  if (channels.telegram.token && channels.telegram.chatIds.length) tasks.push(sendTelegram(msg));
   if (channels.twilioSms.sid && channels.twilioSms.from && channels.twilioSms.to.length)
     tasks.push(sendTwilio(channels.twilioSms, body, false));
   if (
