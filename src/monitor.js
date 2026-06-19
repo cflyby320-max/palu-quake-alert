@@ -93,6 +93,14 @@ async function heartbeat() {
   }
 }
 
+// True only when an alert was actually attempted on >=1 external channel and
+// every one failed. dry-run and log-only cycles have empty results and are NOT
+// treated as delivery failures. Mirrors the "ALL channels failed" check in
+// notify.js so the heartbeat and the CRITICAL delivery log always agree.
+function allChannelsFailed(res) {
+  return Boolean(res && !res.dryRun && res.results.length > 0 && res.results.every((r) => !r.ok));
+}
+
 // One full cycle. Returns number of alerts sent.
 export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge = false } = {}) {
   let events = [];
@@ -129,11 +137,13 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
     .sort((a, b) => a.time - b.time);
 
   let sent = 0;
+  let deliveryFailed = false;
   for (const m of merged) {
     const prior = findPriorAlert(state, m);
     if (!prior) {
       const msg = buildMessage(m);
-      await notifyAll(msg, { dryRun });
+      const res = await notifyAll(msg, { dryRun });
+      if (allChannelsFailed(res)) deliveryFailed = true;
       recordAlert(state, m);
       sent++;
     } else if (m.magnitude - prior.mag >= ESCALATION_DELTA) {
@@ -143,7 +153,8 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
       msg.body = `⏫ Magnitudo diperbarui M${prior.mag.toFixed(1)} → M${m.magnitude.toFixed(
         1
       )} / Magnitude revised up.\n\n${msg.body}`;
-      await notifyAll(msg, { dryRun });
+      const res = await notifyAll(msg, { dryRun });
+      if (allChannelsFailed(res)) deliveryFailed = true;
       prior.mag = m.magnitude;
       sent++;
     }
@@ -151,7 +162,19 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
 
   pruneState(state);
   saveState(STATE_FILE, state);
-  await heartbeat();
+  // Dead-man's-switch integrity: only signal "alive" to the heartbeat monitor if
+  // delivery actually worked. A cycle that detected a quake but failed to send it
+  // on EVERY channel must NOT keep the healthcheck green — that silent
+  // "detector up, delivery down" state (e.g. a revoked bot token 404-ing every
+  // send) is exactly what the heartbeat exists to expose.
+  if (deliveryFailed) {
+    log(
+      'ERROR',
+      "Heartbeat SUPPRESSED — an alert failed on all channels this cycle. Dead-man's-switch will fire so you learn delivery is broken."
+    );
+  } else {
+    await heartbeat();
+  }
 
   log(
     'INFO',
