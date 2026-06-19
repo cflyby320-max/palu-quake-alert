@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="CRITICAL severity">
+  <!-- 🔴 CRITICAL (≥M7.0 or official tsunami warning) — tallest, full-amplitude spike -->
+  <circle cx="64" cy="64" r="60" fill="#B5362B"/>
+  <circle cx="64" cy="64" r="57" fill="none" stroke="#82231B" stroke-width="3" opacity="0.5"/>
+  <path d="M24 64 H42 L50 40 58 98 66 30 74 64 H104" fill="none"
+        stroke="#82231B" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 64 H42 L50 40 58 98 66 30 74 64 H104" fill="none"
+        stroke="#FFFFFF" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
