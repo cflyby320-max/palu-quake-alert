@@ -22,6 +22,15 @@ function bool(key, fallback) {
   return /^(1|true|yes|on)$/i.test(v.trim());
 }
 
+// Trimmed string env. Secrets pasted into a host's UI (e.g. GitHub Secrets)
+// very often pick up a stray leading/trailing space. A space in the bot-token
+// URL path is percent-encoded and makes Telegram return HTTP 404 ("Not Found"),
+// silently breaking delivery — so always trim tokens/credentials, never use raw.
+// (Tab/CR/newline happen to be stripped by the URL parser; a space is not.)
+function str(key) {
+  return (process.env[key] || '').trim();
+}
+
 // --- Who we are protecting: Palu city center -------------------------------
 export const PALU = {
   lat: num('PALU_LAT', -0.8917),
@@ -85,19 +94,19 @@ export const WITA_OFFSET_HOURS = 8;
 // runs whether you've configured Telegram, Twilio, both, or neither.
 export const channels = {
   telegram: {
-    token: process.env.TELEGRAM_BOT_TOKEN || '',
+    token: str('TELEGRAM_BOT_TOKEN'),
     chatIds: list('TELEGRAM_CHAT_IDS'),
   },
   twilioSms: {
-    sid: process.env.TWILIO_SID || '',
-    token: process.env.TWILIO_TOKEN || '',
-    from: process.env.TWILIO_FROM || '',
+    sid: str('TWILIO_SID'),
+    token: str('TWILIO_TOKEN'),
+    from: str('TWILIO_FROM'),
     to: list('TWILIO_TO'),
   },
   twilioWhatsapp: {
-    sid: process.env.TWILIO_SID || '',
-    token: process.env.TWILIO_TOKEN || '',
-    from: process.env.TWILIO_WHATSAPP_FROM || '', // e.g. "whatsapp:+14155238886"
+    sid: str('TWILIO_SID'),
+    token: str('TWILIO_TOKEN'),
+    from: str('TWILIO_WHATSAPP_FROM'), // e.g. "whatsapp:+14155238886"
     to: list('TWILIO_WHATSAPP_TO'),
   },
 };

@@ -252,3 +252,19 @@ test('buildDigest formats a recap with count + safety note', () => {
   assert.match(body, /M4\.6/);
   assert.match(body, /BMKG/); // the safety footer
 });
+
+// Regression: a stray space on the bot token (common when pasting into GitHub
+// Secrets) put a space in the Telegram URL path and returned HTTP 404, silently
+// breaking the channel digest. config must trim it. The monitor hid the bug
+// because it only sends on a real quake; the always-on digest exposed it.
+test('config trims surrounding whitespace from the Telegram bot token', async () => {
+  const saved = process.env.TELEGRAM_BOT_TOKEN;
+  process.env.TELEGRAM_BOT_TOKEN = '  123456:ABC-def_Ghi  ';
+  try {
+    const cfg = await import('../src/config.js?trim-regression');
+    assert.equal(cfg.channels.telegram.token, '123456:ABC-def_Ghi');
+  } finally {
+    if (saved === undefined) delete process.env.TELEGRAM_BOT_TOKEN;
+    else process.env.TELEGRAM_BOT_TOKEN = saved;
+  }
+});
