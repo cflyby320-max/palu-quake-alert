@@ -66,3 +66,21 @@ export async function fetchUsgs() {
   const features = data?.features || [];
   return features.map(parseUsgsFeature).filter(Boolean);
 }
+
+// Like fetchUsgs but for an explicit time window + magnitude floor — used by the
+// digest/recap. Higher limit since a window can contain many events.
+export async function fetchUsgsSince(startIso, minMag) {
+  const params = new URLSearchParams({
+    format: 'geojson',
+    latitude: String(PALU.lat),
+    longitude: String(PALU.lon),
+    maxradiuskm: String(ALERT_RADIUS_KM),
+    minmagnitude: String(minMag),
+    starttime: startIso,
+    orderby: 'time',
+    limit: '200',
+  });
+  const url = `https://earthquake.usgs.gov/fdsnws/event/1/query?${params}`;
+  const data = await fetchJson(url);
+  return (data?.features || []).map(parseUsgsFeature).filter(Boolean);
+}

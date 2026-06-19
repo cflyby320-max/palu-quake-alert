@@ -55,6 +55,15 @@ async function sendTelegram(text) {
   return results;
 }
 
+// Send one message to a single chat (used by the digest to post to the channel).
+export async function sendTelegramTo(chatId, text) {
+  await postForm(`https://api.telegram.org/bot${channels.telegram.token}/sendMessage`, {
+    chat_id: chatId,
+    text,
+    disable_web_page_preview: 'true',
+  });
+}
+
 async function sendTwilio(cfg, body, whatsapp) {
   const url = `https://api.twilio.com/2010-04-01/Accounts/${cfg.sid}/Messages.json`;
   const auth = 'Basic ' + Buffer.from(`${cfg.sid}:${cfg.token}`).toString('base64');
@@ -76,7 +85,13 @@ async function sendTwilio(cfg, body, whatsapp) {
 // sends (console + file only) — used for tests and the offline demo.
 export async function notifyAll({ subject, body }, { dryRun = false } = {}) {
   log('ALERT', subject);
-  appendFileSync(LOG_FILE, body + '\n---\n');
+  // Guard the log write: a transient file lock (e.g. cloud-sync) must NEVER
+  // abort the actual alert delivery below.
+  try {
+    appendFileSync(LOG_FILE, body + '\n---\n');
+  } catch {
+    /* ignore — delivery is what matters */
+  }
 
   if (dryRun) {
     console.log('\n----- ALERT (dry-run, not sent externally) -----\n' + body + '\n');

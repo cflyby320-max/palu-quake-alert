@@ -18,7 +18,13 @@ export function loadState(file) {
 }
 
 export function saveState(file, state) {
-  writeFileSync(file, JSON.stringify(state, null, 2));
+  // Guard against transient file locks (e.g. cloud-sync) so a failed save
+  // never crashes the cycle. Dedup is best-effort if a write is skipped.
+  try {
+    writeFileSync(file, JSON.stringify(state, null, 2));
+  } catch (e) {
+    console.error(`${new Date().toISOString()} [WARN] state save skipped: ${e.code || e}`);
+  }
 }
 
 // Match a merged event against an already-alerted physical event using the

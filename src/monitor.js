@@ -13,11 +13,12 @@ import {
   HEARTBEAT_URL,
   HTTP_TIMEOUT_MS,
   activeChannelNames,
+  channels,
 } from './config.js';
-import { fetchBmkg, fetchUsgs } from './sources.js';
-import { parseBmkgEntry, parseUsgsFeature, clusterEvents, buildMessage } from './core.js';
+import { fetchBmkg, fetchUsgs, fetchUsgsSince } from './sources.js';
+import { parseBmkgEntry, parseUsgsFeature, clusterEvents, buildMessage, buildDigest } from './core.js';
 import { loadState, saveState, findPriorAlert, recordAlert, pruneState } from './state.js';
-import { notifyAll, log } from './notify.js';
+import { notifyAll, sendTelegramTo, log } from './notify.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = join(__dirname, '..', 'fixtures');
@@ -92,6 +93,14 @@ async function heartbeat() {
   }
 }
 
+// True only when an alert was actually attempted on >=1 external channel and
+// every one failed. dry-run and log-only cycles have empty results and are NOT
+// treated as delivery failures. Mirrors the "ALL channels failed" check in
+// notify.js so the heartbeat and the CRITICAL delivery log always agree.
+function allChannelsFailed(res) {
+  return Boolean(res && !res.dryRun && res.results.length > 0 && res.results.every((r) => !r.ok));
+}
+
 // One full cycle. Returns number of alerts sent.
 export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge = false } = {}) {
   let events = [];
@@ -128,11 +137,13 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
     .sort((a, b) => a.time - b.time);
 
   let sent = 0;
+  let deliveryFailed = false;
   for (const m of merged) {
     const prior = findPriorAlert(state, m);
     if (!prior) {
       const msg = buildMessage(m);
-      await notifyAll(msg, { dryRun });
+      const res = await notifyAll(msg, { dryRun });
+      if (allChannelsFailed(res)) deliveryFailed = true;
       recordAlert(state, m);
       sent++;
     } else if (m.magnitude - prior.mag >= ESCALATION_DELTA) {
@@ -142,7 +153,8 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
       msg.body = `⏫ Magnitudo diperbarui M${prior.mag.toFixed(1)} → M${m.magnitude.toFixed(
         1
       )} / Magnitude revised up.\n\n${msg.body}`;
-      await notifyAll(msg, { dryRun });
+      const res = await notifyAll(msg, { dryRun });
+      if (allChannelsFailed(res)) deliveryFailed = true;
       prior.mag = m.magnitude;
       sent++;
     }
@@ -150,7 +162,19 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
 
   pruneState(state);
   saveState(STATE_FILE, state);
-  await heartbeat();
+  // Dead-man's-switch integrity: only signal "alive" to the heartbeat monitor if
+  // delivery actually worked. A cycle that detected a quake but failed to send it
+  // on EVERY channel must NOT keep the healthcheck green — that silent
+  // "detector up, delivery down" state (e.g. a revoked bot token 404-ing every
+  // send) is exactly what the heartbeat exists to expose.
+  if (deliveryFailed) {
+    log(
+      'ERROR',
+      "Heartbeat SUPPRESSED — an alert failed on all channels this cycle. Dead-man's-switch will fire so you learn delivery is broken."
+    );
+  } else {
+    await heartbeat();
+  }
 
   log(
     'INFO',
@@ -174,6 +198,40 @@ async function selftest() {
   log('INFO', 'Self-test done.');
 }
 
+// Posts a catch-up recap of recent qualifying quakes to the channel (or, if no
+// channel is configured, to all recipients). Reusable: `node run.js --digest 24`.
+async function runDigest(hours, dryRun) {
+  const startIso = new Date(Date.now() - hours * 3600 * 1000).toISOString().slice(0, 19);
+  const [usgs, bmkg] = await Promise.allSettled([
+    fetchUsgsSince(startIso, INFO_MAGNITUDE),
+    fetchBmkg(),
+  ]);
+  const events = [];
+  if (usgs.status === 'fulfilled') events.push(...usgs.value);
+  else log('ERROR', `digest USGS fetch failed: ${usgs.reason}`);
+  if (bmkg.status === 'fulfilled') events.push(...bmkg.value);
+  const cutoff = Date.now() - hours * 3600 * 1000;
+  const merged = clusterEvents(events)
+    .filter((m) => m.distanceToPalu() <= ALERT_RADIUS_KM)
+    .filter((m) => m.magnitude >= INFO_MAGNITUDE)
+    .filter((m) => m.time.getTime() >= cutoff)
+    .sort((a, b) => b.time - a.time)
+    .slice(0, 30);
+  const { body } = buildDigest(merged, { hours, minMag: INFO_MAGNITUDE, radiusKm: ALERT_RADIUS_KM });
+  log('INFO', `digest: ${merged.length} qualifying events in last ${hours}h`);
+  if (dryRun) {
+    console.log('\n----- DIGEST (dry-run, not sent) -----\n' + body + '\n');
+    return;
+  }
+  const channelId = channels.telegram.chatIds.find((id) => id.startsWith('-100'));
+  if (channelId) {
+    await sendTelegramTo(channelId, body);
+    log('INFO', `digest posted to channel ${channelId}`);
+  } else {
+    await notifyAll({ subject: 'Quake recap', body }, { dryRun: false });
+  }
+}
+
 export async function main() {
   const args = new Set(process.argv.slice(2));
   if (args.has('--help')) {
@@ -185,6 +243,7 @@ export async function main() {
         '  node run.js --selftest   check config + live feed connectivity',
         '  node run.js --testsend   send a REAL test message to your channels',
         '  node run.js --test       offline demo using captured real data (dry-run)',
+        '  node run.js --digest [h] post a recap of recent quakes to the channel (default 24h)',
         '  --dry-run                log alerts but do not send externally',
       ].join('\n')
     );
@@ -201,6 +260,11 @@ export async function main() {
       'This is only a test. If you received this, your earthquake alerts are WORKING.';
     await notifyAll({ subject: '🔔 TEST — Palu Quake Alerter', body }, { dryRun: false });
     return;
+  }
+
+  if (args.has('--digest')) {
+    const hoursArg = process.argv.slice(2).find((a) => /^\d+$/.test(a));
+    return runDigest(hoursArg ? Number(hoursArg) : 24, args.has('--dry-run'));
   }
 
   const dryRun = args.has('--dry-run') || args.has('--test');
