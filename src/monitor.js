@@ -16,7 +16,14 @@ import {
   channels,
 } from './config.js';
 import { fetchBmkg, fetchUsgs, fetchUsgsSince } from './sources.js';
-import { parseBmkgEntry, parseUsgsFeature, clusterEvents, buildMessage, buildDigest } from './core.js';
+import {
+  parseBmkgEntry,
+  parseUsgsFeature,
+  clusterEvents,
+  buildMessage,
+  buildDigest,
+  sequenceOrdinal,
+} from './core.js';
 import { loadState, saveState, findPriorAlert, recordAlert, pruneState } from './state.js';
 import { notifyAll, sendTelegramTo, log } from './notify.js';
 
@@ -139,16 +146,19 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
   let sent = 0;
   let deliveryFailed = false;
   for (const m of merged) {
+    // "Nth quake near Palu in 24h" — computed before recordAlert(m), so the
+    // ordinal counts the priors and lands on this event.
+    const sequenceN = sequenceOrdinal(state.alerted, m);
     const prior = findPriorAlert(state, m);
     if (!prior) {
-      const msg = buildMessage(m);
+      const msg = buildMessage(m, { sequenceN });
       const res = await notifyAll(msg, { dryRun });
       if (allChannelsFailed(res)) deliveryFailed = true;
       recordAlert(state, m);
       sent++;
     } else if (m.magnitude - prior.mag >= ESCALATION_DELTA) {
       // Preliminary magnitude was revised upward — re-alert as an escalation.
-      const msg = buildMessage(m);
+      const msg = buildMessage(m, { sequenceN });
       msg.subject = `⏫ DIPERBARUI / UPDATED: ${msg.subject}`;
       msg.body = `⏫ Magnitudo diperbarui M${prior.mag.toFixed(1)} → M${m.magnitude.toFixed(
         1

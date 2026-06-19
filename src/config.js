@@ -32,6 +32,8 @@ export const STRONG_MAGNITUDE = num('STRONG_MAGNITUDE', 6.0); // likely strongly
 export const TSUNAMI_MAG = num('TSUNAMI_MAG', 6.5); // precautionary high-ground threshold
 export const SHALLOW_KM = num('SHALLOW_KM', 70); // shallow quakes shake/displace water more
 export const MAX_EVENT_AGE_HOURS = num('MAX_EVENT_AGE_HOURS', 6); // max age for a real-time push; dedup makes a wider window safe, and the twice-daily digest catches anything older
+export const SHAKEMAP_MIN_MAG = num('SHAKEMAP_MIN_MAG', 5.5); // attach BMKG shakemap image at/above this magnitude
+export const SEQUENCE_WINDOW_HOURS = num('SEQUENCE_WINDOW_HOURS', 24); // lookback for the "Nth quake near Palu" aftershock-context line
 
 // --- Cross-source correlation (treat 2 feeds' versions as 1 physical quake) -
 export const SAME_EVENT_SECONDS = num('SAME_EVENT_SECONDS', 90);

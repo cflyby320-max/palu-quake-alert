@@ -1,7 +1,7 @@
 // Normalisation, cross-source merging, classification, and message building.
 // This module is pure (no network, no I/O) so it is fully unit-testable.
 
-import { haversineKm } from './geo.js';
+import { haversineKm, bearingDeg } from './geo.js';
 import {
   PALU,
   MIN_MAGNITUDE,
@@ -11,6 +11,8 @@ import {
   SAME_EVENT_SECONDS,
   SAME_EVENT_KM,
   WITA_OFFSET_HOURS,
+  SHAKEMAP_MIN_MAG,
+  SEQUENCE_WINDOW_HOURS,
 } from './config.js';
 
 // A single earthquake observation from one source, normalised.
@@ -27,6 +29,7 @@ export class Event {
     this.tsunamiFlag = o.tsunamiFlag; // true | false | null(unknown)
     this.felt = o.felt || null;
     this.url = o.url || '';
+    this.shakemap = o.shakemap || null; // direct BMKG shakemap image URL, if any
   }
 }
 
@@ -56,6 +59,7 @@ export function parseBmkgEntry(g) {
     return null; // defensive: skip malformed entries rather than crash
   }
   const felt = g.Dirasakan && g.Dirasakan.trim() && g.Dirasakan.trim() !== '-' ? g.Dirasakan.trim() : null;
+  const shakemap = g.Shakemap ? `https://data.bmkg.go.id/DataMKG/TEWS/${g.Shakemap}` : null;
   return new Event({
     source: 'BMKG',
     id: `BMKG:${g.DateTime}:${g.Coordinates}`,
@@ -67,9 +71,8 @@ export function parseBmkgEntry(g) {
     place: g.Wilayah || '',
     tsunamiFlag: parsePotensi(g.Potensi),
     felt,
-    url: g.Shakemap
-      ? `https://data.bmkg.go.id/DataMKG/TEWS/${g.Shakemap}`
-      : 'https://inatews.bmkg.go.id/',
+    shakemap,
+    url: shakemap || 'https://inatews.bmkg.go.id/',
   });
 }
 
@@ -139,6 +142,10 @@ export class MergedEvent {
   get url() {
     return this.primary.url;
   }
+  // Only BMKG publishes shakemaps, so the first non-null wins regardless of order.
+  get shakemap() {
+    return this.events.map((e) => e.shakemap).find(Boolean) || null;
+  }
   get felt() {
     return this.events.map((e) => e.felt).find(Boolean) || null;
   }
@@ -153,6 +160,58 @@ export class MergedEvent {
   distanceToPalu() {
     return haversineKm(this.lat, this.lon, PALU.lat, PALU.lon);
   }
+  // Direction the epicentre lies FROM Palu (so "NE of Palu" reads correctly).
+  bearingFromPalu() {
+    return bearingDeg(PALU.lat, PALU.lon, this.lat, this.lon);
+  }
+}
+
+// --- Direction, map link & aftershock context (pure presentation helpers) ---
+
+// 8-point compass label for a bearing: Indonesian name + English abbreviation.
+const COMPASS = [
+  { id: 'utara', en: 'N' },
+  { id: 'timur laut', en: 'NE' },
+  { id: 'timur', en: 'E' },
+  { id: 'tenggara', en: 'SE' },
+  { id: 'selatan', en: 'S' },
+  { id: 'barat daya', en: 'SW' },
+  { id: 'barat', en: 'W' },
+  { id: 'barat laut', en: 'NW' },
+];
+export function compass(deg) {
+  return COMPASS[Math.round((((deg % 360) + 360) % 360) / 45) % 8];
+}
+
+// A universally-tappable map link to the epicentre (opens the Maps app on phones).
+export function mapLink(lat, lon) {
+  return `https://www.google.com/maps?q=${lat},${lon}`;
+}
+
+// 1-based ordinal of event m among recent quakes near Palu, computed from the
+// persisted dedup records (plain {timeIso,lat,lon} rows, so this stays pure).
+// Counts distinct OTHER physical events in the preceding window — the same
+// time+distance window used for merging excludes m itself, so an escalation
+// re-alert of m is not miscounted — then +1 for m. Returns 1 if it stands alone.
+export function sequenceOrdinal(priorAlerts, m, hours = SEQUENCE_WINDOW_HOURS) {
+  const tEnd = m.time.getTime();
+  const tStart = tEnd - hours * 3600 * 1000;
+  let prior = 0;
+  for (const a of priorAlerts || []) {
+    const at = new Date(a.timeIso).getTime();
+    if (!(at >= tStart && at <= tEnd)) continue;
+    const sameEvent =
+      Math.abs(at - tEnd) <= SAME_EVENT_SECONDS * 1000 &&
+      haversineKm(a.lat, a.lon, m.lat, m.lon) <= SAME_EVENT_KM;
+    if (!sameEvent) prior++;
+  }
+  return prior + 1;
+}
+
+function ordinalEn(n) {
+  const s = ['th', 'st', 'nd', 'rd'];
+  const v = n % 100;
+  return n + (s[(v - 20) % 10] || s[v] || s[0]);
 }
 
 export function clusterEvents(events) {
@@ -216,12 +275,16 @@ export function witaString(date) {
 
 const ICON = { CRITICAL: '🔴', HIGH: '🟠', MODERATE: '🟡', LOW: '🟢' };
 
-// Returns { subject, body }. Body is bilingual (Bahasa Indonesia + English)
-// because recipients may include relatives who don't read English.
-export function buildMessage(m) {
+// Returns { subject, body, photo }. Body is bilingual (Bahasa Indonesia +
+// English) because recipients may include relatives who don't read English.
+// `photo` (a BMKG shakemap image URL, or null) is set for stronger quakes so a
+// channel that supports images can attach it. Pass `sequenceN` (from
+// sequenceOrdinal) to add the "Nth quake near Palu in 24h" aftershock context.
+export function buildMessage(m, { sequenceN } = {}) {
   const c = classify(m);
   const wita = witaString(m.time);
   const dist = Math.round(c.dist);
+  const dir = compass(m.bearingFromPalu());
   const conf = m.confirmed
     ? `Dikonfirmasi ${m.sources.join(' + ')}`
     : `Sumber: ${m.sources[0]} (data awal / preliminary)`;
@@ -259,24 +322,39 @@ export function buildMessage(m) {
 
   const subject = `${ICON[c.level] || ''} M${m.magnitude.toFixed(1)} ${dist} km dari Palu — ${c.level}`;
 
+  // Attach the BMKG shakemap for stronger quakes (channels that can't show an
+  // image just ignore this and keep the text alert).
+  const photo = m.magnitude >= SHAKEMAP_MIN_MAG && m.shakemap ? m.shakemap : null;
+
+  // Aftershock context only once there's actually been a prior quake recently —
+  // an isolated event shows no "1st quake" noise.
+  const aftershock =
+    sequenceN && sequenceN >= 2
+      ? `📊 Gempa ke-${sequenceN} di sekitar Palu dalam ${SEQUENCE_WINDOW_HOURS} jam terakhir. ` +
+        `/ ${ordinalEn(sequenceN)} quake near Palu in the last ${SEQUENCE_WINDOW_HOURS}h.`
+      : null;
+
   const lines = [
     subject,
     '',
     `Magnitudo / Magnitude: M${m.magnitude.toFixed(1)}`,
     `Lokasi / Location: ${m.place}`,
-    `Jarak ke Palu / Distance to Palu: ~${dist} km`,
+    `Jarak ke Palu / Distance to Palu: ~${dist} km ${dir.id} / ${dir.en}`,
     `Kedalaman / Depth: ${Number.isFinite(m.depthKm) ? m.depthKm + ' km' : 'n/a'}`,
     `Waktu / Time: ${wita}`,
     official,
     m.felt ? `Dirasakan / Felt: ${m.felt}` : null,
+    aftershock,
     '',
     `➡️ ${action}`,
     '',
+    `🗺️ Peta / Map: ${mapLink(m.lat, m.lon)}`,
     conf,
-    m.url ? `Detail: ${m.url}` : null,
+    // Skip the details link when it's the very image we're attaching as a photo.
+    m.url && m.url !== photo ? `Detail: ${m.url}` : null,
   ].filter((x) => x !== null);
 
-  return { subject, body: lines.join('\n') };
+  return { subject, body: lines.join('\n'), photo };
 }
 
 // Catch-up recap of recent quakes near Palu, for posting to the channel.

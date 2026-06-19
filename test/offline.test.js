@@ -15,9 +15,11 @@ import {
   buildMessage,
   buildDigest,
   witaString,
+  sequenceOrdinal,
+  compass,
   Event,
 } from '../src/core.js';
-import { haversineKm } from '../src/geo.js';
+import { haversineKm, bearingDeg } from '../src/geo.js';
 import { findPriorAlert, recordAlert } from '../src/state.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -118,6 +120,56 @@ test('dedup: same physical event matches a prior alert; far one does not', () =>
 
 test('WITA conversion adds 8 hours to UTC', () => {
   assert.match(witaString(new Date('2026-06-16T03:27:44Z')), /2026-06-16 11:27 WITA/);
+});
+
+test('bearingDeg + compass give cardinal directions (ID + EN)', () => {
+  assert.ok(Math.abs(bearingDeg(0, 0, 10, 0) - 0) < 1, 'due north ~0deg');
+  assert.ok(Math.abs(bearingDeg(0, 0, 0, 10) - 90) < 1, 'due east ~90deg');
+  assert.deepEqual(compass(0), { id: 'utara', en: 'N' });
+  assert.deepEqual(compass(90), { id: 'timur', en: 'E' });
+  assert.deepEqual(compass(45), { id: 'timur laut', en: 'NE' });
+});
+
+test('buildMessage includes a map link and the compass bearing from Palu', () => {
+  // Epicentre north-east of Palu (higher lat = north, higher lon = east).
+  const e = new Event({ source: 'BMKG', id: 'ne', time: new Date(), magnitude: 5.0, depthKm: 10, lat: -0.3, lon: 120.5, tsunamiFlag: false });
+  const [m] = clusterEvents([e]);
+  const msg = buildMessage(m);
+  assert.match(msg.body, /timur laut \/ NE/); // bilingual direction on the distance line
+  assert.match(msg.body, /google\.com\/maps\?q=-0\.3,120\.5/); // tappable epicentre map link
+});
+
+test('sequenceOrdinal counts recent nearby quakes, excluding stale + same-event rows', () => {
+  const e = new Event({ source: 'BMKG', id: 'now', time: new Date('2026-06-16T12:00:00Z'), magnitude: 5.0, depthKm: 10, lat: -1.0, lon: 120.2 });
+  const [m] = clusterEvents([e]);
+  const priors = [
+    { timeIso: '2026-06-16T11:00:00Z', lat: -1.0, lon: 120.3 }, // 1h before, distinct -> counts
+    { timeIso: '2026-06-16T06:00:00Z', lat: -1.2, lon: 120.0 }, // 6h before, distinct -> counts
+    { timeIso: '2026-06-15T10:00:00Z', lat: -1.0, lon: 120.2 }, // >24h before -> excluded
+    { timeIso: '2026-06-16T11:59:50Z', lat: -1.0, lon: 120.2 }, // same physical event -> excluded
+  ];
+  assert.equal(sequenceOrdinal(priors, m, 24), 3); // 2 priors + itself
+  assert.equal(sequenceOrdinal([], m, 24), 1); // stands alone
+});
+
+test('buildMessage adds the aftershock-sequence line only when there are recent priors', () => {
+  const e = new Event({ source: 'BMKG', id: 's', time: new Date('2026-06-16T12:00:00Z'), magnitude: 5.0, depthKm: 10, lat: -1.0, lon: 120.2, tsunamiFlag: false });
+  const [m] = clusterEvents([e]);
+  assert.doesNotMatch(buildMessage(m, { sequenceN: 1 }).body, /quake near Palu in the last/i);
+  const seq = buildMessage(m, { sequenceN: 3 }).body;
+  assert.match(seq, /Gempa ke-3 di sekitar Palu/);
+  assert.match(seq, /3rd quake near Palu in the last 24h/);
+});
+
+test('shakemap image is parsed and attached only at/above the magnitude threshold', () => {
+  const big = parseBmkgEntry(fx('scenario_m67_palu.json').Infogempa.gempa); // M6.7, has Shakemap
+  assert.match(big.shakemap, /20260616103010\.mmi\.jpg$/);
+  const [mBig] = clusterEvents([big]);
+  assert.equal(buildMessage(mBig).photo, big.shakemap); // M6.7 >= 5.5 -> attached
+
+  const small = parseBmkgEntry(fx('bmkg_autogempa.json').Infogempa.gempa); // M4.7, has Shakemap
+  assert.ok(small.shakemap, 'shakemap URL parsed even for a small quake');
+  assert.equal(buildMessage(clusterEvents([small])[0]).photo, null); // below 5.5 -> not attached
 });
 
 test('buildDigest formats a recap with count + safety note', () => {
