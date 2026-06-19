@@ -55,6 +55,15 @@ async function sendTelegram(text) {
   return results;
 }
 
+// Send one message to a single chat (used by the digest to post to the channel).
+export async function sendTelegramTo(chatId, text) {
+  await postForm(`https://api.telegram.org/bot${channels.telegram.token}/sendMessage`, {
+    chat_id: chatId,
+    text,
+    disable_web_page_preview: 'true',
+  });
+}
+
 async function sendTwilio(cfg, body, whatsapp) {
   const url = `https://api.twilio.com/2010-04-01/Accounts/${cfg.sid}/Messages.json`;
   const auth = 'Basic ' + Buffer.from(`${cfg.sid}:${cfg.token}`).toString('base64');

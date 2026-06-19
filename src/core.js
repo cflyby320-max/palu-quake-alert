@@ -278,3 +278,27 @@ export function buildMessage(m) {
 
   return { subject, body: lines.join('\n') };
 }
+
+// Catch-up recap of recent quakes near Palu, for posting to the channel.
+export function buildDigest(list, { hours, minMag, radiusKm }) {
+  const lines = list.map((m) => {
+    const c = classify(m);
+    const t = witaString(m.time).slice(5); // "MM-DD HH:MM WITA"
+    const dist = Math.round(c.dist);
+    const tsu = m.tsunamiFlag === true ? ' · 🌊 POTENSI TSUNAMI' : '';
+    const felt = m.felt ? ' · dirasakan' : '';
+    return `${ICON[c.level] || '•'} M${m.magnitude.toFixed(1)} · ${t} · ~${dist} km dari Palu${tsu}${felt}`;
+  });
+  const subject = `📋 Ringkasan ${hours} jam — ${list.length} gempa dekat Palu`;
+  const body = [
+    '📋 RINGKASAN GEMPA / QUAKE RECAP',
+    `Sekitar Palu · ${hours} jam terakhir · ≥ M${minMag.toFixed(1)}, ≤ ${radiusKm} km`,
+    '',
+    ...(list.length ? lines : ['(Tidak ada gempa yang memenuhi kriteria. / No qualifying quakes.)']),
+    '',
+    `Total: ${list.length} kejadian / events.`,
+    'ℹ️ Rekap susulan (mungkin terlambat), BUKAN peringatan real-time. Selalu utamakan BMKG, sirene & petugas.',
+    'A delayed recap, not a real-time alert — always follow BMKG & authorities.',
+  ].join('\n');
+  return { subject, body };
+}

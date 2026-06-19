@@ -13,11 +13,12 @@ import {
   HEARTBEAT_URL,
   HTTP_TIMEOUT_MS,
   activeChannelNames,
+  channels,
 } from './config.js';
-import { fetchBmkg, fetchUsgs } from './sources.js';
-import { parseBmkgEntry, parseUsgsFeature, clusterEvents, buildMessage } from './core.js';
+import { fetchBmkg, fetchUsgs, fetchUsgsSince } from './sources.js';
+import { parseBmkgEntry, parseUsgsFeature, clusterEvents, buildMessage, buildDigest } from './core.js';
 import { loadState, saveState, findPriorAlert, recordAlert, pruneState } from './state.js';
-import { notifyAll, log } from './notify.js';
+import { notifyAll, sendTelegramTo, log } from './notify.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const FIXTURES = join(__dirname, '..', 'fixtures');
@@ -174,6 +175,40 @@ async function selftest() {
   log('INFO', 'Self-test done.');
 }
 
+// Posts a catch-up recap of recent qualifying quakes to the channel (or, if no
+// channel is configured, to all recipients). Reusable: `node run.js --digest 24`.
+async function runDigest(hours, dryRun) {
+  const startIso = new Date(Date.now() - hours * 3600 * 1000).toISOString().slice(0, 19);
+  const [usgs, bmkg] = await Promise.allSettled([
+    fetchUsgsSince(startIso, INFO_MAGNITUDE),
+    fetchBmkg(),
+  ]);
+  const events = [];
+  if (usgs.status === 'fulfilled') events.push(...usgs.value);
+  else log('ERROR', `digest USGS fetch failed: ${usgs.reason}`);
+  if (bmkg.status === 'fulfilled') events.push(...bmkg.value);
+  const cutoff = Date.now() - hours * 3600 * 1000;
+  const merged = clusterEvents(events)
+    .filter((m) => m.distanceToPalu() <= ALERT_RADIUS_KM)
+    .filter((m) => m.magnitude >= INFO_MAGNITUDE)
+    .filter((m) => m.time.getTime() >= cutoff)
+    .sort((a, b) => b.time - a.time)
+    .slice(0, 30);
+  const { body } = buildDigest(merged, { hours, minMag: INFO_MAGNITUDE, radiusKm: ALERT_RADIUS_KM });
+  log('INFO', `digest: ${merged.length} qualifying events in last ${hours}h`);
+  if (dryRun) {
+    console.log('\n----- DIGEST (dry-run, not sent) -----\n' + body + '\n');
+    return;
+  }
+  const channelId = channels.telegram.chatIds.find((id) => id.startsWith('-100'));
+  if (channelId) {
+    await sendTelegramTo(channelId, body);
+    log('INFO', `digest posted to channel ${channelId}`);
+  } else {
+    await notifyAll({ subject: 'Quake recap', body }, { dryRun: false });
+  }
+}
+
 export async function main() {
   const args = new Set(process.argv.slice(2));
   if (args.has('--help')) {
@@ -185,6 +220,7 @@ export async function main() {
         '  node run.js --selftest   check config + live feed connectivity',
         '  node run.js --testsend   send a REAL test message to your channels',
         '  node run.js --test       offline demo using captured real data (dry-run)',
+        '  node run.js --digest [h] post a recap of recent quakes to the channel (default 24h)',
         '  --dry-run                log alerts but do not send externally',
       ].join('\n')
     );
@@ -201,6 +237,11 @@ export async function main() {
       'This is only a test. If you received this, your earthquake alerts are WORKING.';
     await notifyAll({ subject: '🔔 TEST — Palu Quake Alerter', body }, { dryRun: false });
     return;
+  }
+
+  if (args.has('--digest')) {
+    const hoursArg = process.argv.slice(2).find((a) => /^\d+$/.test(a));
+    return runDigest(hoursArg ? Number(hoursArg) : 24, args.has('--dry-run'));
   }
 
   const dryRun = args.has('--dry-run') || args.has('--test');

@@ -13,6 +13,7 @@ import {
   clusterEvents,
   classify,
   buildMessage,
+  buildDigest,
   witaString,
   Event,
 } from '../src/core.js';
@@ -117,4 +118,14 @@ test('dedup: same physical event matches a prior alert; far one does not', () =>
 
 test('WITA conversion adds 8 hours to UTC', () => {
   assert.match(witaString(new Date('2026-06-16T03:27:44Z')), /2026-06-16 11:27 WITA/);
+});
+
+test('buildDigest formats a recap with count + safety note', () => {
+  const e = new Event({ source: 'USGS', id: 'd1', time: new Date('2026-06-18T05:39:00Z'), magnitude: 4.6, depthKm: 10, lat: -1.1, lon: 120.2, tsunamiFlag: false });
+  const [m] = clusterEvents([e]);
+  const { subject, body } = buildDigest([m], { hours: 24, minMag: 4.0, radiusKm: 350 });
+  assert.match(subject, /1 gempa/);
+  assert.match(body, /RINGKASAN/);
+  assert.match(body, /M4\.6/);
+  assert.match(body, /BMKG/); // the safety footer
 });
