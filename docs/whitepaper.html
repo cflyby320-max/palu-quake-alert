@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Palu Earthquake Alerts — White Paper / Kertas Putih Proyek</title>
+<meta name="description" content="Kertas putih proyek komunitas: bagaimana semua bagian peringatan gempa Palu saling terhubung. A community white paper explaining how all the work streams of the Palu earthquake alerter fit together.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#0C2A30;
+    --ink-soft:#3D5C61;
+    --paper:#EEF3F2;
+    --card:#FBFCFB;
+    --line:#D3DEDC;
+    --teal:#0F4C5C;
+    --teal-deep:#0A3742;
+    --amber:#C77B0A;
+    --green:#2E7D52;
+    --yellow:#D9A406;
+    --orange:#CC6B27;
+    --red:#B5362B;
+    --maxw:980px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;font-size:16px;line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 22px;}
+
+  .seismic{display:block;width:100%;height:22px;color:var(--teal);opacity:.5;}
+  .seismic path{fill:none;stroke:currentColor;stroke-width:2;}
+
+  header.masthead{
+    background:linear-gradient(160deg,var(--teal-deep),var(--teal));
+    color:#EAF4F3;padding:42px 0 34px;
+  }
+  .badge{
+    display:inline-block;font-size:12px;font-weight:600;letter-spacing:.08em;
+    text-transform:uppercase;color:#0A3742;background:#FAD56A;
+    padding:5px 12px;border-radius:999px;margin-bottom:16px;
+  }
+  h1{
+    font-family:'Archivo',sans-serif;font-weight:800;line-height:1.07;
+    font-size:clamp(28px,6vw,46px);margin:0 0 10px;letter-spacing:-.01em;
+  }
+  .sub{font-size:16px;color:#C2DCD9;max-width:58ch;margin:0;}
+  .updated{margin-top:18px;font-size:13px;color:#9CC4C1;}
+  .masthead a{color:#FAD56A;}
+
+  main{padding:8px 0 60px;}
+  section{
+    background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:28px 28px 24px;margin:22px 0;
+  }
+  .eyebrow{
+    font-family:'Archivo',sans-serif;font-size:12px;font-weight:700;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:0 0 4px;
+  }
+  h2{
+    font-family:'Archivo',sans-serif;font-weight:700;
+    font-size:24px;margin:0 0 14px;color:var(--teal-deep);letter-spacing:-.01em;
+  }
+  h3{font-family:'Archivo',sans-serif;font-size:17px;color:var(--teal-deep);margin:22px 0 6px;}
+  p{margin:0 0 13px;}
+  .lead{font-size:17px;}
+  .muted{color:var(--ink-soft);}
+
+  figure{margin:8px 0 6px;}
+  figure svg{display:block;width:100%;height:auto;
+    background:#fff;border:1px solid var(--line);border-radius:14px;}
+  figcaption{font-size:13px;color:var(--ink-soft);margin-top:8px;text-align:center;}
+
+  .critical{
+    background:#fff;border:2px solid var(--red);border-left:8px solid var(--red);
+    border-radius:14px;padding:22px 24px;margin:22px 0;
+  }
+  .critical .eyebrow{color:var(--red);}
+  .critical h2{color:var(--red);}
+  .critical strong{color:var(--red);}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:6px;}
+  .stream{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:16px 18px;}
+  .stream h4{font-family:'Archivo',sans-serif;font-size:15px;margin:0 0 4px;color:var(--teal-deep);}
+  .stream .role{font-size:12px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--amber);margin:0 0 8px;}
+  .stream p{font-size:14px;margin:0 0 8px;color:var(--ink-soft);}
+  .pill{display:inline-block;font-size:11px;font-weight:600;letter-spacing:.04em;
+    padding:3px 9px;border-radius:999px;}
+  .live{background:#E2F0E8;color:var(--green);border:1px solid #BBD9C8;}
+  .open{background:#FBEFD6;color:#7A4E00;border:1px solid #ECD49A;}
+
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:14px;}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top;}
+  th{font-family:'Archivo',sans-serif;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);}
+
+  .invariants{counter-reset:inv;list-style:none;padding:0;margin:6px 0 0;}
+  .invariants li{position:relative;padding:12px 14px 12px 48px;border:1px solid var(--line);
+    border-radius:10px;margin-bottom:10px;background:var(--paper);font-size:14px;}
+  .invariants li::before{counter-increment:inv;content:counter(inv);
+    position:absolute;left:12px;top:11px;width:24px;height:24px;border-radius:50%;
+    background:var(--teal);color:#fff;font-family:'Archivo',sans-serif;font-weight:700;
+    font-size:13px;display:flex;align-items:center;justify-content:center;}
+  .invariants b{color:var(--teal-deep);}
+
+  .cta{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;}
+  .chip{font-size:14px;font-weight:600;color:var(--teal-deep);background:var(--paper);
+    border:1px solid var(--line);border-radius:999px;padding:8px 16px;text-decoration:none;}
+  .chip:hover{border-color:var(--teal);}
+  a{color:var(--teal);}
+
+  .roles{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:8px;}
+  .role-card{border:1px solid var(--line);border-radius:12px;padding:16px 18px;background:#fff;}
+  .role-card b{font-family:'Archivo',sans-serif;color:var(--teal-deep);display:block;margin-bottom:4px;}
+  .role-card span{font-size:14px;color:var(--ink-soft);}
+
+  footer{border-top:1px solid var(--line);padding:26px 0 50px;color:var(--ink-soft);font-size:13px;}
+  footer .deferral{font-weight:600;color:var(--ink);margin-bottom:6px;}
+
+  @media (max-width:560px){
+    section{padding:22px 18px 18px;}
+    .grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <span class="badge">Proyek Komunitas · Non-Profit · White Paper</span>
+    <h1>Peringatan Gempa Palu</h1>
+    <p class="sub">Bagaimana satu alat keselamatan kecil tumbuh menjadi beberapa alur kerja yang saling terhubung — dan bagaimana Anda bisa ikut. <em>How one small safety tool grew into several connected work streams — and how you can help.</em></p>
+    <p class="updated">Versi kertas putih · diperbarui 2026 · sumber terbuka di GitHub</p>
+  </div>
+</header>
+
+<svg class="seismic" viewBox="0 0 1200 22" preserveAspectRatio="none" aria-hidden="true">
+  <path d="M0 11 H300 l12 -8 l10 16 l12 -22 l11 26 l13 -12 H560 l10 -7 l9 14 l11 -19 l10 22 l12 -10 H1200"/>
+</svg>
+
+<main class="wrap">
+
+  <!-- WHY -->
+  <section id="why">
+    <p class="eyebrow">Mengapa ini ada / Why this exists</p>
+    <h2>Sebuah janji setelah 2018</h2>
+    <p class="lead">Pada 28 September 2018, gempa M7.5 dan tsunami melanda Palu, Sulawesi Tengah. Tsunami itu dipicu longsor bawah laut — tidak terprediksi model standar — dan peringatan resmi sempat dicabut lebih awal. Ribuan orang kehilangan nyawa.</p>
+    <p>Proyek ini lahir dari satu kebutuhan sederhana: <b>memberi tahu keluarga di Palu secepat mungkin</b> ketika gempa terjadi, agar mereka punya waktu untuk pindah ke tempat tinggi. Ini <b>bukan</b> peringatan dini (P-wave) dan <b>bukan</b> pengganti BMKG — ini notifikasi cepat, biasanya 2–5 menit setelah gempa dipublikasikan oleh sumber resmi.</p>
+    <p class="muted">This document is a map, not a manual. It explains how the project's separate work streams relate to each other, so that new contributors — developers, designers, translators, and community organisers in Central Sulawesi — can see where they fit and pick up a piece.</p>
+  </section>
+
+  <!-- THE SHAPE -->
+  <section id="shape">
+    <p class="eyebrow">Gambaran besar / The big picture</p>
+    <h2>Satu mesin, banyak cabang</h2>
+    <p>Setiap bagian proyek tumbuh dari satu inti: <b>"the watcher"</b> — sebuah program Node.js tanpa dependensi pihak ketiga yang memantau gempa dan mengirim peringatan. Semua alur kerja lain adalah cabang dari batang itu, atau lapisan yang membungkusnya. Diagram di bawah menunjukkan bagaimana semuanya terhubung.</p>
+
+    <figure>
+      <!-- ===== DIAGRAM B: WORK-STREAM RELATIONSHIP MAP ===== -->
+      <svg viewBox="0 0 1140 860" role="img" aria-labelledby="mapTitle mapDesc">
+        <title id="mapTitle">Peta hubungan antar alur kerja proyek</title>
+        <desc id="mapDesc">Data sources feed the central watcher, which delivers alerts to family and feeds a shared catalog. The catalog powers intelligence features. Studio extends to Instagram. A trust layer wraps everything and a deployment foundation keeps it alive.</desc>
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#3D5C61"/>
+          </marker>
+          <marker id="arrowAmber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#C77B0A"/>
+          </marker>
+          <style>
+            .lbl{font-family:'Archivo',sans-serif;font-weight:700;fill:#0A3742;}
+            .bx{font-family:'Inter',sans-serif;fill:#0C2A30;}
+            .sm{font-family:'Inter',sans-serif;fill:#3D5C61;}
+            .wht{font-family:'Inter',sans-serif;fill:#EAF4F3;}
+            .whtl{font-family:'Archivo',sans-serif;font-weight:700;fill:#fff;}
+            .ln{stroke:#3D5C61;stroke-width:2;fill:none;}
+            .lna{stroke:#C77B0A;stroke-width:2;fill:none;stroke-dasharray:6 4;}
+          </style>
+        </defs>
+
+        <!-- TRUST band (top wrapper) -->
+        <rect x="20" y="18" width="1100" height="58" rx="12" fill="#F4F8F7" stroke="#0F4C5C" stroke-dasharray="7 5"/>
+        <text x="40" y="42" class="lbl" font-size="15">LAPISAN KEPERCAYAAN · TRUST LAYER</text>
+        <text x="40" y="62" class="sm" font-size="13">Brand kit · halaman publik (GitHub Pages) · teks BotFather · pesan jujur yang sama di mana-mana — membuat semua cabang terasa satu proyek yang dapat dipercaya.</text>
+
+        <!-- FOUNDATION band (bottom wrapper) -->
+        <rect x="20" y="784" width="1100" height="58" rx="12" fill="#F4F8F7" stroke="#0F4C5C" stroke-dasharray="7 5"/>
+        <text x="40" y="808" class="lbl" font-size="15">FONDASI · FOUNDATION — menjaga loop tetap hidup</text>
+        <text x="40" y="828" class="sm" font-size="13">Host selalu-aktif (Fly.io / Docker / Raspberry Pi, polling ~45 dtk) · GitHub Actions sebagai cadangan · Heartbeat (healthchecks.io) mengawasi sang pengawas.</text>
+
+        <!-- DATA SOURCES -->
+        <text x="40" y="108" class="lbl" font-size="13">SUMBER DATA</text>
+        <rect x="40" y="120" width="160" height="62" rx="10" fill="#0F4C5C"/>
+        <text x="120" y="148" class="whtl" font-size="15" text-anchor="middle">BMKG / InaTEWS</text>
+        <text x="120" y="168" class="wht" font-size="12" text-anchor="middle">resmi · utama</text>
+        <rect x="40" y="200" width="160" height="62" rx="10" fill="#16707F"/>
+        <text x="120" y="228" class="whtl" font-size="15" text-anchor="middle">USGS</text>
+        <text x="120" y="248" class="wht" font-size="12" text-anchor="middle">cek-silang · cadangan</text>
+
+        <!-- THE WATCHER -->
+        <rect x="250" y="100" width="290" height="360" rx="14" fill="#0A3742"/>
+        <text x="395" y="128" class="whtl" font-size="17" text-anchor="middle">THE WATCHER</text>
+        <text x="395" y="147" class="wht" font-size="12" text-anchor="middle">inti Node.js · nol-dependensi</text>
+        <!-- pipeline pills -->
+        <rect x="272" y="162" width="246" height="42" rx="8" fill="#13586A"/>
+        <text x="395" y="188" class="wht" font-size="13" text-anchor="middle">1 · Ambil &amp; normalisasi</text>
+        <rect x="272" y="214" width="246" height="42" rx="8" fill="#13586A"/>
+        <text x="395" y="240" class="wht" font-size="13" text-anchor="middle">2 · Gabung — 1 gempa = 1 peringatan</text>
+        <rect x="272" y="266" width="246" height="42" rx="8" fill="#13586A"/>
+        <text x="395" y="292" class="wht" font-size="13" text-anchor="middle">3 · Klasifikasi tingkat + tsunami</text>
+        <rect x="272" y="318" width="246" height="42" rx="8" fill="#C77B0A"/>
+        <text x="395" y="344" class="whtl" font-size="13" text-anchor="middle">4 · Kirim notifikasi</text>
+        <!-- catalog cylinder -->
+        <g>
+          <rect x="272" y="384" width="246" height="56" rx="8" fill="#E9F1EF" stroke="#9FBFBA"/>
+          <ellipse cx="395" cy="384" rx="123" ry="9" fill="#E9F1EF" stroke="#9FBFBA"/>
+          <text x="395" y="406" class="lbl" font-size="13" text-anchor="middle">Katalog lokal (state.json)</text>
+          <text x="395" y="424" class="sm" font-size="11" text-anchor="middle">memori bersama: dedup + riwayat gempa</text>
+        </g>
+
+        <!-- arrows sources -> watcher -->
+        <path class="ln" d="M200 151 H236 V183 L268 183" marker-end="url(#arrow)"/>
+        <path class="ln" d="M200 231 H236 V183 L268 183" marker-end="url(#arrow)"/>
+
+        <!-- DELIVERY: Telegram family -->
+        <rect x="600" y="120" width="210" height="78" rx="12" fill="#2E7D52"/>
+        <text x="705" y="150" class="whtl" font-size="15" text-anchor="middle">Telegram</text>
+        <text x="705" y="172" class="wht" font-size="12" text-anchor="middle">keluarga di Palu</text>
+        <text x="705" y="189" class="wht" font-size="11" text-anchor="middle">(+ Twilio SMS / WhatsApp)</text>
+        <path class="ln" d="M518 339 C560 339 565 165 596 161" marker-end="url(#arrow)"/>
+
+        <!-- INTELLIGENCE features fed by catalog -->
+        <text x="600" y="236" class="lbl" font-size="13">FITUR CERDAS — dari katalog</text>
+        <rect x="600" y="248" width="210" height="52" rx="10" fill="#fff" stroke="#9FBFBA"/>
+        <text x="705" y="270" class="lbl" font-size="13" text-anchor="middle">Konteks per-peringatan</text>
+        <text x="705" y="288" class="sm" font-size="11" text-anchor="middle">peta · shakemap · urutan gempa</text>
+        <rect x="600" y="310" width="210" height="52" rx="10" fill="#fff" stroke="#9FBFBA"/>
+        <text x="705" y="332" class="lbl" font-size="13" text-anchor="middle">Seismic Activity Outlook</text>
+        <text x="705" y="350" class="sm" font-size="11" text-anchor="middle">peluang gempa susulan</text>
+        <rect x="600" y="372" width="210" height="52" rx="10" fill="#fff" stroke="#9FBFBA"/>
+        <text x="705" y="394" class="lbl" font-size="13" text-anchor="middle">Rekap dua kali sehari</text>
+        <text x="705" y="412" class="sm" font-size="11" text-anchor="middle">digest 08:00 &amp; 20:00 WITA</text>
+        <!-- catalog -> trio -->
+        <path class="ln" d="M520 412 C545 412 560 274 596 274" marker-end="url(#arrow)"/>
+        <path class="ln" d="M520 412 H560 V336 L596 336" marker-end="url(#arrow)"/>
+        <path class="ln" d="M520 412 C548 412 560 398 596 398" marker-end="url(#arrow)"/>
+        <!-- trio -> telegram (posted via same channel) -->
+        <path class="ln" d="M812 274 C850 274 850 200 812 192" marker-end="url(#arrow)"/>
+
+        <!-- STUDIO branch -->
+        <text x="600" y="468" class="lbl" font-size="13">STUDIO — agen konten (terisolasi)</text>
+        <rect x="600" y="480" width="150" height="64" rx="10" fill="#fff" stroke="#C77B0A"/>
+        <text x="675" y="506" class="lbl" font-size="13" text-anchor="middle">Render kartu</text>
+        <text x="675" y="524" class="sm" font-size="11" text-anchor="middle">+ caption (ID)</text>
+        <rect x="770" y="480" width="150" height="64" rx="10" fill="#fff" stroke="#C77B0A"/>
+        <text x="845" y="506" class="lbl" font-size="13" text-anchor="middle">Tinjau (DM)</text>
+        <text x="845" y="524" class="sm" font-size="11" text-anchor="middle">Anda menyetujui</text>
+        <rect x="940" y="480" width="150" height="64" rx="10" fill="#C77B0A"/>
+        <text x="1015" y="506" class="whtl" font-size="13" text-anchor="middle">Instagram</text>
+        <text x="1015" y="524" class="wht" font-size="11" text-anchor="middle">posting manual</text>
+        <!-- notify -> studio (hook), isolated -->
+        <path class="lna" d="M518 339 C560 460 575 512 596 512" marker-end="url(#arrowAmber)"/>
+        <path class="lna" d="M750 512 H766" marker-end="url(#arrowAmber)"/>
+        <path class="lna" d="M920 512 H936" marker-end="url(#arrowAmber)"/>
+        <text x="560" y="455" class="sm" font-size="11">hook · tak pernah memblokir peringatan</text>
+
+        <!-- REACH (open) -->
+        <text x="600" y="588" class="lbl" font-size="13">JANGKAUAN — alur kerja terbuka</text>
+        <rect x="600" y="600" width="490" height="70" rx="12" fill="#FBEFD6" stroke="#ECD49A"/>
+        <text x="845" y="628" class="lbl" font-size="14" text-anchor="middle">Telegram Channel  ·  Bot berlangganan (/start · /stop)</text>
+        <text x="845" y="650" class="sm" font-size="12" text-anchor="middle">menyiarkan ke ratusan orang, bukan hanya daftar tetap — butuh layanan kecil yang selalu-aktif + basis data</text>
+        <path class="lna" d="M705 198 V596" marker-end="url(#arrowAmber)"/>
+        <text x="712" y="430" class="sm" font-size="11" transform="rotate(90 712 430)">arah pertumbuhan</text>
+
+        <!-- legend -->
+        <rect x="40" y="300" width="160" height="150" rx="10" fill="#F4F8F7" stroke="#D3DEDC"/>
+        <text x="56" y="324" class="lbl" font-size="12">LEGENDA</text>
+        <line x1="56" y1="344" x2="86" y2="344" class="ln" marker-end="url(#arrow)"/>
+        <text x="94" y="348" class="sm" font-size="11">aliran data</text>
+        <line x1="56" y1="372" x2="86" y2="372" class="lna" marker-end="url(#arrowAmber)"/>
+        <text x="94" y="376" class="sm" font-size="11">cabang / rencana</text>
+        <rect x="56" y="390" width="14" height="12" rx="3" fill="#0A3742"/>
+        <text x="78" y="400" class="sm" font-size="11">inti pengawas</text>
+        <rect x="56" y="410" width="14" height="12" rx="3" fill="#fff" stroke="#C77B0A"/>
+        <text x="78" y="420" class="sm" font-size="11">modul terisolasi</text>
+        <rect x="56" y="430" width="14" height="12" rx="3" fill="#FBEFD6" stroke="#ECD49A"/>
+        <text x="78" y="440" class="sm" font-size="11">belum dibangun</text>
+      </svg>
+      <figcaption>Peta hubungan antar alur kerja. Inti pengawas (biru) adalah batangnya; katalog bersama memberi makan fitur cerdas; Studio (oranye) memperluas ke Instagram tanpa pernah membahayakan peringatan; lapisan kepercayaan &amp; fondasi membungkus semuanya. <br><em>How the work streams relate — the watcher is the trunk, everything else branches from it.</em></figcaption>
+    </figure>
+  </section>
+
+  <!-- REAL-TIME PIPELINE -->
+  <section id="pipeline">
+    <p class="eyebrow">Inti / The core loop</p>
+    <h2>Bagaimana satu peringatan diputuskan</h2>
+    <p>Setiap siklus (default tiap ~45 detik) menjalankan pipeline yang sama. Dua sumber dipantau secara paralel; jika satu gagal, yang lain tetap jalan. Satu gempa fisik menghasilkan tepat satu peringatan.</p>
+    <figure>
+      <!-- ===== DIAGRAM A: LINEAR PIPELINE ===== -->
+      <svg viewBox="0 0 1140 320" role="img" aria-labelledby="pipeTitle">
+        <title id="pipeTitle">Pipeline real-time dari sumber data ke penerima</title>
+        <defs>
+          <marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="#0F4C5C"/>
+          </marker>
+        </defs>
+        <style>
+          .p-lbl{font-family:'Archivo',sans-serif;font-weight:700;fill:#fff;}
+          .p-sm{font-family:'Inter',sans-serif;fill:#EAF4F3;}
+          .p-cap{font-family:'Inter',sans-serif;fill:#3D5C61;}
+          .p-ln{stroke:#0F4C5C;stroke-width:2.5;fill:none;}
+        </style>
+
+        <!-- sources -->
+        <rect x="20" y="60" width="150" height="50" rx="9" fill="#0F4C5C"/>
+        <text x="95" y="90" class="p-lbl" font-size="14" text-anchor="middle">BMKG + USGS</text>
+        <text x="95" y="132" class="p-cap" font-size="12" text-anchor="middle">paralel · toleran gagal</text>
+
+        <!-- step boxes -->
+        <rect x="215" y="55" width="150" height="60" rx="9" fill="#13586A"/>
+        <text x="290" y="80" class="p-lbl" font-size="13" text-anchor="middle">Normalisasi</text>
+        <text x="290" y="100" class="p-sm" font-size="11" text-anchor="middle">parse → Event</text>
+
+        <rect x="410" y="55" width="150" height="60" rx="9" fill="#13586A"/>
+        <text x="485" y="80" class="p-lbl" font-size="13" text-anchor="middle">Gabung</text>
+        <text x="485" y="100" class="p-sm" font-size="11" text-anchor="middle">cluster 2 feed → 1</text>
+
+        <rect x="605" y="55" width="150" height="60" rx="9" fill="#13586A"/>
+        <text x="680" y="78" class="p-lbl" font-size="13" text-anchor="middle">Saring + dedup</text>
+        <text x="680" y="98" class="p-sm" font-size="11" text-anchor="middle">radius · mag · usia</text>
+
+        <rect x="800" y="55" width="150" height="60" rx="9" fill="#C77B0A"/>
+        <text x="875" y="78" class="p-lbl" font-size="13" text-anchor="middle">Klasifikasi</text>
+        <text x="875" y="98" class="p-sm" font-size="11" text-anchor="middle">tingkat + tsunami</text>
+
+        <rect x="990" y="55" width="130" height="60" rx="9" fill="#2E7D52"/>
+        <text x="1055" y="78" class="p-lbl" font-size="13" text-anchor="middle">Kirim</text>
+        <text x="1055" y="98" class="p-sm" font-size="11" text-anchor="middle">semua kanal</text>
+
+        <!-- arrows -->
+        <path class="p-ln" d="M170 85 H211" marker-end="url(#ar2)"/>
+        <path class="p-ln" d="M365 85 H406" marker-end="url(#ar2)"/>
+        <path class="p-ln" d="M560 85 H601" marker-end="url(#ar2)"/>
+        <path class="p-ln" d="M755 85 H796" marker-end="url(#ar2)"/>
+        <path class="p-ln" d="M950 85 H986" marker-end="url(#ar2)"/>
+
+        <!-- catalog + follow-ons -->
+        <rect x="410" y="200" width="345" height="58" rx="9" fill="#E9F1EF" stroke="#9FBFBA"/>
+        <text x="582" y="225" class="p-cap" font-family="'Archivo',sans-serif" font-weight="700" font-size="13" text-anchor="middle" fill="#0A3742">Katalog lokal (state.json)</text>
+        <text x="582" y="244" class="p-cap" font-size="11" text-anchor="middle">memberi makan Outlook · Digest · konteks urutan</text>
+        <path class="p-ln" d="M485 115 V200" marker-end="url(#ar2)"/>
+        <path class="p-ln" d="M680 115 C680 160 690 175 700 198" marker-end="url(#ar2)"/>
+
+        <!-- heartbeat note -->
+        <text x="1055" y="138" class="p-cap" font-size="11" text-anchor="middle">→ heartbeat</text>
+      </svg>
+      <figcaption>Pipeline real-time: fetch → normalisasi → gabung → saring/dedup → klasifikasi → kirim. Peristiwa dekat Palu juga terakumulasi di katalog, yang memberi makan fitur lanjutan. <em>The real-time loop; near-Palu events also accumulate into the catalog.</em></figcaption>
+    </figure>
+  </section>
+
+  <!-- WORK STREAMS -->
+  <section id="streams">
+    <p class="eyebrow">Alur kerja / The work streams</p>
+    <h2>Enam bagian, satu cerita</h2>
+    <p>Proyek ini bukan satu fitur besar, melainkan beberapa alur kerja yang saling menopang. Inilah masing-masing — apa perannya, dan bagaimana ia terhubung ke yang lain.</p>
+
+    <div class="grid">
+      <div class="stream">
+        <p class="role">Batang · Inti</p>
+        <h4>1 · The Watcher <span class="pill live">LIVE</span></h4>
+        <p>Program Node.js nol-dependensi yang memantau BMKG + USGS, menggabungkan keduanya, mengklasifikasi tingkat keparahan, dan mengirim peringatan Bahasa Indonesia via Telegram/Twilio.</p>
+        <p><b>Terhubung ke:</b> segala sesuatu — semua alur kerja lain membaca darinya atau membungkusnya.</p>
+      </div>
+
+      <div class="stream">
+        <p class="role">Cabang · dari katalog</p>
+        <h4>2 · Fitur cerdas <span class="pill live">LIVE</span></h4>
+        <p>Tiga fitur yang dibangun di atas katalog bersama: <b>konteks per-peringatan</b> (peta, shakemap, "gempa ke-N dalam 24 jam"), <b>Seismic Activity Outlook</b> (peluang gempa susulan), dan <b>rekap dua kali sehari</b>.</p>
+        <p><b>Terhubung ke:</b> membaca katalog pengawas; mengirim lewat kanal yang sama.</p>
+      </div>
+
+      <div class="stream">
+        <p class="role">Lapisan · membungkus</p>
+        <h4>3 · Kepercayaan &amp; presentasi <span class="pill live">LIVE</span></h4>
+        <p>Brand kit (avatar + lencana tingkat keparahan), halaman publik <em>About/Terms/Privacy</em> di GitHub Pages, dan teks BotFather. Membuat alat ini terlihat lengkap dan layak dipercaya saat beredar.</p>
+        <p><b>Terhubung ke:</b> tidak menyentuh runtime — menyelaraskan cerita di setiap permukaan.</p>
+      </div>
+
+      <div class="stream">
+        <p class="role">Modul · terisolasi</p>
+        <h4>4 · Studio (Instagram) <span class="pill live">LIVE — manual</span></h4>
+        <p>Mengubah data gempa menjadi kartu Instagram berlabel: render → caption → Anda menyetujui → posting. Sengaja dipisah dari pengawas (boleh punya dependensi) agar kegagalannya tak pernah memengaruhi peringatan.</p>
+        <p><b>Terhubung ke:</b> hook setelah tiap peringatan; impor malas, non-blok.</p>
+      </div>
+
+      <div class="stream">
+        <p class="role">Pertumbuhan · terbuka</p>
+        <h4>5 · Jangkauan &amp; skala <span class="pill open">OPEN</span></h4>
+        <p>Hari ini penerima adalah daftar tetap. Berikutnya: <b>Telegram Channel</b> (mudah, siaran ke banyak orang) atau <b>bot berlangganan</b> dengan <code>/start</code>/<code>/stop</code> + basis data.</p>
+        <p><b>Terhubung ke:</b> mendorong proyek dari cron statis ke layanan kecil selalu-aktif.</p>
+      </div>
+
+      <div class="stream">
+        <p class="role">Fondasi · menopang</p>
+        <h4>6 · Penyebaran &amp; keandalan <span class="pill live">LIVE</span></h4>
+        <p>Host selalu-aktif (Fly.io / Docker / Raspberry Pi) menjalankan loop; GitHub Actions sebagai cadangan; <b>heartbeat</b> (healthchecks.io) memberi tahu jika pengawas diam-diam mati.</p>
+        <p><b>Terhubung ke:</b> menjaga setiap alur kerja lain tetap hidup &amp; jujur tentang kesehatannya.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- MATURITY -->
+  <section id="maturity">
+    <p class="eyebrow">Status / Maturity</p>
+    <h2>Apa yang sudah jalan, apa yang terbuka</h2>
+    <table>
+      <thead><tr><th>Alur kerja</th><th>Status</th><th>Langkah berikutnya / Where help lands</th></tr></thead>
+      <tbody>
+        <tr><td>The Watcher (inti)</td><td><span class="pill live">LIVE</span></td><td>Pemantauan parser BMKG saat format feed berubah.</td></tr>
+        <tr><td>Konteks per-peringatan</td><td><span class="pill live">LIVE</span></td><td>Penyempurnaan salinan; pengujian kasus tepi.</td></tr>
+        <tr><td>Seismic Activity Outlook</td><td><span class="pill live">LIVE</span></td><td>Kalibrasi parameter dengan ahli seismologi lokal.</td></tr>
+        <tr><td>Rekap dua kali sehari</td><td><span class="pill live">LIVE</span></td><td>—</td></tr>
+        <tr><td>Brand kit &amp; halaman publik</td><td><span class="pill live">LIVE</span></td><td>Tinjauan bahasa oleh penutur asli; aksesibilitas.</td></tr>
+        <tr><td>Studio — mode manual</td><td><span class="pill live">LIVE</span></td><td>Wire ke Dockerfile; bank konten edukatif.</td></tr>
+        <tr><td>Studio — auto-publish (Graph API)</td><td><span class="pill open">OPEN</span></td><td>Setup akun Meta + hosting gambar (Fase 0 &amp; 2).</td></tr>
+        <tr><td>Bot interaktif (/start, /stop)</td><td><span class="pill open">OPEN</span></td><td>Komponen listener + basis data pelanggan.</td></tr>
+        <tr><td>Telegram Channel / skala</td><td><span class="pill open">OPEN</span></td><td>Evaluasi channel vs bot berlangganan.</td></tr>
+      </tbody>
+    </table>
+    <p class="muted" style="margin-top:14px;">Aturan emas yang menyatukan semuanya: setiap alur kerja baru harus mematuhi invarian keselamatan di bawah. Itulah yang membuat ini satu proyek, bukan tumpukan fitur.</p>
+  </section>
+
+  <!-- SAFETY INVARIANTS -->
+  <section id="safety">
+    <p class="eyebrow">Yang tak bisa ditawar / Non-negotiable</p>
+    <h2>Lima invarian keselamatan</h2>
+    <p>Aturan-aturan ini menyandikan pelajaran pahit dari 2018. Setiap kontribusi — kode, salinan, gambar — harus mempertahankannya.</p>
+    <ol class="invariants">
+      <li><b>"Tidak ada potensi tsunami" TIDAK PERNAH berarti "aman".</b> Gempa besar &amp; dangkal dekat pantai selalu memicu imbauan ke tempat tinggi, apa pun flag resmi.</li>
+      <li><b>Penggabungan sumber yang konservatif.</b> Jika ada satu sumber yang memperingatkan tsunami, peringatkan.</li>
+      <li><b>Framing yang jujur.</b> Ini notifikasi cepat (~2–5 menit), bukan peringatan dini, dan bukan pengganti BMKG/sirene/petugas.</li>
+      <li><b>Bahasa Indonesia, waktu WITA, nada tenang.</b> Pesan singkat &amp; mudah dipindai; baris tindakan di atas. Hindari kelelahan peringatan (ambang M4.0).</li>
+      <li><b>Outlook adalah "peluang meningkat", bukan ramalan dan bukan "aman".</b> Selalu sebutkan peluang kecil-tapi-nyata gempa lebih besar; selalu rujuk BMKG.</li>
+    </ol>
+  </section>
+
+  <!-- THE ONE RULE -->
+  <div class="wrap" style="padding:0;">
+    <div class="critical">
+      <p class="eyebrow">Aturan utama / The one rule</p>
+      <h2>Guncangan kuat dekat pantai → segera ke tempat tinggi</h2>
+      <p style="margin:0;"><strong>Jangan menunggu</strong> peringatan, pesan bot ini, atau pernyataan "aman". Tsunami 2018 dipicu longsor, tidak terprediksi, dan peringatan resmi sempat dicabut lebih awal. <em>If you feel strong shaking near the coast, move to high ground now — do not wait for any all-clear.</em></p>
+    </div>
+  </div>
+
+  <!-- GET INVOLVED -->
+  <section id="join">
+    <p class="eyebrow">Bergabung / Get involved</p>
+    <h2>Tempat Anda bisa membantu</h2>
+    <p>Ini proyek komunitas non-profit, sumber terbuka, tanpa motif komersial. Jika Anda berada di Sulawesi Tengah — atau peduli pada orang-orang yang ada di sana — ada tempat untuk setiap keterampilan.</p>
+    <div class="roles">
+      <div class="role-card"><b>Pengembang</b><span>Pantau parser BMKG, bangun bot berlangganan, atau jalur auto-publish Studio. Node.js, nol/sedikit dependensi.</span></div>
+      <div class="role-card"><b>Penerjemah &amp; editor</b><span>Tinjau setiap salinan Bahasa Indonesia agar tenang, akurat, dan sesuai konteks lokal Palu.</span></div>
+      <div class="role-card"><b>Desainer</b><span>Sempurnakan brand kit, lencana tingkat keparahan, dan kartu Instagram Studio — tepercaya, tidak alarmis.</span></div>
+      <div class="role-card"><b>Penyelenggara komunitas</b><span>Edarkan channel ke keluarga &amp; lingkungan; hubungkan dengan RT/RW, sekolah, dan kelompok kesiapsiagaan.</span></div>
+      <div class="role-card"><b>Seismolog / ahli</b><span>Kalibrasi parameter Outlook gempa susulan dan tinjau ambang keselamatan.</span></div>
+      <div class="role-card"><b>Operator host</b><span>Jalankan loop selalu-aktif (Pi di Palu = bonus lokal) + heartbeat agar cakupan andal.</span></div>
+    </div>
+    <div class="cta">
+      <a class="chip" href="https://github.com/cflyby320-max/palu-quake-alert">Kode di GitHub →</a>
+      <a class="chip" href="https://t.me/Palu_quake_alert_bot">Bot Telegram →</a>
+      <a class="chip" href="./index.html">Tentang · Ketentuan · Privasi →</a>
+      <a class="chip" href="https://inatews.bmkg.go.id">BMKG InaTEWS →</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <p class="deferral">Selalu utamakan BMKG, sirene, dan petugas. Bot ini hanya pelengkap.</p>
+    <p>Proyek komunitas tidak resmi · gratis &amp; non-komersial · sumber terbuka. Kertas putih ini adalah dokumen hidup; perbarui saat alur kerja berkembang.<br>
+    <em>Unofficial community project · free &amp; non-commercial · open source. This white paper is a living document — update it as the work streams evolve.</em></p>
+  </div>
+</footer>
+
+</body>
+</html>
