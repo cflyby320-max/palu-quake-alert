@@ -60,7 +60,7 @@ async function tgSendPhoto(chatId, photo, caption) {
 // send that single rich message but fall back to plain text if Telegram can't
 // fetch the image; when the body is too long for a caption we send the full
 // text first and add the image as a best-effort extra.
-async function deliverTelegram(chatId, { subject, body, photo }) {
+export async function deliverTelegram(chatId, { subject, body, photo }) {
   if (photo && body.length <= TELEGRAM_CAPTION_MAX) {
     try {
       await tgSendPhoto(chatId, photo, body);
