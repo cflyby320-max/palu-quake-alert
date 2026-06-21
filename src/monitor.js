@@ -33,6 +33,7 @@ import {
   parseUsgsFeature,
   clusterEvents,
   buildMessage,
+  escalateMessage,
   digestFromCatalog,
   sequenceOrdinal,
   bValueMLE,
@@ -207,11 +208,7 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
       sent++;
     } else if (m.magnitude - prior.mag >= ESCALATION_DELTA) {
       // Preliminary magnitude was revised upward — re-alert as an escalation.
-      const msg = buildMessage(m, { sequenceN });
-      msg.subject = `⏫ DIPERBARUI / UPDATED: ${msg.subject}`;
-      msg.body = `⏫ Magnitudo diperbarui M${prior.mag.toFixed(1)} → M${m.magnitude.toFixed(
-        1
-      )} / Magnitude revised up.\n\n${msg.body}`;
+      const msg = escalateMessage(buildMessage(m, { sequenceN }), prior.mag, m.magnitude);
       const res = await notifyAll(msg, { dryRun });
       if (allChannelsFailed(res)) deliveryFailed = true;
       prior.mag = m.magnitude;
@@ -294,7 +291,7 @@ async function runDigest(hours, dryRun) {
 // The 08:00 & 20:00 WITA digest slots are 00:00 & 12:00 UTC. Returns the most
 // recent slot at or before `now`, so the loop posts once per slot and dedups
 // across restarts via state.lastDigestIso.
-function lastDigestSlot(now) {
+export function lastDigestSlot(now) {
   const d = new Date(now);
   const slot = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0));
   if (d.getUTCHours() >= 12) slot.setUTCHours(12);
