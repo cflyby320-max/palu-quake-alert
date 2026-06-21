@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Palu Earthquake Alerts — kartu Instagram (pratinjau)</title>
+<!--
+  Branded Instagram card preview for Palu Earthquake Alerts.
+  This is a DESIGN PROTOTYPE for the `studio/` workstream: it shows a real BMKG
+  shakemap composited inside the brand frame, plus the Indonesian caption.
+  Data below is the live BMKG `autogempa` event captured 2026-06-21.
+  At build time the agent fills these fields from the persisted catalog (state.json)
+  and rasterises this layout to a JPEG for the Instagram Graph API.
+  Open by double-clicking; the shakemap loads directly from data.bmkg.go.id.
+-->
+<style>
+  :root{
+    --teal-deep:#0A3742; --teal:#0F4C5C; --teal-mid:#11343d;
+    --teal-accent:#7FB7B8; --mint:#9FE1CB; --off:#FBFCFB;
+    --amber:#C77B0A; --amber-ink:#412402; --red:#B5362B; --low:#1D9E75;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,sans-serif;
+    background:#1c1c1a;color:#e6e6e2;
+    min-height:100vh;display:flex;flex-direction:column;align-items:center;
+    gap:18px;padding:32px 16px;
+  }
+  .meta{font-size:13px;color:#9a9a94;text-align:center;max-width:560px;line-height:1.6}
+  .meta code{color:#cfcfc8}
+
+  /* ---- the post: 1080x1350 (4:5), shown at 0.5 scale ---- */
+  .card{
+    width:540px;height:675px;border-radius:14px;overflow:hidden;
+    background:var(--teal);color:var(--off);
+    display:flex;flex-direction:column;box-shadow:0 10px 40px rgba(0,0,0,.45);
+  }
+  .head{height:92px;background:var(--teal-deep);display:flex;align-items:center;
+    gap:14px;padding:0 22px}
+  .mark{width:48px;height:48px;flex:0 0 48px}
+  .brand{flex:1;line-height:1.25}
+  .brand b{font-size:23px;font-weight:600;color:var(--off);display:block}
+  .brand span{font-size:15px;color:var(--teal-accent)}
+  .chip{display:flex;align-items:center;gap:7px;background:var(--low);
+    color:#04342C;font-size:15px;font-weight:600;padding:7px 14px;border-radius:16px}
+  .chip i{width:8px;height:8px;border-radius:50%;background:#04342C;display:block}
+
+  .hero{height:300px;background:var(--teal-mid);position:relative}
+  .hero img{width:100%;height:100%;object-fit:cover;object-position:center;display:block}
+  .hero .fallback{position:absolute;inset:0;display:none;align-items:center;
+    justify-content:center;color:var(--teal-accent);font-size:15px;text-align:center;padding:24px}
+  .hero .tag{position:absolute;left:16px;bottom:14px;background:rgba(10,55,66,.82);
+    color:var(--mint);font-size:14px;padding:6px 12px;border-radius:7px}
+
+  .body{flex:1;padding:24px 24px 0;display:flex;flex-direction:column;gap:14px}
+  .magrow{display:flex;align-items:baseline;gap:16px}
+  .mag{font-size:58px;font-weight:600;line-height:1}
+  .where b{font-size:21px;font-weight:600;display:block}
+  .where span{font-size:17px;color:var(--mint)}
+  .note{background:var(--teal-deep);border-left:5px solid var(--low);
+    padding:14px 16px;font-size:17px;line-height:1.45;color:#dff0ec}
+  /* For a strong shallow quake the agent swaps this for the amber high-ground band:
+     .note.caution{background:var(--amber);border-color:var(--amber-ink);color:var(--amber-ink)} */
+
+  .foot{background:var(--teal-deep);padding:16px 24px;display:flex;
+    align-items:center;justify-content:space-between}
+  .foot small{font-size:15px;color:var(--teal-accent);line-height:1.4}
+  .foot b{font-size:17px;color:var(--off);font-weight:600}
+
+  .caption{width:540px;background:#262624;border:1px solid #3a3a37;border-radius:12px;
+    padding:16px 18px;font-size:14px;line-height:1.65;color:#d8d8d2;white-space:pre-wrap}
+  .caption h4{font-size:12px;letter-spacing:.04em;color:#8f8f88;margin-bottom:10px;
+    font-weight:600;text-transform:uppercase}
+</style>
+</head>
+<body>
+
+  <p class="meta">Pratinjau kartu Instagram · 1080×1350 (4:5) · shakemap asli BMKG dari kejadian <code>21 Jun 2026, 15.41 WITA</code></p>
+
+  <div class="card">
+    <div class="head">
+      <svg class="mark" viewBox="0 0 96 96" aria-label="Palu Earthquake Alerts">
+        <circle cx="48" cy="48" r="46" fill="#0F4C5C" stroke="#7FB7B8" stroke-width="3"/>
+        <path d="M22 50 H35 L41 32 49 70 57 26 64 50 H74" fill="none" stroke="#FBFCFB"
+              stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M49 70 57 26 64 50" fill="none" stroke="#C77B0A"
+              stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="brand">
+        <b>Palu Earthquake Alerts</b>
+        <span>Pemantau gempa &amp; tsunami · Sulawesi Tengah</span>
+      </div>
+      <div class="chip"><i></i>Ringan</div>
+    </div>
+
+    <div class="hero">
+      <img src="https://data.bmkg.go.id/DataMKG/TEWS/20260621144100.mmi.jpg"
+           alt="Peta guncangan (shakemap) BMKG"
+           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+      <div class="fallback">Shakemap BMKG dimuat dari data.bmkg.go.id<br>(periksa koneksi internet)</div>
+      <div class="tag">Peta guncangan (shakemap) · BMKG</div>
+    </div>
+
+    <div class="body">
+      <div class="magrow">
+        <div class="mag">M4,1</div>
+        <div class="where">
+          <b>37 km utara Sigi</b>
+          <span>Kedalaman 6 km · 21 Jun, 15.41 WITA</span>
+        </div>
+      </div>
+      <div class="note">
+        Gempa dirasakan ringan (II–III) di sekitar Sigi dan Palu.
+        Tetap tenang dan waspadai kemungkinan gempa susulan.
+      </div>
+    </div>
+
+    <div class="foot">
+      <small>Notifikasi cepat — bukan peringatan dini.<br>Selalu ikuti arahan resmi BMKG.</small>
+      <b>@infogempapalu</b>
+    </div>
+  </div>
+
+  <div class="caption">
+    <h4>Teks caption Instagram</h4>Gempa M4,1 dirasakan ringan di sekitar Sigi–Palu (Kedalaman 6 km), 21 Jun 15.41 WITA. Tidak berpotensi tsunami. Tetap tenang dan waspadai gempa susulan.
+
+Ini notifikasi cepat, bukan peringatan dini — selalu ikuti arahan resmi BMKG.
+
+#gempa #Palu #Sigi #SulawesiTengah #BMKG #siapsiaga</div>
+
+</body>
+</html>

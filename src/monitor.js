@@ -151,6 +151,23 @@ async function maybeSendOutlook(state, m, dryRun) {
   }
 }
 
+// After a family alert is delivered, render a branded Instagram card + caption
+// and DM it to the operator (studio/hook.js) for manual posting. OPT-IN
+// (STUDIO_ENABLED=true) and fully isolated: the studio code and its one
+// dependency are imported lazily ONLY here, so the watcher otherwise stays
+// zero-dependency; and ANY failure is swallowed — a draft must never delay or
+// break the alert that has already gone out.
+async function maybeSendStudioDraft(m, dryRun) {
+  if (!/^(1|true|yes|on)$/i.test((process.env.STUDIO_ENABLED || '').trim())) return;
+  try {
+    const { onAlert } = await import('../studio/hook.js');
+    const res = await onAlert(m, { dryRun });
+    log('INFO', `studio draft for M${m.magnitude.toFixed(1)}: ${res.delivered ? 'DM sent' : res.reason}`);
+  } catch (e) {
+    log('WARN', `studio draft failed (alert already sent): ${e && e.message ? e.message : e}`);
+  }
+}
+
 // One full cycle. Returns number of alerts sent.
 export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge = false } = {}) {
   let events = [];
@@ -204,6 +221,7 @@ export async function runOnce({ dryRun = false, useFixtures = false, ignoreAge =
       if (allChannelsFailed(res)) deliveryFailed = true;
       recordAlert(state, m);
       await maybeSendOutlook(state, m, dryRun);
+      await maybeSendStudioDraft(m, dryRun);
       sent++;
     } else if (m.magnitude - prior.mag >= ESCALATION_DELTA) {
       // Preliminary magnitude was revised upward — re-alert as an escalation.
