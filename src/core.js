@@ -263,6 +263,19 @@ export function classify(m) {
 
 // --- Message building -------------------------------------------------------
 
+// Decorate an already-built alert as an upward-magnitude revision: prefix the
+// subject and prepend a "magnitude revised up" banner to the body, preserving
+// the photo. Pure, so the escalation copy can be unit-tested directly.
+export function escalateMessage(msg, fromMag, toMag) {
+  return {
+    ...msg,
+    subject: `⏫ DIPERBARUI / UPDATED: ${msg.subject}`,
+    body: `⏫ Magnitudo diperbarui M${fromMag.toFixed(1)} → M${toMag.toFixed(
+      1
+    )} / Magnitude revised up.\n\n${msg.body}`,
+  };
+}
+
 function pad(n) {
   return String(n).padStart(2, '0');
 }
