@@ -34,12 +34,43 @@ risk; site of the 2018 M7.5 disaster).
   one alert, tagged "confirmed by BMKG+USGS" vs. "preliminary."
 - **Delivery:** **Telegram bot** = `@Palu_quake_alert_bot` ("Palu Earthquake
   Alerts"). Code also supports Twilio SMS / WhatsApp (not yet configured).
-- **Messages:** bilingual (Bahasa Indonesia + English), local time in WITA (UTC+8).
-- **Repo:** `https://github.com/cflyby320-max/palu-quake-alert` (private).
+- **Messages:** **Bahasa Indonesia only**, local time in WITA (UTC+8). (The earlier
+  bilingual ID+EN copy was dropped — every recipient is family in Palu, so messages
+  are kept short and scannable with the action line near the top.)
+- **Repo:** `https://github.com/cflyby320-max/palu-quake-alert` (**public** — so the
+  GitHub Pages page and the free unlimited Actions cron both work).
+- **Also shipped since this doc was first written** (see §2a):
+  per-alert context, a Seismic Activity Outlook, a twice-daily digest, and a
+  committed brand kit.
 - ⚠️ **The bot is SEND-ONLY.** The code fetches data and *sends* messages. It does
   **not** listen for or respond to user commands, and recipients are a **static,
   comma-separated list** in config. There is no `/start`, `/stop`, or subscriber
   database yet. This is the key limitation for workstreams 1 & 3 below.
+
+## 2a. Features shipped since the first draft (keep this in mind)
+
+The original handoff listed several items as "to build." These have since landed —
+don't re-propose them as new work:
+
+- **Per-alert context** — map link + bearing/distance, an inline BMKG shakemap image,
+  and an "Nth quake near Palu in 24h" aftershock-sequence line.
+- **Seismic Activity Outlook** — an aftershock-probability heads-up auto-posted once
+  after a qualifying mainshock (≥ `OUTLOOK_TRIGGER_MAG`, default 5.5). Strictly an
+  "elevated probability," never a prediction or all-clear. Full rules in
+  `OUTLOOK_DESIGN.md`.
+- **Twice-daily digest** — a catch-up recap (08:00 & 20:00 WITA) built from the
+  persisted local catalog, posted to the channel; also runnable manually via
+  `--digest [hours]`.
+- **Brand kit (workstream B, done)** — a committed avatar and four severity badges in
+  `docs/assets/` (`avatar.{svg,png}`, `severity-{low,moderate,high,critical}.*`), plus
+  the public About/Terms/Privacy page at `docs/index.html` (GitHub Pages).
+- **BotFather trust copy (workstream A, cosmetic part done)** — name/about/description,
+  a static info-only command list, and a pinned welcome/safety post are all drafted in
+  `TIER2_PRESENTATION.md`. The *interactive* part (a bot that actually responds to
+  `/start` etc.) is still open — see workstream A below.
+- **Channel posting** — the code can post the digest/Outlook to a Telegram **channel**
+  (any configured chat ID starting `-100`), which is the low-effort path for workstream
+  C below.
 
 ## 3. How an alert is decided (parameters & levels)
 
@@ -60,20 +91,33 @@ recent **AND** not already alerted (dedup). All values are env-overridable.
 🟠 HIGH (≥6.0 within 200 km, or tsunami caution) · 🔴 CRITICAL (≥7.0 or official
 tsunami warning).
 
-## 4. Deployment (two free layers)
+## 4. Deployment (layers)
 
-- **Home PC** — runs continuously, polls every **45s** (fast; only while PC is on).
-  Auto-starts at logon via a Startup-folder launcher; single-instance locked.
-- **GitHub Actions (cloud)** — `.github/workflows/monitor.yml` runs `node run.js
-  --once` every **30 min** as an always-on backup (free on a private repo; 5-min
-  would exceed the 2,000 free Actions-min/month). Secrets stored in GitHub Secrets.
-  Caveat: GitHub auto-disables scheduled jobs after 60 days of repo inactivity.
+- **Recommended primary: an always-on host running the long-lived loop.** A Docker
+  container (`docker compose up -d --build`) on a VPS/Raspberry Pi, or **Fly.io**
+  (`fly.toml`), polling every **45s**. State (`state.json`) lives on a persistent
+  volume so dedup survives restarts. This is the only layer that runs the twice-daily
+  digest (it needs persistent state/catalog).
+- **Home PC** — the same loop, auto-started at logon via a Startup-folder launcher;
+  single-instance locked (PID lockfile). Fine as a primary while the PC is on.
+- **GitHub Actions (free backup only)** — `.github/workflows/monitor.yml` runs
+  `node run.js --once` every **5 min** (the repo is now **public**, so Actions minutes
+  are unlimited/free). In practice GitHub silently drops/delays scheduled runs (observed
+  multi-hour gaps), so it is **not** a reliable primary watcher — it's a safety net.
+  `keepalive.yml` exists because GitHub auto-disables scheduled jobs after 60 days of
+  repo inactivity. Secrets live in GitHub Secrets; add `HEARTBEAT_URL` there too or the
+  cloud layer never pings the dead-man's-switch.
 
 ---
 
 # OPEN WORKSTREAMS (what you want help building)
 
 ## A) Bot interface — description, terms/disclaimer, commands
+
+> **Status: cosmetic part DONE.** BotFather name/about/description, a static info-only
+> command list, the disclaimer, and a pinned welcome/safety post are drafted in
+> `TIER2_PRESENTATION.md`. What remains open is the **interactive** option below
+> (a bot that actually responds to commands).
 
 **Goal:** make the bot look complete and trustworthy, especially if it circulates.
 
@@ -95,6 +139,11 @@ webhook). So decide:
 - **Terms & disclaimer** (see starter draft in §7) — important if shared publicly.
 
 ## B) Visual design — using "Nano Banana" (Google Gemini image model)
+
+> **Status: DONE (v1).** A committed vector avatar and a matching four-badge severity
+> set already live in `docs/assets/` (`avatar.{svg,png}`, `severity-*.{svg,png}`), with
+> the palette documented in `TIER2_PRESENTATION.md`. The notes below are kept only if
+> you want to regenerate a richer avatar via Nano Banana — not required.
 
 **Goal:** a bot avatar (and optionally alert-level icons / a small brand kit).
 
@@ -156,8 +205,9 @@ preferences* → subscriber bot + always-on host + DB. Either way, scaling pushe
 - Prefer **few/zero dependencies**; keep secrets out of the repo and off Google
   Drive sync (use host secret stores).
 - BMKG primary, USGS fallback; dual-source confirmation is a feature, keep it.
-- Bilingual (ID + EN), WITA time, calm tone — avoid alert fatigue (that's why the
-  default floor is M4.0, not every micro-quake).
+- **Bahasa Indonesia only**, WITA time, calm tone — avoid alert fatigue (that's why the
+  default floor is M4.0, not every micro-quake). (Messages used to be bilingual ID+EN;
+  the English half was dropped to keep emergency copy short and scannable.)
 
 ## 6. Reference links
 
@@ -171,7 +221,7 @@ preferences* → subscriber bot + always-on host + DB. Either way, scaling pushe
 - Telegram channels FAQ: https://telegram.org/faq_channels
 - Nano Banana = Google **Gemini 2.5 Flash Image** (generation/editing):
   https://ai.google.dev/ (Gemini API → image generation)
-- Repo (private): https://github.com/cflyby320-max/palu-quake-alert
+- Repo (public): https://github.com/cflyby320-max/palu-quake-alert
 - Bot: https://t.me/Palu_quake_alert_bot
 
 ## 7. Starter drafts (refine freely)
