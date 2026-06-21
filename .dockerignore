@@ -1,0 +1,12 @@
+# Keep the build context clean and platform-correct.
+.git
+.env
+*.log
+node_modules
+# studio deps are installed INSIDE the image (correct Linux/musl binary); never
+# copy the host's (e.g. Windows) build in. out/ is generated artifacts.
+studio/node_modules
+studio/out
+# local runtime state must not bake into the image
+state.json
+state.json.lock

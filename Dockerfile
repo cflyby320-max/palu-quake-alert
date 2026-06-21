@@ -12,8 +12,17 @@ WORKDIR /app
 COPY package.json run.js ./
 COPY src ./src
 COPY fixtures ./fixtures
+# The watcher itself has ZERO dependencies and needs no `npm install`.
+#
+# The Instagram studio (optional, opt-in via STUDIO_ENABLED) is isolated in
+# studio/ with its own package.json. Its single dependency — the SVG rasteriser —
+# is installed ONLY here, fetching the correct Linux/musl binary for this image
+# (the host's node_modules is excluded by .dockerignore). The bundled fonts under
+# studio/assets travel in the COPY so cards render with no system fonts. A studio
+# failure can never affect alert delivery, and flipping STUDIO_ENABLED needs no rebuild.
+COPY studio ./studio
+RUN npm install --prefix studio --omit=dev
 ENV STATE_FILE=/data/state.json
 ENV LOG_FILE=/data/quake_alert.log
 VOLUME ["/data"]
-# No `npm install` — this project has zero dependencies by design.
 CMD ["node", "run.js"]
