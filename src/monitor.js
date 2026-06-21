@@ -22,16 +22,18 @@ import {
   AFTERSHOCK_P,
   AFTERSHOCK_C,
   B_MIN_SAMPLE,
+  DIGEST_ENABLED,
+  DIGEST_HOURS,
   activeChannelNames,
   channels,
 } from './config.js';
-import { fetchBmkg, fetchUsgs, fetchUsgsSince } from './sources.js';
+import { fetchBmkg, fetchUsgs } from './sources.js';
 import {
   parseBmkgEntry,
   parseUsgsFeature,
   clusterEvents,
   buildMessage,
-  buildDigest,
+  digestFromCatalog,
   sequenceOrdinal,
   bValueMLE,
   outlookStats,
@@ -258,27 +260,18 @@ async function selftest() {
   log('INFO', 'Self-test done.');
 }
 
-// Posts a catch-up recap of recent qualifying quakes to the channel (or, if no
-// channel is configured, to all recipients). Reusable: `node run.js --digest 24`.
-async function runDigest(hours, dryRun) {
-  const startIso = new Date(Date.now() - hours * 3600 * 1000).toISOString().slice(0, 19);
-  const [usgs, bmkg] = await Promise.allSettled([
-    fetchUsgsSince(startIso, INFO_MAGNITUDE),
-    fetchBmkg(),
-  ]);
-  const events = [];
-  if (usgs.status === 'fulfilled') events.push(...usgs.value);
-  else log('ERROR', `digest USGS fetch failed: ${usgs.reason}`);
-  if (bmkg.status === 'fulfilled') events.push(...bmkg.value);
-  const cutoff = Date.now() - hours * 3600 * 1000;
-  const merged = clusterEvents(events)
-    .filter((m) => m.distanceToPalu() <= ALERT_RADIUS_KM)
-    .filter((m) => m.magnitude >= INFO_MAGNITUDE)
-    .filter((m) => m.time.getTime() >= cutoff)
-    .sort((a, b) => b.time - a.time)
-    .slice(0, 30);
-  const { body } = buildDigest(merged, { hours, minMag: INFO_MAGNITUDE, radiusKm: ALERT_RADIUS_KM });
-  log('INFO', `digest: ${merged.length} qualifying events in last ${hours}h`);
+// Post a catch-up recap built from the PERSISTED CATALOG (what we actually
+// recorded), so it always matches the real-time alerts — a quake that has
+// rolled off the live feed is still in the catalog. Shared by the manual
+// `--digest` CLI and the scheduled twice-daily run. Posts to the channel, or to
+// all recipients if no channel is configured.
+async function postDigest(catalog, hours, dryRun) {
+  const { subject, body, count } = digestFromCatalog(catalog, {
+    hours,
+    minMag: INFO_MAGNITUDE,
+    radiusKm: ALERT_RADIUS_KM,
+  });
+  log('INFO', `digest: ${count} qualifying events in last ${hours}h`);
   if (dryRun) {
     console.log('\n----- DIGEST (dry-run, not sent) -----\n' + body + '\n');
     return;
@@ -288,7 +281,47 @@ async function runDigest(hours, dryRun) {
     await sendTelegramTo(channelId, body);
     log('INFO', `digest posted to channel ${channelId}`);
   } else {
-    await notifyAll({ subject: 'Quake recap', body }, { dryRun: false });
+    await notifyAll({ subject, body }, { dryRun: false });
+  }
+}
+
+// `node run.js --digest [hours]` — manual recap from the local catalog.
+async function runDigest(hours, dryRun) {
+  const state = loadState(STATE_FILE);
+  await postDigest(state.catalog, hours, dryRun);
+}
+
+// The 08:00 & 20:00 WITA digest slots are 00:00 & 12:00 UTC. Returns the most
+// recent slot at or before `now`, so the loop posts once per slot and dedups
+// across restarts via state.lastDigestIso.
+function lastDigestSlot(now) {
+  const d = new Date(now);
+  const slot = new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 0, 0, 0));
+  if (d.getUTCHours() >= 12) slot.setUTCHours(12);
+  return slot;
+}
+
+// Posts the twice-daily recap from inside the always-on loop (NOT from --once,
+// which has no persistent state/catalog). Idempotent per slot and across
+// restarts via state.lastDigestIso. Best-effort: never throws into the cycle.
+async function maybeRunScheduledDigest(dryRun) {
+  if (!DIGEST_ENABLED) return;
+  try {
+    const state = loadState(STATE_FILE);
+    const slot = lastDigestSlot(Date.now());
+    // First ever run: arm at the current slot WITHOUT posting, so a fresh deploy
+    // or a restart never fires a recap immediately.
+    if (!state.lastDigestIso) {
+      state.lastDigestIso = slot.toISOString();
+      saveState(STATE_FILE, state);
+      return;
+    }
+    if (slot.getTime() <= new Date(state.lastDigestIso).getTime()) return; // already posted this slot
+    await postDigest(state.catalog, DIGEST_HOURS, dryRun);
+    state.lastDigestIso = slot.toISOString();
+    saveState(STATE_FILE, state);
+  } catch (e) {
+    log('ERROR', `scheduled digest failed: ${e && e.stack ? e.stack : e}`);
   }
 }
 
@@ -388,6 +421,7 @@ export async function main() {
   while (true) {
     try {
       await runOnce({ dryRun });
+      await maybeRunScheduledDigest(dryRun);
     } catch (e) {
       log('ERROR', `cycle crashed (continuing): ${e && e.stack ? e.stack : e}`);
     }

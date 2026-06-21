@@ -14,6 +14,7 @@ import {
   classify,
   buildMessage,
   buildDigest,
+  digestFromCatalog,
   witaString,
   sequenceOrdinal,
   compass,
@@ -27,7 +28,7 @@ import {
   Event,
 } from '../src/core.js';
 import { haversineKm, bearingDeg } from '../src/geo.js';
-import { findPriorAlert, recordAlert } from '../src/state.js';
+import { findPriorAlert, recordAlert, appendCatalog } from '../src/state.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fx = (f) => JSON.parse(readFileSync(join(__dirname, '..', 'fixtures', f), 'utf8'));
@@ -92,7 +93,7 @@ test('classify: M6.7 shallow near Palu => HIGH with tsunami CAUTION despite "no 
   assert.equal(c.tsunami, 'caution'); // the safety-critical behaviour
   assert.ok(c.level === 'HIGH' || c.level === 'CRITICAL');
   const msg = buildMessage(m);
-  assert.match(msg.body, /high ground/i);
+  assert.match(msg.body, /tempat tinggi/i); // high-ground instruction (now Indonesian only)
   assert.match(msg.body, /tidak berpotensi tsunami/i); // still reports the official status
 });
 
@@ -102,7 +103,8 @@ test('classify: M4.2 near Palu => LOW (new below-5.0 heads-up level)', () => {
   assert.equal(classify(m).level, 'LOW');
   const msg = buildMessage(m);
   assert.match(msg.subject, /🟢/);
-  assert.match(msg.body, /heads-up/i);
+  assert.match(msg.subject, /RINGAN/); // Indonesian level label
+  assert.match(msg.body, /hanya info/i); // minor-quake heads-up (now Indonesian only)
 });
 
 test('classify: official tsunami warning => CRITICAL', () => {
@@ -142,7 +144,7 @@ test('buildMessage includes a map link and the compass bearing from Palu', () =>
   const e = new Event({ source: 'BMKG', id: 'ne', time: new Date(), magnitude: 5.0, depthKm: 10, lat: -0.3, lon: 120.5, tsunamiFlag: false });
   const [m] = clusterEvents([e]);
   const msg = buildMessage(m);
-  assert.match(msg.body, /timur laut \/ NE/); // bilingual direction on the distance line
+  assert.match(msg.body, /~\d+ km timur laut/); // Indonesian compass direction on the distance line
   assert.match(msg.body, /google\.com\/maps\?q=-0\.3,120\.5/); // tappable epicentre map link
 });
 
@@ -162,21 +164,23 @@ test('sequenceOrdinal counts recent nearby quakes, excluding stale + same-event 
 test('buildMessage adds the aftershock-sequence line only when there are recent priors', () => {
   const e = new Event({ source: 'BMKG', id: 's', time: new Date('2026-06-16T12:00:00Z'), magnitude: 5.0, depthKm: 10, lat: -1.0, lon: 120.2, tsunamiFlag: false });
   const [m] = clusterEvents([e]);
-  assert.doesNotMatch(buildMessage(m, { sequenceN: 1 }).body, /quake near Palu in the last/i);
+  assert.doesNotMatch(buildMessage(m, { sequenceN: 1 }).body, /Gempa ke-/);
   const seq = buildMessage(m, { sequenceN: 3 }).body;
   assert.match(seq, /Gempa ke-3 di sekitar Palu/);
-  assert.match(seq, /3rd quake near Palu in the last 24h/);
 });
 
-test('shakemap image is parsed and attached only at/above the magnitude threshold', () => {
+test('shakemap image is attached inline whenever BMKG provides one', () => {
   const big = parseBmkgEntry(fx('scenario_m67_palu.json').Infogempa.gempa); // M6.7, has Shakemap
   assert.match(big.shakemap, /20260616103010\.mmi\.jpg$/);
-  const [mBig] = clusterEvents([big]);
-  assert.equal(buildMessage(mBig).photo, big.shakemap); // M6.7 >= 5.5 -> attached
+  assert.equal(buildMessage(clusterEvents([big])[0]).photo, big.shakemap);
 
   const small = parseBmkgEntry(fx('bmkg_autogempa.json').Infogempa.gempa); // M4.7, has Shakemap
   assert.ok(small.shakemap, 'shakemap URL parsed even for a small quake');
-  assert.equal(buildMessage(clusterEvents([small])[0]).photo, null); // below 5.5 -> not attached
+  assert.equal(buildMessage(clusterEvents([small])[0]).photo, small.shakemap); // now attached inline too
+
+  // A USGS-only event has no shakemap, so nothing is attached.
+  const usgs = new Event({ source: 'USGS', id: 'u', time: new Date(), magnitude: 6.0, depthKm: 10, lat: -1.0, lon: 120.2 });
+  assert.equal(buildMessage(clusterEvents([usgs])[0]).photo, null);
 });
 
 // --- Seismic Activity Outlook (Tier 3) -------------------------------------
@@ -225,14 +229,10 @@ test('buildOutlook obeys every safety-framing invariant', () => {
   const stats = outlookStats(6.7, { a: -1.67, b: 1.0, p: 1.07, c: 0.05 }, { feltMag: 4.0, strongMag: 6.0 });
   const { body } = buildOutlook(m, stats);
 
-  assert.match(body, /BUKAN ramalan/); // probabilistic, not a prediction (ID)
-  assert.match(body, /NOT a prediction/i); // (EN)
-  assert.match(body, /LEBIH BESAR/); // the larger-quake caveat, stated plainly (ID)
-  assert.match(body, /LARGER/); // (EN)
-  assert.match(body, /tempat tinggi/); // high-ground rule kept (ID)
-  assert.match(body, /high ground/i); // (EN)
-  assert.match(body, /menurun seiring waktu/); // decay honesty (ID)
-  assert.match(body, /decays with time/i); // (EN)
+  assert.match(body, /BUKAN ramalan/); // probabilistic, not a prediction
+  assert.match(body, /LEBIH BESAR/); // the larger-quake caveat, stated plainly
+  assert.match(body, /tempat tinggi/); // high-ground rule kept
+  assert.match(body, /menurun seiring waktu/); // decay honesty
   assert.match(body, /BMKG/); // defer to authorities
   assert.match(body, /2018/); // model humility
   assert.doesNotMatch(body, /\d+\.\d+%/); // NEVER a false-precision percentage
@@ -251,6 +251,36 @@ test('buildDigest formats a recap with count + safety note', () => {
   assert.match(body, /RINGKASAN/);
   assert.match(body, /M4\.6/);
   assert.match(body, /BMKG/); // the safety footer
+});
+
+test('digestFromCatalog builds the recap from persisted rows, honouring window/mag/radius', () => {
+  const now = new Date('2026-06-18T12:00:00Z').getTime();
+  const iso = (h) => new Date(now - h * 3600 * 1000).toISOString();
+  const catalog = [
+    { timeIso: iso(1), lat: -1.1, lon: 120.2, mag: 5.2, depthKm: 10, tsunamiFlag: true, felt: 'IV Palu' }, // in
+    { timeIso: iso(3), lat: -1.0, lon: 120.0, mag: 4.2, depthKm: 8 }, // in
+    { timeIso: iso(5), lat: -1.0, lon: 120.0, mag: 3.6, depthKm: 8 }, // below floor -> out
+    { timeIso: iso(30), lat: -1.0, lon: 120.0, mag: 5.0, depthKm: 8 }, // older than 24h -> out
+    { timeIso: iso(2), lat: 5.6, lon: 125.4, mag: 6.0, depthKm: 10 }, // beyond radius -> out
+  ];
+  const { subject, body, count } = digestFromCatalog(catalog, { hours: 24, minMag: 4.0, radiusKm: 350, now });
+  assert.equal(count, 2);
+  assert.match(subject, /2 gempa/);
+  assert.match(body, /M5\.2/);
+  assert.match(body, /POTENSI TSUNAMI/); // tsunami marker preserved from the catalog row
+  assert.match(body, /dirasakan/); // felt marker preserved from the catalog row
+  assert.doesNotMatch(body, /M3\.6/); // below the magnitude floor is excluded
+});
+
+test('appendCatalog stores place/tsunami/felt so the digest keeps its markers', () => {
+  const state = { catalog: [] };
+  const e = new Event({ source: 'BMKG', id: 'c', time: new Date('2026-06-18T05:00:00Z'), magnitude: 5.0, depthKm: 10, lat: -1.0, lon: 120.2, place: 'Dekat Palu', tsunamiFlag: true, felt: 'III Palu' });
+  const [m] = clusterEvents([e]);
+  appendCatalog(state, m, 3.5);
+  assert.equal(state.catalog.length, 1);
+  assert.equal(state.catalog[0].place, 'Dekat Palu');
+  assert.equal(state.catalog[0].tsunamiFlag, true);
+  assert.equal(state.catalog[0].felt, 'III Palu');
 });
 
 // Regression: a stray space on the bot token (common when pasting into GitHub

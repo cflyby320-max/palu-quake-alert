@@ -215,12 +215,6 @@ export function sequenceOrdinal(priorAlerts, m, hours = SEQUENCE_WINDOW_HOURS) {
   return prior + 1;
 }
 
-function ordinalEn(n) {
-  const s = ['th', 'st', 'nd', 'rd'];
-  const v = n % 100;
-  return n + (s[(v - 20) % 10] || s[v] || s[0]);
-}
-
 export function clusterEvents(events) {
   const clusters = [];
   const sorted = events.slice().sort((a, b) => a.time - b.time);
@@ -281,12 +275,16 @@ export function witaString(date) {
 }
 
 const ICON = { CRITICAL: '🔴', HIGH: '🟠', MODERATE: '🟡', LOW: '🟢' };
+// Indonesian severity labels for the subject line. Recipients are family in
+// Palu, so the whole message is Bahasa Indonesia only (see below).
+const LEVEL_ID = { CRITICAL: 'KRITIS', HIGH: 'TINGGI', MODERATE: 'SEDANG', LOW: 'RINGAN' };
 
-// Returns { subject, body, photo }. Body is bilingual (Bahasa Indonesia +
-// English) because recipients may include relatives who don't read English.
-// `photo` (a BMKG shakemap image URL, or null) is set for stronger quakes so a
-// channel that supports images can attach it. Pass `sequenceN` (from
-// sequenceOrdinal) to add the "Nth quake near Palu in 24h" aftershock context.
+// Returns { subject, body, photo }. Body is Bahasa Indonesia ONLY — every
+// recipient is family in Palu, so the former English half was dropped to keep
+// emergency messages short and scannable (the action line stays near the top).
+// `photo` (a BMKG shakemap image URL, or null) is attached whenever BMKG
+// provides one so an image-capable channel shows it inline. Pass `sequenceN`
+// (from sequenceOrdinal) to add the "Nth quake near Palu in 24h" context.
 export function buildMessage(m, { sequenceN } = {}) {
   const c = classify(m);
   const wita = witaString(m.time);
@@ -294,7 +292,7 @@ export function buildMessage(m, { sequenceN } = {}) {
   const dir = compass(m.bearingFromPalu());
   const conf = m.confirmed
     ? `Dikonfirmasi ${m.sources.join(' + ')}`
-    : `Sumber: ${m.sources[0]} (data awal / preliminary)`;
+    : `Sumber: ${m.sources[0]} (data awal)`;
 
   const official =
     m.tsunamiFlag === true
@@ -306,30 +304,22 @@ export function buildMessage(m, { sequenceN } = {}) {
   // Safety instruction scales with tsunami level.
   let action;
   if (c.tsunami === 'warning') {
-    action =
-      'SEGERA menjauh dari pantai & sungai, naik ke tempat tinggi SEKARANG. ' +
-      '/ Move AWAY from coast & rivers to high ground NOW.';
+    action = 'SEGERA menjauh dari pantai & sungai, naik ke tempat tinggi SEKARANG.';
   } else if (c.tsunami === 'caution') {
     action =
       'Gempa besar & dangkal. Jika di dekat pantai dan guncangan terasa kuat, ' +
-      'JANGAN menunggu konfirmasi — naik ke tempat tinggi. ' +
-      '/ Large shallow quake. If near the coast and shaking felt strong, do NOT wait — move to high ground.';
+      'JANGAN menunggu konfirmasi — naik ke tempat tinggi.';
   } else if (c.level === 'HIGH' || c.level === 'CRITICAL') {
-    action =
-      'Berlindung (merunduk, lindungi kepala), jauhi bangunan/jendela, siap untuk gempa susulan. ' +
-      '/ Take cover, stay clear of buildings/windows, expect aftershocks.';
+    action = 'Berlindung (merunduk, lindungi kepala), jauhi bangunan/jendela, siap untuk gempa susulan.';
   } else if (c.level === 'LOW') {
-    action =
-      'Gempa kecil — dampak minim, ini hanya info. Tetap waspada. ' +
-      '/ Minor quake — little expected impact, just a heads-up. Stay aware.';
+    action = 'Gempa kecil — dampak minim, ini hanya info. Tetap waspada.';
   } else {
-    action =
-      'Tetap tenang dan waspada gempa susulan. / Stay calm and watch for aftershocks.';
+    action = 'Tetap tenang dan waspada gempa susulan.';
   }
 
-  const subject = `${ICON[c.level] || ''} M${m.magnitude.toFixed(1)} ${dist} km dari Palu — ${c.level}`;
+  const subject = `${ICON[c.level] || ''} M${m.magnitude.toFixed(1)} ${dist} km dari Palu — ${LEVEL_ID[c.level] || c.level}`;
 
-  // Attach the BMKG shakemap for stronger quakes (channels that can't show an
+  // Attach the BMKG shakemap whenever one exists (channels that can't show an
   // image just ignore this and keep the text alert).
   const photo = m.magnitude >= SHAKEMAP_MIN_MAG && m.shakemap ? m.shakemap : null;
 
@@ -337,25 +327,24 @@ export function buildMessage(m, { sequenceN } = {}) {
   // an isolated event shows no "1st quake" noise.
   const aftershock =
     sequenceN && sequenceN >= 2
-      ? `📊 Gempa ke-${sequenceN} di sekitar Palu dalam ${SEQUENCE_WINDOW_HOURS} jam terakhir. ` +
-        `/ ${ordinalEn(sequenceN)} quake near Palu in the last ${SEQUENCE_WINDOW_HOURS}h.`
+      ? `📊 Gempa ke-${sequenceN} di sekitar Palu dalam ${SEQUENCE_WINDOW_HOURS} jam terakhir.`
       : null;
 
   const lines = [
     subject,
     '',
-    `Magnitudo / Magnitude: M${m.magnitude.toFixed(1)}`,
-    `Lokasi / Location: ${m.place}`,
-    `Jarak ke Palu / Distance to Palu: ~${dist} km ${dir.id} / ${dir.en}`,
-    `Kedalaman / Depth: ${Number.isFinite(m.depthKm) ? m.depthKm + ' km' : 'n/a'}`,
-    `Waktu / Time: ${wita}`,
+    `Magnitudo: M${m.magnitude.toFixed(1)}`,
+    `Lokasi: ${m.place}`,
+    `Jarak ke Palu: ~${dist} km ${dir.id}`,
+    `Kedalaman: ${Number.isFinite(m.depthKm) ? m.depthKm + ' km' : 'n/a'}`,
+    `Waktu: ${wita}`,
     official,
-    m.felt ? `Dirasakan / Felt: ${m.felt}` : null,
+    m.felt ? `Dirasakan: ${m.felt}` : null,
     aftershock,
     '',
     `➡️ ${action}`,
     '',
-    `🗺️ Peta / Map: ${mapLink(m.lat, m.lon)}`,
+    `🗺️ Peta: ${mapLink(m.lat, m.lon)}`,
     conf,
     // Skip the details link when it's the very image we're attaching as a photo.
     m.url && m.url !== photo ? `Detail: ${m.url}` : null,
@@ -376,16 +365,53 @@ export function buildDigest(list, { hours, minMag, radiusKm }) {
   });
   const subject = `📋 Ringkasan ${hours} jam — ${list.length} gempa dekat Palu`;
   const body = [
-    '📋 RINGKASAN GEMPA / QUAKE RECAP',
+    '📋 RINGKASAN GEMPA',
     `Sekitar Palu · ${hours} jam terakhir · ≥ M${minMag.toFixed(1)}, ≤ ${radiusKm} km`,
     '',
-    ...(list.length ? lines : ['(Tidak ada gempa yang memenuhi kriteria. / No qualifying quakes.)']),
+    ...(list.length ? lines : ['(Tidak ada gempa yang memenuhi kriteria.)']),
     '',
-    `Total: ${list.length} kejadian / events.`,
+    `Total: ${list.length} kejadian.`,
     'ℹ️ Rekap susulan (mungkin terlambat), BUKAN peringatan real-time. Selalu utamakan BMKG, sirene & petugas.',
-    'A delayed recap, not a real-time alert — always follow BMKG & authorities.',
   ].join('\n');
   return { subject, body };
+}
+
+// Adapt a persisted catalog row ({timeIso,lat,lon,mag,depthKm,sources,place,
+// tsunamiFlag,felt}) into the minimal shape classify()/buildDigest() need, so
+// the recap can be built from what we actually recorded. Rows written before
+// the catalog was enriched may lack place/tsunamiFlag/felt — those default to
+// empty/unknown rather than crash.
+function catalogRowToEvent(row) {
+  return {
+    magnitude: row.mag,
+    depthKm: row.depthKm,
+    lat: row.lat,
+    lon: row.lon,
+    time: new Date(row.timeIso),
+    place: row.place || '',
+    tsunamiFlag: row.tsunamiFlag ?? null,
+    felt: row.felt || null,
+    distanceToPalu() {
+      return haversineKm(this.lat, this.lon, PALU.lat, PALU.lon);
+    },
+  };
+}
+
+// Build the recap straight from the persisted catalog — NOT a live re-fetch —
+// so the digest can never disagree with the real-time alerts (a quake that has
+// rolled off the live feed is still in the catalog). Pure; `now` is injectable
+// for tests. Applies the same window/floor/radius filters as the alert path.
+export function digestFromCatalog(catalog, { hours, minMag, radiusKm, now = Date.now() }) {
+  const cutoff = now - hours * 3600 * 1000;
+  const events = (catalog || [])
+    .map(catalogRowToEvent)
+    .filter((m) => Number.isFinite(m.magnitude) && m.time.getTime() >= cutoff)
+    .filter((m) => m.magnitude >= minMag)
+    .filter((m) => m.distanceToPalu() <= radiusKm)
+    .sort((a, b) => b.time - a.time)
+    .slice(0, 30);
+  const { subject, body } = buildDigest(events, { hours, minMag, radiusKm });
+  return { subject, body, count: events.length };
 }
 
 // --- Seismic Activity Outlook (aftershock probability) ----------------------
@@ -484,7 +510,7 @@ export function buildOutlook(m, stats) {
   const fM = stats.feltMag.toFixed(1);
   const sM = stats.strongMag.toFixed(1);
 
-  const subject = `📈 Prakiraan gempa susulan / Aftershock Outlook — M${mag} dekat Palu`;
+  const subject = `📈 Prakiraan Gempa Susulan — M${mag} dekat Palu`;
   const body = [
     subject,
     '',
@@ -499,11 +525,6 @@ export function buildOutlook(m, stats) {
     'Peluang ini paling tinggi SEKARANG dan menurun seiring waktu.',
     'Jika guncangan kuat di dekat pantai: JANGAN menunggu — segera ke tempat tinggi.',
     'Utamakan BMKG, sirene & petugas. Model ini bisa keliru; kejadian luar biasa (seperti 2018) tidak selalu tercakup.',
-    '',
-    '— English —',
-    `After the M${mag} near Palu, aftershocks are temporarily MORE LIKELY. This is a statistical estimate, NOT a prediction of a specific quake.`,
-    `Next 24 h (rough): felt aftershock (≥M${fM}) ${felt.en} (${felt.range}) · strong (≥M${sM}) ${strong.en} (${strong.range}) · an even LARGER quake ${larger.en} (${larger.range}), small but real. Over 7 days the larger-quake chance is ${larger7.range}.`,
-    "The chance is highest NOW and decays with time. Strong shaking near the coast → move to high ground now, don't wait. Always follow BMKG & authorities; this model can be wrong and unusual events (like 2018) may not be captured.",
   ].join('\n');
   return { subject, body };
 }

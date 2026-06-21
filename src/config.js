@@ -47,7 +47,7 @@ export const STRONG_MAGNITUDE = num('STRONG_MAGNITUDE', 6.0); // likely strongly
 export const TSUNAMI_MAG = num('TSUNAMI_MAG', 6.5); // precautionary high-ground threshold
 export const SHALLOW_KM = num('SHALLOW_KM', 70); // shallow quakes shake/displace water more
 export const MAX_EVENT_AGE_HOURS = num('MAX_EVENT_AGE_HOURS', 6); // max age for a real-time push; dedup makes a wider window safe, and the twice-daily digest catches anything older
-export const SHAKEMAP_MIN_MAG = num('SHAKEMAP_MIN_MAG', 5.5); // attach BMKG shakemap image at/above this magnitude
+export const SHAKEMAP_MIN_MAG = num('SHAKEMAP_MIN_MAG', 0); // attach the BMKG shakemap image inline whenever BMKG provides one (0 = no magnitude gate; raise to suppress images on smaller quakes)
 export const SEQUENCE_WINDOW_HOURS = num('SEQUENCE_WINDOW_HOURS', 24); // lookback for the "Nth quake near Palu" aftershock-context line
 
 // --- Seismic Activity Outlook (aftershock-probability heads-up) -------------
@@ -64,6 +64,14 @@ export const AFTERSHOCK_C = num('AFTERSHOCK_C', 0.05); // Omori-Utsu time offset
 export const B_MIN_SAMPLE = num('B_MIN_SAMPLE', 50); // min events before trusting a locally-fitted b-value
 export const CATALOG_MIN_MAG = num('CATALOG_MIN_MAG', 3.5); // accumulate near-Palu events at/above this into the catalog
 export const CATALOG_RETENTION_DAYS = num('CATALOG_RETENTION_DAYS', 60); // how long the local catalog is kept
+
+// --- Twice-daily digest (catch-up recap, posted from the always-on loop) -----
+// Fires at 08:00 & 20:00 WITA (00:00 & 12:00 UTC) from inside the monitoring
+// loop, built from the persisted catalog so it always matches the real-time
+// alerts. (The old GitHub-Actions digest re-fetched live feeds and could miss a
+// quake that had rolled off the feed — see git history.)
+export const DIGEST_ENABLED = bool('DIGEST_ENABLED', true); // kill-switch
+export const DIGEST_HOURS = num('DIGEST_HOURS', 24); // lookback window for the recap
 
 // --- Cross-source correlation (treat 2 feeds' versions as 1 physical quake) -
 export const SAME_EVENT_SECONDS = num('SAME_EVENT_SECONDS', 90);
