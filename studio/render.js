@@ -34,10 +34,17 @@ export async function fetchAsDataUri(url, { timeoutMs = 20000 } = {}) {
 export async function renderCard(m, opts = {}) {
   const shakemapDataUri = m.shakemap ? await fetchAsDataUri(m.shakemap) : null;
   const svg = buildCardSvg(m, { ...opts, shakemapDataUri });
+  return { png: rasterizePng(svg), svg, hadShakemap: Boolean(shakemapDataUri) };
+}
+
+// Rasterise any 1080-wide card SVG (event cards OR the evergreen series) to PNG.
+// The single dependency (@resvg/resvg-js) is confined to this file; callers pass
+// in a finished SVG string, so ../src and the evergreen template stay dep-free.
+export function rasterizePng(svg, { width = 1080, background = '#0F4C5C' } = {}) {
   const resvg = new Resvg(svg, {
-    fitTo: { mode: 'width', value: 1080 },
+    fitTo: { mode: 'width', value: width },
     font: { fontFiles: FONT_FILES, loadSystemFonts: false, defaultFontFamily: 'DejaVu Sans' },
-    background: '#0F4C5C',
+    background,
   });
-  return { png: resvg.render().asPng(), svg, hadShakemap: Boolean(shakemapDataUri) };
+  return resvg.render().asPng();
 }
