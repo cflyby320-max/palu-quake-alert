@@ -86,6 +86,9 @@ export function appendCatalog(state, m, minMag) {
   const existing = state.catalog.find((a) => sameQuake(a, m));
   if (existing) {
     if (m.magnitude > existing.mag) existing.mag = m.magnitude; // keep a revised-up magnitude
+    if (m.tsunamiFlag === true) existing.tsunamiFlag = true; // conservative: warn if any source warns
+    if (!existing.felt && m.felt) existing.felt = m.felt; // fill in once felt-reports arrive
+    if (!existing.place && m.place) existing.place = m.place;
     return;
   }
   state.catalog.push({
@@ -95,6 +98,11 @@ export function appendCatalog(state, m, minMag) {
     mag: m.magnitude,
     depthKm: m.depthKm,
     sources: m.sources,
+    // Stored so the twice-daily digest (built from this catalog) keeps the same
+    // tsunami / felt markers the real-time alert showed.
+    place: m.place,
+    tsunamiFlag: m.tsunamiFlag,
+    felt: m.felt,
   });
 }
 
