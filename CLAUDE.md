@@ -21,6 +21,7 @@ npm test                  # run the offline unit tests (node --test); no network
 node --env-file=.env run.js          # continuous monitoring loop (polls every POLL_SECONDS)
 node --env-file=.env run.js --once   # single cycle, for cron / GitHub Actions
 node --env-file=.env run.js --outlook # post an aftershock-probability Outlook for the latest mainshock (add --dry-run to preview)
+node --env-file=.env run.js --digest [h] # post a catch-up recap of recent quakes from the local catalog (default 24h; add --dry-run to preview)
 node run.js --dry-run                # log alerts but never send externally
 ```
 
@@ -51,7 +52,7 @@ fetch BMKG + USGS (parallel, Promise.allSettled — one source failing is tolera
 
 ### Module responsibilities
 
-- **`src/config.js`** — all tunables come from env vars (with defaults) via helpers `num()` / `list()`. Defines the `channels` object and `activeChannelNames()`. A channel is "active" only if its credentials are present, so the same code runs with Telegram, Twilio, both, or neither configured.
+- **`src/config.js`** — all tunables come from env vars (with defaults) via helpers `num()` / `list()` / `bool()` (the last for kill-switches like `DIGEST_ENABLED`/`OUTLOOK_ENABLED`). Defines the `channels` object and `activeChannelNames()`. A channel is "active" only if its credentials are present, so the same code runs with Telegram, Twilio, both, or neither configured.
 - **`src/sources.js`** — network I/O only. `fetchJson()` wraps `fetch` with timeout + retry. `fetchBmkg()` combines `autogempa.json` (latest single event) with `gempaterkini.json` (recent list) and dedups; BMKG has no server-side geo filter. `fetchUsgs()` uses the USGS FDSN API's server-side radius filter around Palu.
 - **`src/core.js`** — **pure** (no network, no I/O), therefore fully unit-testable. Contains parsing (`parseBmkgEntry`, `parseUsgsFeature`), the `Event` and `MergedEvent` classes, `clusterEvents`, `classify`, `buildMessage`/`buildDigest`/`digestFromCatalog`, the per-alert context helpers (`compass`, `mapLink`, `sequenceOrdinal`), and the **Seismic Activity Outlook** math (`expectedAftershocks`, `probAtLeastOne`, `bValueMLE`, `probBucket`, `outlookStats`, `buildOutlook` — see `OUTLOOK_DESIGN.md`). Most domain logic and safety rules live here.
 - **`src/state.js`** — JSON-file memory (`state.json`) holding three arrays — `alerted` (dedup), `catalog` (the local event history that feeds the Outlook **and the digest**; rows store `place`/`tsunamiFlag`/`felt` so the recap keeps its markers), and `outlooks` (Outlook dedup) — plus a `lastDigestIso` scalar (per-slot dedup for the twice-daily digest). `findPriorAlert`/`findPriorOutlook` match by the same time+distance window used for cross-source merging, so a quake is recognised even if it gained a second source between polls. `pruneState` drops `alerted`/`outlooks` older than `STATE_RETENTION_DAYS`; `pruneCatalog` keeps the catalog for `CATALOG_RETENTION_DAYS`.
@@ -88,6 +89,13 @@ BMKG fields are free-text Indonesian strings whose format occasionally changes (
 ## Configuration
 
 All config is env-driven; see `.env.example` for the full annotated list and `src/config.js` for defaults. Key knobs: `PALU_LAT`/`PALU_LON`, `ALERT_RADIUS_KM` (350), `INFO_MAGNITUDE` (4.0), `MIN_MAGNITUDE` (5.0), `STRONG_MAGNITUDE` (6.0), `TSUNAMI_MAG` (6.5), `SHALLOW_KM` (70), `MAX_EVENT_AGE_HOURS` (6), `POLL_SECONDS` (45), `ESCALATION_DELTA` (0.5, re-alert when a preliminary magnitude is revised up by this much), `SHAKEMAP_MIN_MAG` (0, attach the BMKG shakemap image inline whenever BMKG provides one; raise to suppress images on smaller quakes), `SEQUENCE_WINDOW_HOURS` (24, lookback for the "Nth quake near Palu" aftershock-context line), `DIGEST_ENABLED` (true, kill-switch), `DIGEST_HOURS` (24, twice-daily recap window). **Seismic Activity Outlook** (see `OUTLOOK_DESIGN.md`): `OUTLOOK_ENABLED` (true, kill-switch), `OUTLOOK_TRIGGER_MAG` (5.5), `OUTLOOK_FELT_MAG` (4.0), `OUTLOOK_STRONG_MAG` (6.0), `AFTERSHOCK_A/B/P/C` (Reasenberg-Jones generic params), `CATALOG_MIN_MAG` (3.5), `CATALOG_RETENTION_DAYS` (60). Secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_IDS`, `TWILIO_*`) belong in `.env` (gitignored) or host secret stores — never committed.
+
+## Companion docs & public assets
+
+- **`OUTLOOK_DESIGN.md`** — full spec + safety rules for the Seismic Activity Outlook (aftershock probability). Read before touching any Outlook math or copy.
+- **`TIER2_PRESENTATION.md`** — the trust/presentation work (BotFather copy, pinned post, brand kit rationale).
+- **`CONTEXT.md`** — self-contained handoff doc for the open workstreams (interactive bot, brand assets, scaling). Note: it predates the Indonesian-only and Tier 2/3 changes, so some details (e.g. "bilingual messages") are stale relative to the code.
+- **`docs/`** — the GitHub Pages site: `index.html` is the public About / Terms / Privacy page (Bahasa + English, links to the bot), and `docs/assets/` holds the brand kit (`avatar.{png,svg}` and the four `severity-*` badges). These are user-facing assets, not wired into the runtime — keep their copy aligned with the safety framing (not early warning, defer to BMKG, high-ground rule).
 
 ## Known limitation: the bot is SEND-ONLY
 
