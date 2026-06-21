@@ -129,7 +129,7 @@ async function heartbeat() {
 // every one failed. dry-run and log-only cycles have empty results and are NOT
 // treated as delivery failures. Mirrors the "ALL channels failed" check in
 // notify.js so the heartbeat and the CRITICAL delivery log always agree.
-function allChannelsFailed(res) {
+export function allChannelsFailed(res) {
   return Boolean(res && !res.dryRun && res.results.length > 0 && res.results.every((r) => !r.ok));
 }
 
