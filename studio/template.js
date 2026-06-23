@@ -6,12 +6,9 @@
 // never disagree with the text alerts. Bahasa Indonesia + WITA only.
 
 import { classify } from '../src/core.js';
+import { T, wrap, svgOpen, SVG_CLOSE, brandHeader, honestFooter } from './svg.js';
 
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-
-function esc(s) {
-  return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
 
 // Palu is WITA (UTC+8); compute from the UTC timestamp (never BMKG's WIB field).
 function witaCard(date) {
@@ -28,30 +25,6 @@ function shortPlace(p) {
   if (!s) return 'Dekat Palu';
   s = s.charAt(0).toUpperCase() + s.slice(1);
   return s.length > 30 ? s.slice(0, 29).trimEnd() + '…' : s;
-}
-
-// SVG <text> does not wrap; split into at most 3 lines for the caution band.
-function wrap(text, max) {
-  const lines = [];
-  let cur = '';
-  for (const w of String(text).split(/\s+/)) {
-    if ((cur + ' ' + w).trim().length > max) {
-      if (cur) lines.push(cur);
-      cur = w;
-    } else {
-      cur = cur ? cur + ' ' + w : w;
-    }
-  }
-  if (cur) lines.push(cur);
-  return lines.slice(0, 3);
-}
-
-function T(x, y, size, fill, content, { weight = 400, anchor = 'start' } = {}) {
-  return (
-    `<text x="${x}" y="${y}" font-family="'DejaVu Sans', Arial, sans-serif" ` +
-    `font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}">` +
-    `${esc(content)}</text>`
-  );
 }
 
 // Severity chip — maps classify().level to a brand colour + Indonesian label
@@ -115,17 +88,10 @@ export function buildCardSvg(m, { shakemapDataUri = null } = {}) {
     : T(540, 500, 30, '#7FB7B8', 'Shakemap BMKG tidak tersedia', { anchor: 'middle' });
 
   const p = [];
-  p.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350" width="1080" height="1350" role="img">');
-  p.push(`<title>${esc(`Palu Earthquake Alerts — ${mag} ${place}`)}</title>`);
-  p.push('<rect x="0" y="0" width="1080" height="1350" fill="#0F4C5C"/>');
+  p.push(svgOpen(`Palu Earthquake Alerts — ${mag} ${place}`));
 
-  // header
-  p.push('<rect x="0" y="0" width="1080" height="184" fill="#0A3742"/>');
-  p.push('<circle cx="96" cy="92" r="58" fill="#0F4C5C" stroke="#7FB7B8" stroke-width="5"/>');
-  p.push('<path d="M40 92 H62 L72 70 84 120 96 56 108 92 H152" fill="none" stroke="#FBFCFB" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>');
-  p.push('<path d="M84 120 96 56 108 92" fill="none" stroke="#C77B0A" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>');
-  p.push(T(184, 80, 40, '#FBFCFB', 'Palu Earthquake Alerts', { weight: 600 }));
-  p.push(T(184, 124, 26, '#7FB7B8', 'Pemantau gempa & tsunami · Sulawesi Tengah'));
+  // header (shared brand chrome + the quake-specific severity chip)
+  p.push(brandHeader());
   p.push(`<rect x="${chipX}" y="56" width="${chipW}" height="60" rx="30" fill="${sev.bg}"/>`);
   p.push(`<circle cx="${chipX + 34}" cy="86" r="9" fill="${sev.dot}"/>`);
   p.push(T(chipX + 58, 97, 30, sev.ink, sev.label, { weight: 600 }));
@@ -146,12 +112,9 @@ export function buildCardSvg(m, { shakemapDataUri = null } = {}) {
   p.push(`<rect x="44" y="${bandY}" width="12" height="${bandH}" fill="${note.bar}"/>`);
   noteLines.forEach((ln, i) => p.push(T(82, bandY + 56 + i * 46, 32, note.ink, ln)));
 
-  // footer (honest framing — carried on every post)
-  p.push('<rect x="0" y="1200" width="1080" height="150" fill="#0A3742"/>');
-  p.push(T(44, 1262, 28, '#7FB7B8', 'Notifikasi cepat — bukan peringatan dini.'));
-  p.push(T(44, 1300, 28, '#7FB7B8', 'Selalu ikuti arahan resmi BMKG.'));
-  p.push(T(1036, 1284, 32, '#FBFCFB', '@infogempapalu', { weight: 600, anchor: 'end' }));
+  // footer (honest framing — carried on every post; shared single source)
+  p.push(honestFooter());
 
-  p.push('</svg>');
+  p.push(SVG_CLOSE);
   return p.join('');
 }

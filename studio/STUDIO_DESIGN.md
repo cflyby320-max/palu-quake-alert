@@ -234,7 +234,21 @@ conditional band before rasterising.
 - **Phase 4 — Delivery to operator. ✅ DONE (manual mode).** `studio/deliver.js` DMs the card +
   caption to your private Telegram (`STUDIO_REVIEW_CHAT_ID`); you post to Instagram by hand. (The
   `--publish`/Graph-API half is only for the future auto-post path — Phases 0 & 2.)
-- **Phase 5 — Evergreen + schedule.** Content bank, anniversary, weekly recap; optional LLM drafting.
+- **Phase 5 — Evergreen + schedule. ✅ DONE (manual mode).** A pillar-structured content bank
+  (`studio/content/bank.js`, calendar in `studio/content/CALENDAR.md`) drives educational cards +
+  carousels for the quiet periods between quakes — three pillars (Kenali Wilayahmu / Siap Sebelum
+  Bencana / Saring Sebelum Sebar) plus the 28-Sep anniversary, built from the Sulawesi Tengah
+  content strategy. `studio/edutemplate.js` renders each slide through the **shared brand chrome**
+  (`studio/svg.js`, also used by the quake card, so the honest-framing footer can never diverge);
+  `renderEduPost` rasterises a card or a multi-slide carousel; `deliverDraft` DMs a single photo or
+  a media-group album to the operator for **manual** posting to the channel + Instagram. Captions
+  are **pre-authored** (no LLM in the default path) with qualified 2018 figures and the
+  BMKG/BNPB/BPBD routing baked in; the **opt-in `--llm`** flag rephrases a caption via the Claude
+  Messages API (`ANTHROPIC_API_KEY`, pure `fetch`, model `STUDIO_LLM_MODEL`), re-appends the fixed
+  framing, runs `validateEduCaption`, and **falls back to the authored caption** on any
+  failure/validation miss — so the LLM can never put an unsafe claim on a post.
+  CLI: `node studio/studio.js --edu` (list) · `--edu <id> [--dry-run] [--llm]` · `--edu-all`.
+  Safety invariants are enforced offline by `test/studio_content.test.js`.
 - **Phase 6 — (optional) Telegram buttons.** Inline approve/reject, via the interactive-bot
   workstream in `CONTEXT.md`.
 

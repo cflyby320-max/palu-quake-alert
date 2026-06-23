@@ -12,8 +12,10 @@
 
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { parseBmkgEntry, clusterEvents } from '../src/core.js';
-import { renderCard } from './render.js';
+import { renderCard, renderEduPost } from './render.js';
 import { buildCaption } from './caption.js';
+import { buildEduCaption, draftEduCaption } from './educaption.js';
+import { listPosts, getPost } from './content/bank.js';
 import { deliverDraft } from './deliver.js';
 
 const BMKG_AUTOGEMPA = 'https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json';
@@ -42,6 +44,31 @@ async function emit(m) {
   return { png, caption, hadShakemap };
 }
 
+// Render an educational post (bank.js entry) to studio/out/ and return the
+// assets. With useLlm, the caption is rephrased via the Claude API (validated,
+// with deterministic fallback); otherwise the authored caption is used as-is.
+async function emitEdu(post, { useLlm = false } = {}) {
+  const outDir = new URL('./out/', import.meta.url);
+  mkdirSync(outDir, { recursive: true });
+  const { pngs } = renderEduPost(post);
+  const { caption, llm, reason } = useLlm
+    ? await draftEduCaption(post)
+    : { caption: buildEduCaption(post), llm: false };
+
+  if (pngs.length === 1) {
+    writeFileSync(new URL('card.png', outDir), pngs[0]);
+  } else {
+    pngs.forEach((buf, i) => writeFileSync(new URL(`card-${i + 1}.png`, outDir), buf));
+  }
+  writeFileSync(new URL('caption.txt', outDir), caption, 'utf8');
+
+  const kb = (pngs.reduce((n, b) => n + b.length, 0) / 1024).toFixed(0);
+  console.log(`Rendered [P${post.pillar}] ${post.id} — ${pngs.length} slide(s), ${kb} KB`);
+  console.log(`  cards   : studio/out/${pngs.length === 1 ? 'card.png' : `card-1..${pngs.length}.png`}`);
+  console.log(`  caption : studio/out/caption.txt${useLlm ? (llm ? ' (LLM)' : ` (authored — LLM fell back: ${reason})`) : ''}`);
+  return { pngs, caption, post };
+}
+
 async function main() {
   const args = process.argv.slice(2);
   const dryRun = args.includes('--dry-run');
@@ -49,11 +76,51 @@ async function main() {
   if (args.includes('--help') || args.length === 0) {
     console.log(
       [
-        'Studio — branded Instagram cards for Palu Earthquake Alerts',
-        '  node studio.js --demo               render the live BMKG latest quake -> studio/out/',
-        '  node studio.js --draft [--dry-run]  render it AND DM the draft to your Telegram',
+        'Studio — branded cards for Palu Earthquake Alerts',
+        '  Quake (reactive):',
+        '    node studio.js --demo                 render the live BMKG latest quake -> studio/out/',
+        '    node studio.js --draft [--dry-run]    render it AND DM the draft to your Telegram',
+        '  Educational (evergreen):',
+        '    node studio.js --edu                  list available educational posts',
+        '    node studio.js --edu <id> [--dry-run] [--llm]   render one post + DM the draft',
+        '    node studio.js --edu-all [--dry-run] [--llm]     render + DM every post',
+        '  (--llm rephrases captions via the Claude API; default is the authored caption.)',
       ].join('\n')
     );
+    return;
+  }
+
+  // Educational evergreen track --------------------------------------------
+  if (args.includes('--edu-all')) {
+    const useLlm = args.includes('--llm');
+    for (const { id } of listPosts()) {
+      const post = getPost(id);
+      const { pngs, caption } = await emitEdu(post, { useLlm });
+      const res = await deliverDraft({ pngs, caption, label: `${post.accent.tag} · ${post.id}` }, { dryRun });
+      console.log(res.delivered ? '  → draft DM sent.' : `  → not sent (${res.reason}).`);
+    }
+    return;
+  }
+
+  if (args.includes('--edu')) {
+    const i = args.indexOf('--edu');
+    const id = args[i + 1] && !args[i + 1].startsWith('--') ? args[i + 1] : null;
+    if (!id) {
+      console.log('Educational posts:');
+      for (const p of listPosts()) {
+        console.log(`  ${p.id}  [P${p.pillar} · ${p.slot} · ${p.slides} slide(s)]`);
+      }
+      console.log('\nRender one:  node studio.js --edu <id> [--dry-run] [--llm]');
+      return;
+    }
+    const post = getPost(id);
+    if (!post) {
+      console.log(`Unknown post id "${id}". Run "node studio.js --edu" to list them.`);
+      process.exit(1);
+    }
+    const { pngs, caption } = await emitEdu(post, { useLlm: args.includes('--llm') });
+    const res = await deliverDraft({ pngs, caption, label: `${post.accent.tag} · ${post.id}` }, { dryRun });
+    console.log(res.delivered ? '\nDraft DM sent to your Telegram.' : `\nDraft not sent (${res.reason}).`);
     return;
   }
 

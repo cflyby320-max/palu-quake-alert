@@ -6,6 +6,7 @@
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { buildCardSvg } from './template.js';
+import { buildEduSvgs } from './edutemplate.js';
 
 // Bundled fonts so the card renders identically on Windows AND on the Linux host
 // (Fly), which ships no system fonts — without these the text would come out
@@ -40,4 +41,19 @@ export async function renderCard(m, opts = {}) {
     background: '#0F4C5C',
   });
   return { png: resvg.render().asPng(), svg, hadShakemap: Boolean(shakemapDataUri) };
+}
+
+// Rasterise an educational post (bank.js entry) to one PNG per slide. No network
+// (no shakemap), so this is fully offline. Returns { pngs: Buffer[], svgs }.
+export function renderEduPost(post) {
+  const svgs = buildEduSvgs(post);
+  const pngs = svgs.map((svg) => {
+    const resvg = new Resvg(svg, {
+      fitTo: { mode: 'width', value: 1080 },
+      font: { fontFiles: FONT_FILES, loadSystemFonts: false, defaultFontFamily: 'DejaVu Sans' },
+      background: '#0F4C5C',
+    });
+    return resvg.render().asPng();
+  });
+  return { pngs, svgs };
 }
