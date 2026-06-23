@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A safety tool that sends **rapid earthquake & tsunami-caution alerts** to family in **Palu, Central Sulawesi, Indonesia** (site of the 2018 M7.5 disaster). It polls two independent feeds — **BMKG/InaTEWS** (Indonesia's official agency; primary) and **USGS** (cross-check/fallback) — merges them so one physical quake produces one alert, and pushes a Bahasa Indonesia message via Telegram and/or Twilio SMS/WhatsApp.
 
-**Node.js with zero third-party dependencies — by design.** It uses only stdlib: global `fetch`, `node:fs`, the `node:test` runner, and `--env-file`. There is no `npm install` step and no lockfile. Keep it that way: every dependency is one more thing that can break in a tool people trust with their safety. Requires Node >= 20.
+**The watcher (`src/`) is Node.js with zero third-party dependencies — by design.** It uses only stdlib: global `fetch`, `node:fs`, the `node:test` runner, and `--env-file`. There is no `npm install` step and no lockfile for the watcher. Keep it that way: every dependency is one more thing that can break in a tool people trust with their safety. Requires Node >= 20. (The one sanctioned exception is the optional, deliberately isolated `studio/` Instagram module, which has its **own** `package.json` and a single dependency — see [Instagram studio](#instagram-studio-studio). It is opt-in and can never affect alert delivery.)
 
 ## Commands
 
@@ -47,6 +47,7 @@ fetch BMKG + USGS (parallel, Promise.allSettled — one source failing is tolera
   → dedup against persisted state (findPriorAlert)
   → classify() + buildMessage() → notifyAll() across all configured channels
   → if mainshock >= OUTLOOK_TRIGGER_MAG: buildOutlook() → notifyAll() (deduped, once)
+  → if STUDIO_ENABLED: maybeSendStudioDraft() → studio renders a branded card + DMs it (isolated, failure-swallowed)
   → prune + save state, then heartbeat ping
 ```
 
@@ -58,7 +59,19 @@ fetch BMKG + USGS (parallel, Promise.allSettled — one source failing is tolera
 - **`src/state.js`** — JSON-file memory (`state.json`) holding three arrays — `alerted` (dedup), `catalog` (the local event history that feeds the Outlook **and the digest**; rows store `place`/`tsunamiFlag`/`felt` so the recap keeps its markers), and `outlooks` (Outlook dedup) — plus a `lastDigestIso` scalar (per-slot dedup for the twice-daily digest). `findPriorAlert`/`findPriorOutlook` match by the same time+distance window used for cross-source merging, so a quake is recognised even if it gained a second source between polls. `pruneState` drops `alerted`/`outlooks` older than `STATE_RETENTION_DAYS`; `pruneCatalog` keeps the catalog for `CATALOG_RETENTION_DAYS`.
 - **`src/notify.js`** — multi-channel, multi-recipient delivery. Console + file log always run. External channels run only when configured; each send is independent so one failing never blocks the others. `dryRun` skips external sends.
 - **`src/geo.js`** — `haversineKm` great-circle distance.
-- **`src/monitor.js`** — orchestration, the CLI dispatch, the continuous loop, fixture loading for `--test`, the heartbeat ping, and a PID-lockfile single-instance guard (prevents double-sends when both a manual run and a logon-autostart run start a loop). The **twice-daily digest runs from inside this loop** (`maybeRunScheduledDigest`, fires at 08:00 & 20:00 WITA, deduped per-slot via `state.lastDigestIso`) and is built from the persisted catalog by `digestFromCatalog`, so the recap always matches the real-time alerts. It is NOT run from `--once` (which has no persistent catalog).
+- **`src/monitor.js`** — orchestration, the CLI dispatch, the continuous loop, fixture loading for `--test`, the heartbeat ping, and a PID-lockfile single-instance guard (prevents double-sends when both a manual run and a logon-autostart run start a loop). The **twice-daily digest runs from inside this loop** (`maybeRunScheduledDigest`, fires at 08:00 & 20:00 WITA, deduped per-slot via `state.lastDigestIso`) and is built from the persisted catalog by `digestFromCatalog`, so the recap always matches the real-time alerts. It is NOT run from `--once` (which has no persistent catalog). After each delivered alert it also calls `maybeSendStudioDraft` (opt-in via `STUDIO_ENABLED`), which **lazily** `import('../studio/hook.js')` so the watcher stays zero-dependency unless studio is turned on; any studio failure is caught and logged so it can never delay or break an alert already sent.
+
+## Instagram studio (`studio/`)
+
+A **separate, optional** content module — *not* part of the safety watcher — that turns a quake into a branded Instagram post: it renders the BMKG shakemap into an on-brand card (1080×1350 PNG) with a deterministic Bahasa Indonesia caption and DMs the draft to the operator's private Telegram for **manual** posting ("AI drafts → you approve → you post"). The full spec and safety/brand rules are in **`studio/STUDIO_DESIGN.md`** — read it before touching anything here.
+
+Key boundaries:
+
+- **Isolated by design.** `studio/` has its **own `studio/package.json`** with a single third-party dependency, `@resvg/resvg-js` (the SVG→PNG rasteriser — the only dependency in the whole repo). The watcher in `src/` never imports it; studio is imported lazily only from `maybeSendStudioDraft` in `src/monitor.js`, gated on `STUDIO_ENABLED`, and every failure is swallowed. A broken studio dependency must never take the alerter down. Fonts (`studio/assets/fonts/DejaVuSans*.ttf`) are committed so text renders with no system fonts; `studio/node_modules` and `studio/out/` are gitignored, and studio keeps its **own** dedup memory (`studio/state.json`, separate from the watcher's `state.json`).
+- **Same safety/brand invariants as the alerts** (§10 of `STUDIO_DESIGN.md`): Bahasa Indonesia only, WITA time, calm tone, never an "all-clear" or prediction, the high-ground rule for strong shallow quakes, and the honest-framing footer ("notifikasi cepat — bukan peringatan dini · ikuti BMKG"). The card's conditional band mirrors `classify()` in `src/core.js` and must not diverge from it.
+- **CLI:** `node studio/studio.js --demo` (render the live BMKG latest quake to `studio/out/`), `node studio/studio.js --draft [--dry-run]` (render **and** DM the draft to Telegram; `--dry-run` renders without sending). Reactive drafts fire automatically from the watcher loop after a delivered alert. Enable with `STUDIO_ENABLED=true` + `STUDIO_REVIEW_CHAT_ID=<your chat id>` in `.env` (the bot token defaults to the existing `TELEGRAM_BOT_TOKEN`); install its dependency with `npm install --prefix studio`.
+
+Currently manual-mode only: the Graph-API auto-publish path (`--publish`) and image hosting are designed but not the active flow — `STUDIO_DESIGN.md` §11 tracks the phased rollout.
 
 ## Safety-critical invariants — do not regress
 
@@ -78,7 +91,7 @@ BMKG fields are free-text Indonesian strings whose format occasionally changes (
 
 ## Tests
 
-`test/offline.test.js` runs entirely offline against the fixtures and synthetic `Event`s. It covers parsing robustness, cross-source merge/no-merge, the safety-critical classification cases, dedup matching, and WITA conversion. There are no network or integration tests by design (no credentials in CI).
+The suite is four files under `test/`, all discovered and run offline by `npm test` (`node --test`): `offline.test.js` (parsing robustness, cross-source merge/no-merge, the safety-critical classification cases, dedup matching, WITA conversion) plus `priority1.test.js` / `priority2.test.js` / `priority3.test.js` (added coverage, prioritised by safety impact — P1 is the safety-critical cases). They run against the fixtures and synthetic `Event`s. There are no network or integration tests by design (no credentials in CI). The `--test-name-pattern` example above filters by test name across the suite.
 
 ## Deployment
 
@@ -88,14 +101,15 @@ BMKG fields are free-text Indonesian strings whose format occasionally changes (
 
 ## Configuration
 
-All config is env-driven; see `.env.example` for the full annotated list and `src/config.js` for defaults. Key knobs: `PALU_LAT`/`PALU_LON`, `ALERT_RADIUS_KM` (350), `INFO_MAGNITUDE` (4.0), `MIN_MAGNITUDE` (5.0), `STRONG_MAGNITUDE` (6.0), `TSUNAMI_MAG` (6.5), `SHALLOW_KM` (70), `MAX_EVENT_AGE_HOURS` (6), `POLL_SECONDS` (45), `ESCALATION_DELTA` (0.5, re-alert when a preliminary magnitude is revised up by this much), `SHAKEMAP_MIN_MAG` (0, attach the BMKG shakemap image inline whenever BMKG provides one; raise to suppress images on smaller quakes), `SEQUENCE_WINDOW_HOURS` (24, lookback for the "Nth quake near Palu" aftershock-context line), `DIGEST_ENABLED` (true, kill-switch), `DIGEST_HOURS` (24, twice-daily recap window). **Seismic Activity Outlook** (see `OUTLOOK_DESIGN.md`): `OUTLOOK_ENABLED` (true, kill-switch), `OUTLOOK_TRIGGER_MAG` (5.5), `OUTLOOK_FELT_MAG` (4.0), `OUTLOOK_STRONG_MAG` (6.0), `AFTERSHOCK_A/B/P/C` (Reasenberg-Jones generic params), `CATALOG_MIN_MAG` (3.5), `CATALOG_RETENTION_DAYS` (60). Secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_IDS`, `TWILIO_*`) belong in `.env` (gitignored) or host secret stores — never committed.
+All config is env-driven; see `.env.example` for the full annotated list and `src/config.js` for defaults. Key knobs: `PALU_LAT`/`PALU_LON`, `ALERT_RADIUS_KM` (350), `INFO_MAGNITUDE` (4.0), `MIN_MAGNITUDE` (5.0), `STRONG_MAGNITUDE` (6.0), `TSUNAMI_MAG` (6.5), `SHALLOW_KM` (70), `MAX_EVENT_AGE_HOURS` (6), `POLL_SECONDS` (45), `ESCALATION_DELTA` (0.5, re-alert when a preliminary magnitude is revised up by this much), `SHAKEMAP_MIN_MAG` (0, attach the BMKG shakemap image inline whenever BMKG provides one; raise to suppress images on smaller quakes), `SEQUENCE_WINDOW_HOURS` (24, lookback for the "Nth quake near Palu" aftershock-context line), `DIGEST_ENABLED` (true, kill-switch), `DIGEST_HOURS` (24, twice-daily recap window). **Seismic Activity Outlook** (see `OUTLOOK_DESIGN.md`): `OUTLOOK_ENABLED` (true, kill-switch), `OUTLOOK_TRIGGER_MAG` (5.5), `OUTLOOK_FELT_MAG` (4.0), `OUTLOOK_STRONG_MAG` (6.0), `AFTERSHOCK_A/B/P/C` (Reasenberg-Jones generic params), `CATALOG_MIN_MAG` (3.5), `CATALOG_RETENTION_DAYS` (60). **Instagram studio** (see `studio/STUDIO_DESIGN.md`): `STUDIO_ENABLED` (false; opt-in kill-switch for the auto-draft), `STUDIO_REVIEW_CHAT_ID` (the operator's private Telegram chat that receives drafts; the bot token defaults to `TELEGRAM_BOT_TOKEN`). Secrets (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_IDS`, `TWILIO_*`) belong in `.env` (gitignored) or host secret stores — never committed.
 
 ## Companion docs & public assets
 
 - **`OUTLOOK_DESIGN.md`** — full spec + safety rules for the Seismic Activity Outlook (aftershock probability). Read before touching any Outlook math or copy.
 - **`TIER2_PRESENTATION.md`** — the trust/presentation work (BotFather copy, pinned post, brand kit rationale).
+- **`studio/STUDIO_DESIGN.md`** — full spec + safety/brand rules for the optional Instagram content studio (branded shakemap cards). Read before touching anything in `studio/`.
 - **`CONTEXT.md`** — self-contained handoff doc for the open workstreams (interactive bot, brand assets, scaling). Note: it predates the Indonesian-only and Tier 2/3 changes, so some details (e.g. "bilingual messages") are stale relative to the code.
-- **`docs/`** — the GitHub Pages site: `index.html` is the public About / Terms / Privacy page (Bahasa + English, links to the bot), and `docs/assets/` holds the brand kit (`avatar.{png,svg}` and the four `severity-*` badges). These are user-facing assets, not wired into the runtime — keep their copy aligned with the safety framing (not early warning, defer to BMKG, high-ground rule).
+- **`docs/`** — the GitHub Pages site: `index.html` is the public About / Terms / Privacy page (Bahasa + English, links to the bot), `whitepaper.html` is the project white paper visualising how the work streams relate (linked from `index.html`), and `docs/assets/` holds the brand kit (`avatar.{png,svg}` and the four `severity-*` badges). These are user-facing assets, not wired into the runtime — keep their copy aligned with the safety framing (not early warning, defer to BMKG, high-ground rule).
 
 ## Known limitation: the bot is SEND-ONLY
 
