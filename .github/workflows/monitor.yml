@@ -12,8 +12,18 @@
 #   * Filesystem is ephemeral; dedup state is persisted via actions/cache
 #     (best-effort) so the same quake isn't re-alerted each run.
 #
+# Dead-man's-switch (no double-sends): this backup CANNOT share dedup state with
+# the always-on host, so if it sent unconditionally every quake would arrive
+# twice. Instead it runs heartbeat-gated — it only sends when the host's
+# healthchecks.io heartbeat is STALE (host down). When the host is alive it
+# detects + logs but suppresses external sends. Note this run does NOT set
+# HEARTBEAT_URL: it must not ping (and thus refresh) the very check it reads, or
+# it would mask a real outage and suppress itself when it should be covering.
+#
 # Setup: add these repository secrets (Settings -> Secrets -> Actions):
-#   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_IDS, HEARTBEAT_URL  (and TWILIO_* if used)
+#   TELEGRAM_BOT_TOKEN, TELEGRAM_CHAT_IDS            (and TWILIO_* if used)
+#   PRIMARY_HEARTBEAT_URL  = the host's hc-ping URL (the check the host pings)
+#   HEALTHCHECKS_API_KEY   = a read-only healthchecks.io API key (Project Settings)
 
 name: palu-quake-monitor
 on:
@@ -47,7 +57,12 @@ jobs:
           TWILIO_TOKEN: ${{ secrets.TWILIO_TOKEN }}
           TWILIO_FROM: ${{ secrets.TWILIO_FROM }}
           TWILIO_TO: ${{ secrets.TWILIO_TO }}
-          HEARTBEAT_URL: ${{ secrets.HEARTBEAT_URL }}
+          # Heartbeat-gated backup: only send when the always-on host's heartbeat
+          # is stale (host down). Deliberately NO HEARTBEAT_URL here — this run
+          # must read the host's check, not ping it (see header note).
+          SUPPRESS_IF_PRIMARY_ALIVE: 'true'
+          PRIMARY_HEARTBEAT_URL: ${{ secrets.PRIMARY_HEARTBEAT_URL }}
+          HEALTHCHECKS_API_KEY: ${{ secrets.HEALTHCHECKS_API_KEY }}
           # Look back 6h so an event that occurs during a multi-hour GitHub
           # scheduling gap (observed 3–5h) still gets a real-time push, not just
           # a line in the twice-daily recap. Dedup prevents repeats across runs.

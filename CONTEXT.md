@@ -105,8 +105,17 @@ tsunami warning).
   are unlimited/free). In practice GitHub silently drops/delays scheduled runs (observed
   multi-hour gaps), so it is **not** a reliable primary watcher — it's a safety net.
   `keepalive.yml` exists because GitHub auto-disables scheduled jobs after 60 days of
-  repo inactivity. Secrets live in GitHub Secrets; add `HEARTBEAT_URL` there too or the
-  cloud layer never pings the dead-man's-switch.
+  repo inactivity. Secrets live in GitHub Secrets.
+  - **Heartbeat-gated (no double-sends).** The backup keeps its own dedup state and
+    can't see what the host already sent, so unconditional sending would deliver every
+    quake twice (~1h apart, when GitHub's delayed cron finally fires). It is now a
+    dead-man's-switch: `SUPPRESS_IF_PRIMARY_ALIVE=true` + `PRIMARY_HEARTBEAT_URL` (the
+    host's hc-ping URL, which it *reads*) + `HEALTHCHECKS_API_KEY` (read-only) make it
+    send **only** when the host's heartbeat is stale (host down); otherwise it suppresses.
+    The decision is the pure `shouldSuppressBackup()` in `src/monitor.js` (fails open on
+    any uncertainty), gated at the `--once` dispatch; the read is `fetchPrimaryLastPing()`
+    in `src/sources.js`. The backup deliberately does **not** set `HEARTBEAT_URL` — it
+    must not ping the check it reads, or it would mask the host's outage.
 
 ---
 

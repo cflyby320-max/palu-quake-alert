@@ -93,6 +93,25 @@ export const STATE_RETENTION_DAYS = num('STATE_RETENTION_DAYS', 14);
 // a silently dead watcher giving false confidence.
 export const HEARTBEAT_URL = (process.env.HEARTBEAT_URL || '').trim();
 
+// --- Heartbeat-gated backup (dead-man's-switch) -----------------------------
+// The always-on host is the primary watcher; the GitHub Actions cron is a
+// BACKUP. Running both with separate dedup state double-sends every quake (the
+// backup can't see what the host already sent). To fix that without sharing
+// state, the backup only sends when the primary's heartbeat is STALE — i.e.
+// the host is actually down. When the host is alive, the backup detects + logs
+// but suppresses external sends. Only the backup sets SUPPRESS_IF_PRIMARY_ALIVE;
+// the host never does, so the host always sends.
+//   Fail-open: any uncertainty (no key, API error, unparseable) => DON'T
+//   suppress. A possible duplicate is always safer than a missed alert.
+export const SUPPRESS_IF_PRIMARY_ALIVE = bool('SUPPRESS_IF_PRIMARY_ALIVE', false);
+// The primary host's hc-ping URL — read (not pinged) by the backup to learn the
+// host's last-seen time. The check UUID is its last path segment.
+export const PRIMARY_HEARTBEAT_URL = str('PRIMARY_HEARTBEAT_URL');
+// A read-only healthchecks.io API key, so the backup can query the check status.
+export const HEALTHCHECKS_API_KEY = str('HEALTHCHECKS_API_KEY');
+// A primary that pinged within this many minutes counts as "alive" (host up).
+export const PRIMARY_ALIVE_MAX_AGE_MINUTES = num('PRIMARY_ALIVE_MAX_AGE_MINUTES', 10);
+
 // Palu is in the WITA timezone (UTC+8). BMKG's "Jam" field is WIB (UTC+7),
 // so we compute local time ourselves from the UTC timestamp to be correct.
 export const WITA_OFFSET_HOURS = 8;

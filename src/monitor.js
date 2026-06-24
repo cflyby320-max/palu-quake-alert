@@ -24,10 +24,12 @@ import {
   B_MIN_SAMPLE,
   DIGEST_ENABLED,
   DIGEST_HOURS,
+  SUPPRESS_IF_PRIMARY_ALIVE,
+  PRIMARY_ALIVE_MAX_AGE_MINUTES,
   activeChannelNames,
   channels,
 } from './config.js';
-import { fetchBmkg, fetchUsgs } from './sources.js';
+import { fetchBmkg, fetchUsgs, fetchPrimaryLastPing } from './sources.js';
 import {
   parseBmkgEntry,
   parseUsgsFeature,
@@ -132,6 +134,21 @@ async function heartbeat() {
 // notify.js so the heartbeat and the CRITICAL delivery log always agree.
 export function allChannelsFailed(res) {
   return Boolean(res && !res.dryRun && res.results.length > 0 && res.results.every((r) => !r.ok));
+}
+
+// Heartbeat-gated backup decision (pure, so it's unit-testable offline).
+// The GitHub Actions backup must NOT re-send a quake the always-on host already
+// sent. We suppress the backup's external sends ONLY when we can positively
+// confirm the primary host is alive — i.e. it pinged its heartbeat within
+// `maxAgeMin`. Anything else FAILS OPEN (returns false => the backup sends):
+// the feature is disabled, or `lastPing` is null/invalid (liveness unknown),
+// or the ping is stale (host down — the backup's whole reason to exist).
+export function shouldSuppressBackup({ enabled, lastPing, now, maxAgeMin }) {
+  if (enabled !== true) return false;
+  if (!(lastPing instanceof Date) || Number.isNaN(lastPing.getTime())) return false;
+  const ageMs = now - lastPing.getTime();
+  if (!Number.isFinite(ageMs) || ageMs < 0) return false; // clock skew / bad input => fail open
+  return ageMs <= maxAgeMin * 60 * 1000;
 }
 
 // After a qualifying mainshock alert, post the Seismic Activity Outlook once
@@ -423,7 +440,23 @@ export async function main() {
   const useFixtures = args.has('--test');
 
   if (args.has('--once') || useFixtures) {
-    await runOnce({ dryRun, useFixtures, ignoreAge: useFixtures });
+    // Heartbeat-gated backup: when this run is the GitHub Actions backup
+    // (SUPPRESS_IF_PRIMARY_ALIVE=true) and the always-on host pinged its
+    // heartbeat recently, suppress external sends so the same quake isn't
+    // alerted twice. Reuses the dryRun plumbing (alerts/escalation/outlook/
+    // studio all honour it). The host never sets the flag, so it always sends.
+    let effectiveDryRun = dryRun;
+    if (SUPPRESS_IF_PRIMARY_ALIVE && !useFixtures && !dryRun) {
+      const lastPing = await fetchPrimaryLastPing();
+      if (shouldSuppressBackup({ enabled: true, lastPing, now: Date.now(), maxAgeMin: PRIMARY_ALIVE_MAX_AGE_MINUTES })) {
+        const ageMin = Math.round((Date.now() - lastPing.getTime()) / 60000);
+        effectiveDryRun = true;
+        log('INFO', `backup suppressed — primary heartbeat fresh (${ageMin}m old <= ${PRIMARY_ALIVE_MAX_AGE_MINUTES}m); not re-sending.`);
+      } else {
+        log('INFO', `backup active — primary heartbeat ${lastPing ? 'stale' : 'unknown'}; sending normally.`);
+      }
+    }
+    await runOnce({ dryRun: effectiveDryRun, useFixtures, ignoreAge: useFixtures });
     return;
   }
 
