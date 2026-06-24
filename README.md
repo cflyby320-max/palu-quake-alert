@@ -128,10 +128,28 @@ delays the vast majority of scheduled runs** (observed gaps of several hours).
 Combined with `MAX_EVENT_AGE_HOURS` (6h), a quake that happens inside a longer
 gap can be older than the staleness window by the time a run finally fires; the
 twice-daily recap is the backstop that still surfaces it. Treat this strictly as
-a backup, not a primary watcher. Put
-credentials in repository **Secrets**, not in the repo — and note that the
-heartbeat only fires from a runtime where `HEARTBEAT_URL` is actually set, so if
-you rely on the cron, add `HEARTBEAT_URL` to the repository Secrets too.
+a backup, not a primary watcher. Put credentials in repository **Secrets**, not
+in the repo.
+
+**Heartbeat-gated so it never double-sends.** The cron and the always-on host
+keep *separate* dedup state, so if the backup sent unconditionally every quake
+would arrive twice (once from the host instantly, once when GitHub's delayed
+scheduler finally fires — the classic "same alert ~1h apart"). Instead the
+backup is wired as a dead-man's-switch: it only sends when the host's heartbeat
+is **stale** (host actually down), and otherwise detects + logs but stays quiet.
+To enable, add two repository Secrets:
+
+- `PRIMARY_HEARTBEAT_URL` — the always-on host's healthchecks.io ping URL (the
+  same one the host uses for `HEARTBEAT_URL`). The backup *reads* it to learn
+  when the host last checked in.
+- `HEALTHCHECKS_API_KEY` — a **read-only** API key (healthchecks.io → Project
+  Settings → API keys) so the backup can query that check's status.
+
+The workflow deliberately does **not** set `HEARTBEAT_URL` — the backup must not
+ping (and thereby refresh) the very check it reads, or it would mask a real
+outage. Tune `PRIMARY_ALIVE_MAX_AGE_MINUTES` (default 10) if your host polls
+slowly. If either secret is missing or the read fails, the backup **fails open**
+and sends — a possible duplicate is always safer than a missed alert.
 
 ### Heartbeat (do this!)
 The scariest failure for a safety tool is dying silently. Create a free check at

@@ -10,7 +10,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { deliverTelegram } from '../src/notify.js';
-import { allChannelsFailed } from '../src/monitor.js';
+import { allChannelsFailed, shouldSuppressBackup } from '../src/monitor.js';
 import { loadState } from '../src/state.js';
 import { classify, clusterEvents, Event } from '../src/core.js';
 
@@ -93,6 +93,38 @@ test('allChannelsFailed flags only a real all-channels-failed delivery', () => {
   assert.equal(allChannelsFailed({ dryRun: false, results: [{ ok: true }, { ok: false }] }), false); // one ok
   assert.equal(allChannelsFailed({ dryRun: false, results: [{ ok: false }] }), true); // sole channel failed
   assert.equal(allChannelsFailed({ dryRun: false, results: [{ ok: false }, { ok: false }] }), true); // all failed
+});
+
+// --- Item 2b: heartbeat-gated backup (no duplicate sends) -------------------
+// The GitHub Actions backup must suppress its external sends ONLY when it can
+// positively confirm the always-on host is alive (pinged within maxAgeMin).
+// Every other case FAILS OPEN (returns false => the backup sends), because a
+// possible duplicate is always safer than a missed alert.
+
+test('shouldSuppressBackup suppresses only when the primary is provably alive', () => {
+  const now = Date.parse('2026-06-24T00:10:00Z');
+  const fresh = new Date('2026-06-24T00:08:00Z'); // 2 min old
+  const stale = new Date('2026-06-24T00:00:00Z'); // 10 min old, == threshold edge
+  const old = new Date('2026-06-23T23:00:00Z'); // ~70 min old
+
+  // Feature off -> never suppress, regardless of how fresh the ping is.
+  assert.equal(shouldSuppressBackup({ enabled: false, lastPing: fresh, now, maxAgeMin: 10 }), false);
+
+  // Host alive (ping within window) -> suppress, so we don't double-send.
+  assert.equal(shouldSuppressBackup({ enabled: true, lastPing: fresh, now, maxAgeMin: 10 }), true);
+  // Exactly at the threshold still counts as alive (<=).
+  assert.equal(shouldSuppressBackup({ enabled: true, lastPing: stale, now, maxAgeMin: 10 }), true);
+
+  // Host down (stale ping) -> the backup's whole reason to exist: SEND.
+  assert.equal(shouldSuppressBackup({ enabled: true, lastPing: old, now, maxAgeMin: 10 }), false);
+
+  // Liveness unknown -> fail open and SEND.
+  assert.equal(shouldSuppressBackup({ enabled: true, lastPing: null, now, maxAgeMin: 10 }), false);
+  assert.equal(shouldSuppressBackup({ enabled: true, lastPing: new Date('nope'), now, maxAgeMin: 10 }), false);
+
+  // Clock skew (ping in the future) -> fail open and SEND.
+  const future = new Date('2026-06-24T00:20:00Z');
+  assert.equal(shouldSuppressBackup({ enabled: true, lastPing: future, now, maxAgeMin: 10 }), false);
 });
 
 // --- Item 3: corrupt/missing state must never silence the alerter -----------

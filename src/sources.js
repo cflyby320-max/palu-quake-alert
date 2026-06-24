@@ -1,7 +1,14 @@
 // Fetching from BMKG (primary, local, fast) and USGS (cross-check / fallback).
 // Uses the built-in global fetch (Node 18+) with timeout + retry. No deps.
 
-import { HTTP_TIMEOUT_MS, HTTP_RETRIES, PALU, ALERT_RADIUS_KM } from './config.js';
+import {
+  HTTP_TIMEOUT_MS,
+  HTTP_RETRIES,
+  PALU,
+  ALERT_RADIUS_KM,
+  PRIMARY_HEARTBEAT_URL,
+  HEALTHCHECKS_API_KEY,
+} from './config.js';
 import { parseBmkgEntry, parseUsgsFeature } from './core.js';
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -26,6 +33,48 @@ async function fetchJson(url) {
     }
   }
   throw new Error(`fetch failed after ${HTTP_RETRIES} tries: ${url} (${lastErr})`);
+}
+
+// --- Primary-heartbeat read (for the heartbeat-gated backup) ----------------
+// Reads the always-on host's healthchecks.io check to learn when it last pinged.
+// Returns the last-ping time as a Date, or null on ANY problem (missing config,
+// bad URL, network/API error, unparseable). The caller treats null as
+// "liveness unknown" and FAILS OPEN — it sends rather than risk a missed alert.
+//
+// We don't reuse fetchJson() here: this call needs an X-Api-Key header and must
+// stay silent (return null) on failure rather than throw after N retries.
+export async function fetchPrimaryLastPing() {
+  if (!PRIMARY_HEARTBEAT_URL || !HEALTHCHECKS_API_KEY) return null;
+  let uuid;
+  try {
+    // The check UUID is the last path segment of the ping URL
+    // (e.g. https://hc-ping.com/<uuid>). The read API lives on healthchecks.io.
+    uuid = new URL(PRIMARY_HEARTBEAT_URL).pathname.split('/').filter(Boolean).pop();
+  } catch {
+    return null;
+  }
+  if (!uuid) return null;
+
+  const ac = new AbortController();
+  const timer = setTimeout(() => ac.abort(), HTTP_TIMEOUT_MS);
+  try {
+    const res = await fetch(`https://healthchecks.io/api/v3/checks/${uuid}`, {
+      signal: ac.signal,
+      headers: {
+        'X-Api-Key': HEALTHCHECKS_API_KEY,
+        'User-Agent': 'palu-quake-alert/1.0 (family safety prototype)',
+      },
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (!data || !data.last_ping) return null;
+    const d = new Date(data.last_ping);
+    return Number.isNaN(d.getTime()) ? null : d;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
 }
 
 const BMKG_AUTO = 'https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json';
