@@ -64,6 +64,7 @@ Future render requests should be structured objects, not prose prompts.
 | `language` | Must be `id` for current social/emergency content. |
 | `timezone` | Must be `Asia/Makassar` or WITA-equivalent for quake times. |
 | `knowledge.reviewStatus` | Must be `verified` before publication. |
+| `knowledge.sourceIds` | Required for templates that declare `verified_sources`. |
 | `content` | Structured text payload; no HTML; renderer handles placement. |
 | `footerId` | Must resolve to the mandatory honest-framing footer. |
 
@@ -146,8 +147,8 @@ When implementation resumes, prefer an incremental path:
 2. Extract shared tokens and footer/header helpers from existing studio code.
 3. Keep render-spec validation for template IDs, footer IDs, asset IDs, and
    export targets in place before rendering new layouts.
-4. Add educational template renderers only after the SDK tokens and asset IDs
-   exist.
+4. Add educational template renderers only after the SDK tokens, template
+   registry, asset schema, and asset IDs exist.
 5. Add image-layer assets as curated, textless inputs.
 
 Do not introduce a model-generated image directly into final publication. If AI
@@ -166,4 +167,5 @@ Before a rendered asset can be published:
 - Contrast is acceptable.
 - Source IDs are traceable.
 - Asset IDs exist in `ASSET_INDEX.json`.
+- Assets satisfy `ASSET_SCHEMA.json`.
 - Export dimensions match the target.

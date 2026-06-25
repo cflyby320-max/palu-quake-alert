@@ -79,7 +79,9 @@ objects, textures, and background IDs.
 
 Start with `ASSET_INDEX.json`. Assets must be reusable, credited or traceable,
 and safe for civic disaster communication. Generated imagery, if used later,
-must be textless and composited behind deterministic text.
+must be textless and composited behind deterministic text. `ASSET_SCHEMA.json`
+defines the metadata contract, and `design/assets/` contains the future library
+folders for backgrounds, illustrations, icons, objects, and patterns.
 
 ### 4. Rendering
 
@@ -125,7 +127,9 @@ Do not break the existing pipeline:
 - `ILLUSTRATION_BIBLE.md` - imagery and iconography rules.
 - `DESIGN_TOKENS.json` - machine-readable token source for agents.
 - `TEMPLATE_REGISTRY.json` - machine-readable template contracts and zones.
+- `ASSET_SCHEMA.json` - machine-readable asset metadata and safety taxonomy.
 - `ASSET_INDEX.json` - machine-readable inventory of assets and references.
+- `assets/` - future production asset library folders; currently registry-only.
 - `references/` - local copies of the approved handover mockups.
 
 ## How Future Agents Should Work

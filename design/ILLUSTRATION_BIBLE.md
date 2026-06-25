@@ -95,7 +95,27 @@ Every future illustration/background asset should have:
 - "Textless" confirmation.
 - Intended templates and crops.
 
-Add assets to `ASSET_INDEX.json` before using them in a render spec.
+Add assets to `ASSET_INDEX.json` before using them in a render spec. Metadata
+must satisfy `ASSET_SCHEMA.json`; future production assets live under
+`design/assets/` in the matching category folder.
+
+## Asset Library Intake
+
+Phase 4A creates the library structure without adding new artwork:
+
+- `design/assets/backgrounds/`
+- `design/assets/illustrations/`
+- `design/assets/icons/`
+- `design/assets/objects/`
+- `design/assets/patterns/`
+
+Before committing a new asset:
+
+- Give it an ID that follows `ASSET_SCHEMA.json`.
+- Add source, rights, safety review, text policy, and allowed template metadata.
+- Confirm the file is textless unless it is a reference mock.
+- Confirm committed paths exist and checksums are recorded.
+- Confirm allowed template IDs exist in `TEMPLATE_REGISTRY.json`.
 
 ## Background Rules
 
