@@ -119,6 +119,7 @@ For `instagram_feed`:
 
 The live clone currently renders quake cards through:
 
+- `studio/design-sdk.js`
 - `studio/template.js`
 - `studio/render.js`
 - `studio/caption.js`
@@ -126,7 +127,10 @@ The live clone currently renders quake cards through:
 - `studio/hook.js`
 
 The renderer builds SVG strings and rasterizes them to PNG with
-`@resvg/resvg-js`, using bundled DejaVu fonts. This SDK does not change that.
+`@resvg/resvg-js`, using bundled DejaVu fonts. `studio/design-sdk.js` is the
+Phase 2 bridge into `design/DESIGN_TOKENS.json`; it reads core colors, canvas
+dimensions, and mandatory footer copy while falling back to current values if a
+deployment image is missing `design/`.
 
 ## Future Renderer Direction
 
@@ -156,4 +160,3 @@ Before a rendered asset can be published:
 - Source IDs are traceable.
 - Asset IDs exist in `ASSET_INDEX.json`.
 - Export dimensions match the target.
-
