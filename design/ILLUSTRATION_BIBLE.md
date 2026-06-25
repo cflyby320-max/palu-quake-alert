@@ -160,19 +160,21 @@ Generated outputs must be curated, reviewed, named, and indexed before use.
 ### P1: Kenali Wilayahmu
 
 Stylized editorial illustration of Palu valley and Palu Bay at dusk, with an
-abstract Palu-Koro fault line and topographic contours. Deep teal and mint
-palette, calm and factual, no text, no people in distress.
+abstract Palu-Koro fault line and topographic contours. Deep teal foundation
+with royal-blue P1 accents (`#4169E1`), calm and factual, no text, no people in
+distress.
 
 ### P2: Siap Sebelum Bencana
 
 Warm practical flat-lay illustration of an emergency go-bag and family
-preparedness items on a simple surface. Green accents, hopeful and useful, no
-text, no dramatic disaster scene.
+preparedness items on a simple surface. Deep-aqua P2 accents (`#148A87`),
+hopeful and useful, no text, no dramatic disaster scene.
 
 ### P3: Saring Sebelum Sebar
 
 Conceptual illustration of a phone message, magnifier, source trail, and check
-mark. Amber accents, calm and smart, no readable text, no panic.
+mark. Indigo-violet P3 accents (`#6B4EFF`), calm and smart, no readable text,
+no panic.
 
 ## Review Checklist
 
@@ -185,4 +187,3 @@ Before adding an asset:
 - Does it work behind deterministic text?
 - Does it have a stable ID and source note?
 - Does it fit one pillar or template clearly?
-

@@ -60,6 +60,10 @@ pillars:
 | `preparedness` | Siap Sebelum Bencana | Cheap, simple actions that help families. | Do one thing today |
 | `information_hygiene` | Saring Sebelum Sebar | Stop panic and hoaxes from causing more harm. | Verify, then share |
 
+Content-pillar colors are intentionally separate from quake severity colors:
+P1 `#4169E1`, P2 `#148A87`, P3 `#6B4EFF`. Severity colors remain reserved for
+reactive earthquake alert levels.
+
 ### 2. Design
 
 Brand, visual language, typography, layout families, spacing, and accessibility.

@@ -48,13 +48,14 @@ Severity colors are for reactive earthquake alerts only:
 
 Pillar colors are for educational content only:
 
-- P1 Kenali Wilayahmu: `#0F6E56`
-- P2 Siap Sebelum Bencana: `#22A06B`
-- P3 Saring Sebelum Sebar: `#E0951F`
+- P1 Kenali Wilayahmu: `#4169E1`
+- P2 Siap Sebelum Bencana: `#148A87`
+- P3 Saring Sebelum Sebar: `#6B4EFF`
 
-Known tension: pillar colors overlap the severity family. Until a designer
-resolves this, never present a pillar tag where it could be mistaken for alert
-severity. Pair pillar tags with labels and motifs, not color alone.
+These pillar colors are deliberately separated from the severity family. Keep
+them in the education layer and continue pairing them with labels and motifs,
+not color alone. The reference mock PNGs predate this separation, so the JSON
+tokens above supersede their pillar swatches.
 
 ## Typography
 
@@ -212,4 +213,3 @@ The footer must be rendered by the composition layer, not by an image model.
 - Do not put the footer inside generated imagery.
 - Do not crop the logo into illegibility.
 - Do not redesign safety copy for aesthetic balance.
-

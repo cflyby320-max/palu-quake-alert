@@ -43,19 +43,19 @@
     },
     "pillars": {
       "know_your_ground": {
-        "hex": "#0F6E56",
+        "hex": "#4169E1",
         "label": "Kenali Wilayahmu",
-        "note": "Educational pillar color; pair with label and motif"
+        "note": "Educational pillar color; intentionally separate from quake severity colors"
       },
       "preparedness": {
-        "hex": "#22A06B",
+        "hex": "#148A87",
         "label": "Siap Sebelum Bencana",
-        "note": "Educational pillar color; pair with label and motif"
+        "note": "Educational pillar color; intentionally separate from quake severity colors"
       },
       "information_hygiene": {
-        "hex": "#E0951F",
+        "hex": "#6B4EFF",
         "label": "Saring Sebelum Sebar",
-        "note": "Educational pillar color; pair with label and motif"
+        "note": "Educational pillar color; intentionally separate from quake severity colors"
       }
     },
     "overlays": {
@@ -219,4 +219,3 @@
     }
   }
 }
-

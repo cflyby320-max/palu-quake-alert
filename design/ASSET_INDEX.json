@@ -120,7 +120,7 @@
       "path": "design/references/brand-sheet.png",
       "width": 1400,
       "height": 2040,
-      "description": "Handover brand sheet showing palette, type direction, pillar tags, and footer.",
+      "description": "Handover brand sheet showing palette, type direction, pillar tags, and footer. Pillar colors in DESIGN_TOKENS.json supersede the older pillar swatches in this reference image.",
       "sha256": "B801EFC59F77165A61110C4249F8676D8CEFC3BADDE5B188AE8E58B44004A787"
     },
     {
@@ -132,6 +132,7 @@
       "height": 1350,
       "templateId": "editorial_steps",
       "description": "Structured educational layout with image zone, pillar tag, numbered rows, and footer.",
+      "note": "Reference mock predates the separated pillar palette; use DESIGN_TOKENS.json for current pillar colors.",
       "sha256": "B22A781EDE38BE94AD6CA2EB9DBF85814CBD213955EBE74039A16EB9E99B3C4B"
     },
     {
@@ -143,6 +144,7 @@
       "height": 1350,
       "templateId": "poster_statement",
       "description": "Single-message poster layout for myth-busts or authority statements.",
+      "note": "Reference mock predates the separated pillar palette; use DESIGN_TOKENS.json for current pillar colors.",
       "sha256": "7BCF90591CD7AB809663B709B17CED14597F87F6B62D63EC4E7AF461E0637062"
     },
     {
@@ -154,6 +156,7 @@
       "height": 1350,
       "templateId": "carousel_cover",
       "description": "Carousel cover layout with title, context line, swipe cue, dots, and footer.",
+      "note": "Reference mock predates the separated pillar palette; use DESIGN_TOKENS.json for current pillar colors.",
       "sha256": "D9DC51874C34B4187C9DC89CBEB7EF64C80B6AD90FAD238567CC1D1D580719A4"
     }
   ],
@@ -189,4 +192,3 @@
     "indexBeforeUse": "New production assets must be added here before render specs reference them."
   }
 }
-
