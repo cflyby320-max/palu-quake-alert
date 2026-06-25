@@ -104,6 +104,21 @@ function validateContentShape(content, shape, errors) {
   }
 }
 
+function requiresVerifiedSources(template) {
+  return (template.safetyChecks || []).includes('verified_sources');
+}
+
+function validateSourceIds(spec, template, errors) {
+  if (!requiresVerifiedSources(template)) return;
+  if (!Array.isArray(spec.knowledge?.sourceIds) || spec.knowledge.sourceIds.length === 0) {
+    errors.push('knowledge.sourceIds must include at least one verified source');
+    return;
+  }
+  if (spec.knowledge.sourceIds.some((sourceId) => typeof sourceId !== 'string' || !sourceId.trim())) {
+    errors.push('knowledge.sourceIds must contain non-empty strings');
+  }
+}
+
 export function validateRenderSpec(
   spec,
   {
@@ -135,6 +150,7 @@ export function validateRenderSpec(
     if (template.requiresVerifiedReview && spec.knowledge?.reviewStatus !== 'verified') {
       errors.push('knowledge.reviewStatus must be verified');
     }
+    validateSourceIds(spec, template, errors);
     validateContentShape(spec.content, template.contentShape, errors);
   }
 

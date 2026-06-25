@@ -86,3 +86,33 @@ test('render-spec validator rejects unknown IDs and unsafe publication state', (
   assert.match(result.errors.join('\n'), /asset id "missing_background"/);
   assert.match(result.errors.join('\n'), /content.rows must contain 2-4 items/);
 });
+
+test('render-spec validator requires source IDs for verified-source templates', () => {
+  const missingSources = {
+    ...VALID_EDITORIAL_SPEC,
+    knowledge: {
+      pillarId: 'preparedness',
+      reviewStatus: 'verified',
+    },
+  };
+  const emptySources = {
+    ...VALID_EDITORIAL_SPEC,
+    knowledge: {
+      pillarId: 'preparedness',
+      sourceIds: [],
+      reviewStatus: 'verified',
+    },
+  };
+  const blankSource = {
+    ...VALID_EDITORIAL_SPEC,
+    knowledge: {
+      pillarId: 'preparedness',
+      sourceIds: [' '],
+      reviewStatus: 'verified',
+    },
+  };
+
+  assert.match(validateRenderSpec(missingSources).errors.join('\n'), /sourceIds must include/);
+  assert.match(validateRenderSpec(emptySources).errors.join('\n'), /sourceIds must include/);
+  assert.match(validateRenderSpec(blankSource).errors.join('\n'), /sourceIds must contain non-empty strings/);
+});
