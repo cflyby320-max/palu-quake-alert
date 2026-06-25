@@ -1,0 +1,192 @@
+{
+  "schemaVersion": "1.0.0",
+  "updated": "2026-06-26",
+  "assets": [
+    {
+      "id": "avatar_primary_svg",
+      "type": "logo",
+      "status": "committed",
+      "path": "docs/assets/avatar.svg",
+      "sourceOfTruth": true,
+      "description": "Deep-teal medallion with shield/map-pin and seismic waveform.",
+      "sha256": "9A485FC0811CC4E0D62079AA2AC176EA7452A08C9A3614781FE938041F04EEDE"
+    },
+    {
+      "id": "avatar_primary_png",
+      "type": "logo",
+      "status": "committed",
+      "path": "docs/assets/avatar.png",
+      "width": 512,
+      "height": 512,
+      "description": "Bot and channel profile image exported from avatar.svg.",
+      "sha256": "1F993C8EC2CFDC960178CFEA9DD0B1FB91D945EE6170B24F01E256B6E7B76D00"
+    },
+    {
+      "id": "severity_low_svg",
+      "type": "severity_badge",
+      "status": "committed",
+      "path": "docs/assets/severity-low.svg",
+      "severity": "low",
+      "sourceOfTruth": true,
+      "sha256": "81E989DF24825F0BE5EA69EDBCF11A95BD354B4C999A328500C9CA925EAE27B3"
+    },
+    {
+      "id": "severity_low_png",
+      "type": "severity_badge",
+      "status": "committed",
+      "path": "docs/assets/severity-low.png",
+      "severity": "low",
+      "width": 256,
+      "height": 256,
+      "sha256": "37E7FDBB6F542833D5ABC0DA294694EE734CAF414981CC5BD3417D84B8DEE3A0"
+    },
+    {
+      "id": "severity_moderate_svg",
+      "type": "severity_badge",
+      "status": "committed",
+      "path": "docs/assets/severity-moderate.svg",
+      "severity": "moderate",
+      "sourceOfTruth": true,
+      "sha256": "2BC1C6AE04032A0098CA83D6FF63734A5CACB9D8DFB181D77113AC90F67DA939"
+    },
+    {
+      "id": "severity_moderate_png",
+      "type": "severity_badge",
+      "status": "committed",
+      "path": "docs/assets/severity-moderate.png",
+      "severity": "moderate",
+      "width": 256,
+      "height": 256,
+      "sha256": "724E16C7E021B13F1004D1C58A81D877A31EB26E150055ED286895CF915FA92F"
+    },
+    {
+      "id": "severity_high_svg",
+      "type": "severity_badge",
+      "status": "committed",
+      "path": "docs/assets/severity-high.svg",
+      "severity": "high",
+      "sourceOfTruth": true,
+      "sha256": "8D795EE188B09B8442AB6651D6DA1437577AEAAF3BA5C92FC1F7E378FD664095"
+    },
+    {
+      "id": "severity_high_png",
+      "type": "severity_badge",
+      "status": "committed",
+      "path": "docs/assets/severity-high.png",
+      "severity": "high",
+      "width": 256,
+      "height": 256,
+      "sha256": "1A2CCE0DF8C2E81AD093DB70D718935230443A737C17EE5011A3167DD0AA31E0"
+    },
+    {
+      "id": "severity_critical_svg",
+      "type": "severity_badge",
+      "status": "committed",
+      "path": "docs/assets/severity-critical.svg",
+      "severity": "critical",
+      "sourceOfTruth": true,
+      "sha256": "511A83188A0FC6C715103370E6B3A53AD67D332A331F294A90DD40B3A6021627"
+    },
+    {
+      "id": "severity_critical_png",
+      "type": "severity_badge",
+      "status": "committed",
+      "path": "docs/assets/severity-critical.png",
+      "severity": "critical",
+      "width": 256,
+      "height": 256,
+      "sha256": "AB1A255854E353EFEB9C64CD2E8DF6CE9011FC21DB1217A335A90CF613672087"
+    },
+    {
+      "id": "font_dejavu_sans_regular",
+      "type": "font",
+      "status": "committed",
+      "path": "studio/assets/fonts/DejaVuSans.ttf",
+      "role": "Current deterministic renderer regular font",
+      "sha256": "7DA195A74C55BEF988D0D48F9508BD5D849425C1770DBA5D7BFC6CE9ED848954"
+    },
+    {
+      "id": "font_dejavu_sans_bold",
+      "type": "font",
+      "status": "committed",
+      "path": "studio/assets/fonts/DejaVuSans-Bold.ttf",
+      "role": "Current deterministic renderer bold font",
+      "sha256": "E6476C1B80502924294EED40894C5B18E06C181444CA953E5334262DF9C27724"
+    },
+    {
+      "id": "reference_brand_sheet",
+      "type": "reference_mock",
+      "status": "committed_reference",
+      "path": "design/references/brand-sheet.png",
+      "width": 1400,
+      "height": 2040,
+      "description": "Handover brand sheet showing palette, type direction, pillar tags, and footer.",
+      "sha256": "B801EFC59F77165A61110C4249F8676D8CEFC3BADDE5B188AE8E58B44004A787"
+    },
+    {
+      "id": "reference_editorial_steps",
+      "type": "reference_mock",
+      "status": "committed_reference",
+      "path": "design/references/dir1-editorial.png",
+      "width": 1080,
+      "height": 1350,
+      "templateId": "editorial_steps",
+      "description": "Structured educational layout with image zone, pillar tag, numbered rows, and footer.",
+      "sha256": "B22A781EDE38BE94AD6CA2EB9DBF85814CBD213955EBE74039A16EB9E99B3C4B"
+    },
+    {
+      "id": "reference_poster_statement",
+      "type": "reference_mock",
+      "status": "committed_reference",
+      "path": "design/references/dir2-poster.png",
+      "width": 1080,
+      "height": 1350,
+      "templateId": "poster_statement",
+      "description": "Single-message poster layout for myth-busts or authority statements.",
+      "sha256": "7BCF90591CD7AB809663B709B17CED14597F87F6B62D63EC4E7AF461E0637062"
+    },
+    {
+      "id": "reference_carousel_cover",
+      "type": "reference_mock",
+      "status": "committed_reference",
+      "path": "design/references/cover-carousel.png",
+      "width": 1080,
+      "height": 1350,
+      "templateId": "carousel_cover",
+      "description": "Carousel cover layout with title, context line, swipe cue, dots, and footer.",
+      "sha256": "D9DC51874C34B4187C9DC89CBEB7EF64C80B6AD90FAD238567CC1D1D580719A4"
+    }
+  ],
+  "plannedAssetCategories": [
+    {
+      "id": "background_library",
+      "type": "background",
+      "status": "planned",
+      "description": "Curated textless illustration/photo backgrounds by pillar."
+    },
+    {
+      "id": "content_icon_set",
+      "type": "icon_set",
+      "status": "planned",
+      "description": "Rounded line icons for preparedness, geology, tsunami, and information hygiene."
+    },
+    {
+      "id": "wordmark_lockups",
+      "type": "logo",
+      "status": "planned",
+      "description": "Horizontal English and Bahasa wordmark lockups plus one-color variants."
+    },
+    {
+      "id": "renderer_display_font",
+      "type": "font",
+      "status": "planned",
+      "description": "Bundled display/body family for higher-quality deterministic social cards."
+    }
+  ],
+  "rules": {
+    "runtimeUse": "Reference mockups are guidance only and are not imported by the current runtime.",
+    "textSafety": "Assets must be textless unless they are deterministic SVG/text overlays from the renderer.",
+    "indexBeforeUse": "New production assets must be added here before render specs reference them."
+  }
+}
+

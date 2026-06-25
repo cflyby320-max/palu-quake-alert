@@ -1,0 +1,222 @@
+{
+  "schemaVersion": "1.0.0",
+  "updated": "2026-06-26",
+  "project": {
+    "name": "Palu Earthquake Alerts",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "handle": "@infogempapalu"
+  },
+  "colors": {
+    "core": {
+      "teal": "#0F4C5C",
+      "teal_deep": "#0A3742",
+      "teal_mid": "#11343D",
+      "teal_accent": "#7FB7B8",
+      "mint": "#9FE1CB",
+      "off_white": "#FBFCFB",
+      "paper": "#EEF3F2",
+      "amber": "#C77B0A",
+      "amber_ink": "#412402"
+    },
+    "severity": {
+      "low": {
+        "hex": "#2E7D52",
+        "label": "LOW",
+        "use": "Reactive quake severity only"
+      },
+      "moderate": {
+        "hex": "#D9A406",
+        "label": "MODERATE",
+        "use": "Reactive quake severity only"
+      },
+      "high": {
+        "hex": "#CC6B27",
+        "label": "HIGH",
+        "use": "Reactive quake severity only"
+      },
+      "critical": {
+        "hex": "#B5362B",
+        "label": "CRITICAL",
+        "use": "Reactive quake severity only"
+      }
+    },
+    "pillars": {
+      "know_your_ground": {
+        "hex": "#0F6E56",
+        "label": "Kenali Wilayahmu",
+        "note": "Educational pillar color; pair with label and motif"
+      },
+      "preparedness": {
+        "hex": "#22A06B",
+        "label": "Siap Sebelum Bencana",
+        "note": "Educational pillar color; pair with label and motif"
+      },
+      "information_hygiene": {
+        "hex": "#E0951F",
+        "label": "Saring Sebelum Sebar",
+        "note": "Educational pillar color; pair with label and motif"
+      }
+    },
+    "overlays": {
+      "dark_scrim": "#072A33",
+      "footer_rule": "#C77B0A"
+    }
+  },
+  "typography": {
+    "webCurrent": {
+      "display": "Archivo",
+      "body": "Inter"
+    },
+    "rendererCurrent": {
+      "regular": "DejaVu Sans",
+      "bold": "DejaVu Sans Bold",
+      "status": "Bundled deterministic fallback"
+    },
+    "rendererProposed": {
+      "display": "Plus Jakarta Sans",
+      "body": "Plus Jakarta Sans",
+      "status": "Candidate, not yet bundled"
+    },
+    "cardScalePx": {
+      "kicker": 28,
+      "body": 32,
+      "sectionLabel": 36,
+      "titleMin": 58,
+      "titleMax": 96,
+      "footer": 28
+    }
+  },
+  "spacing": {
+    "baseUnitPx": 8,
+    "cardMarginPx": 60,
+    "scalePx": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 24,
+      "xl": 32,
+      "2xl": 48,
+      "3xl": 64,
+      "4xl": 96
+    },
+    "radiusPx": {
+      "sm": 8,
+      "md": 12,
+      "pill": 999
+    }
+  },
+  "canvas": {
+    "instagram_feed": {
+      "width": 1080,
+      "height": 1350,
+      "status": "current"
+    },
+    "telegram_image": {
+      "width": 1080,
+      "height": 1350,
+      "status": "current-compatible"
+    },
+    "story_9_16": {
+      "width": 1080,
+      "height": 1920,
+      "status": "planned"
+    }
+  },
+  "safeAreas": {
+    "instagram_feed": {
+      "outerMarginPx": 60,
+      "currentHeaderBand": {
+        "y": 0,
+        "height": 184
+      },
+      "currentFooterBand": {
+        "y": 1200,
+        "height": 150
+      },
+      "referenceFooterBand": {
+        "y": 1232,
+        "height": 118
+      },
+      "editorialImageZone": {
+        "x": 0,
+        "y": 0,
+        "width": 1080,
+        "height": 520
+      }
+    }
+  },
+  "footers": {
+    "mandatory_honest_framing": {
+      "currentLines": [
+        "Notifikasi cepat — bukan peringatan dini.",
+        "Selalu ikuti arahan resmi BMKG."
+      ],
+      "expandedLines": [
+        "Notifikasi cepat — bukan peringatan dini.",
+        "Selalu ikuti arahan resmi BMKG · BNPB · BPBD Sulteng."
+      ],
+      "handle": "@infogempapalu",
+      "required": true
+    }
+  },
+  "pillars": {
+    "know_your_ground": {
+      "id": "know_your_ground",
+      "shortCode": "P1",
+      "label": "Kenali Wilayahmu",
+      "promise": "Understand the real risk where you live.",
+      "cta": "Learn and remember",
+      "tone": "Grounded, respectful, factual"
+    },
+    "preparedness": {
+      "id": "preparedness",
+      "shortCode": "P2",
+      "label": "Siap Sebelum Bencana",
+      "promise": "Cheap, simple actions that help families.",
+      "cta": "Do one thing today",
+      "tone": "Empowering, practical, hopeful"
+    },
+    "information_hygiene": {
+      "id": "information_hygiene",
+      "shortCode": "P3",
+      "label": "Saring Sebelum Sebar",
+      "promise": "Stop panic and hoaxes from causing more harm.",
+      "cta": "Verify, then share",
+      "tone": "Calm, smart, in-control"
+    }
+  },
+  "templates": {
+    "quake_alert_card": {
+      "status": "current",
+      "contentTypes": ["reactive_quake"],
+      "renderer": "studio/template.js",
+      "requiresFooter": true
+    },
+    "editorial_steps": {
+      "status": "planned",
+      "contentTypes": ["checklist", "explainer", "carousel_slide"],
+      "reference": "design/references/dir1-editorial.png",
+      "requiresFooter": true
+    },
+    "poster_statement": {
+      "status": "planned",
+      "contentTypes": ["myth_bust", "quote", "single_takeaway"],
+      "reference": "design/references/dir2-poster.png",
+      "requiresFooter": true
+    },
+    "carousel_cover": {
+      "status": "planned",
+      "contentTypes": ["carousel_cover"],
+      "reference": "design/references/cover-carousel.png",
+      "requiresFooter": true
+    },
+    "carousel_slide": {
+      "status": "planned",
+      "contentTypes": ["carousel_body"],
+      "reference": "design/references/dir1-editorial.png",
+      "requiresFooter": true
+    }
+  }
+}
+
