@@ -73,6 +73,32 @@ Key boundaries:
 
 Currently manual-mode only: the Graph-API auto-publish path (`--publish`) and image hosting are designed but not the active flow — `STUDIO_DESIGN.md` §11 tracks the phased rollout.
 
+## Design SDK and roadmap status
+
+The design-system roadmap is now tracked in `design/`. Do not re-audit the full
+repository for routine design work; start with the SDK files and then inspect
+only the runtime files touched by the task.
+
+Completed design phases:
+
+- **Phase 1 Foundation:** `design/DESIGN_SDK.md`, `VISUAL_LANGUAGE.md`,
+  `RENDERING_CONTRACT.md`, `ILLUSTRATION_BIBLE.md`, `DESIGN_TOKENS.json`,
+  `ASSET_INDEX.json`, and `design/references/`.
+- **Phase 2 Studio integration:** `studio/design-sdk.js` reads
+  `design/DESIGN_TOKENS.json` for core colors, canvas size, and mandatory
+  footer values.
+- **Phase 3 Template registry:** `design/TEMPLATE_REGISTRY.json` and
+  `studio/template-registry.js` define and validate structured render specs.
+- **Phase 4A Asset library foundation:** `design/ASSET_SCHEMA.json`,
+  `design/assets/`, and enriched `ASSET_INDEX.json` define asset taxonomy and
+  intake rules. No new production asset packs have been generated yet.
+
+Next planned work is **Phase 5 Content Engine**: make content decisions output
+structured render specs (`templateId`, `pillarId`, approved asset IDs,
+verified `content`, `footerId`, `exportTarget`) instead of freeform design
+instructions. Preserve the rule that the renderer owns visible factual text,
+numbers, safety instructions, and footer placement.
+
 ## Safety-critical invariants — do not regress
 
 These encode hard-won lessons from the 2018 Palu tsunami (which was landslide-generated, unpredicted by standard models, and whose official warning was lifted early). They are deliberate and must be preserved in any change:
@@ -91,7 +117,17 @@ BMKG fields are free-text Indonesian strings whose format occasionally changes (
 
 ## Tests
 
-The suite is four files under `test/`, all discovered and run offline by `npm test` (`node --test`): `offline.test.js` (parsing robustness, cross-source merge/no-merge, the safety-critical classification cases, dedup matching, WITA conversion) plus `priority1.test.js` / `priority2.test.js` / `priority3.test.js` (added coverage, prioritised by safety impact — P1 is the safety-critical cases). They run against the fixtures and synthetic `Event`s. There are no network or integration tests by design (no credentials in CI). The `--test-name-pattern` example above filters by test name across the suite.
+All tests live under `test/` and are discovered offline by `npm test`
+(`node --test`). The core watcher coverage includes `offline.test.js`
+(parsing robustness, cross-source merge/no-merge, safety-critical
+classification cases, dedup matching, WITA conversion) plus
+`priority1.test.js` / `priority2.test.js` / `priority3.test.js` (added
+coverage, prioritised by safety impact; P1 is the safety-critical cases).
+Design-system coverage now also includes Studio/SDK token loading, template
+registry validation, and asset index/schema integrity. There are no network or
+integration tests by design (no credentials in CI). The `--test-name-pattern`
+example above filters by test name across the suite. As of the Phase 4A asset
+foundation, `npm.cmd test` passes 62 tests.
 
 ## Deployment
 
@@ -106,6 +142,9 @@ All config is env-driven; see `.env.example` for the full annotated list and `sr
 
 ## Companion docs & public assets
 
+- **`design/DESIGN_SDK.md`** — entry point for the civic design system. Read this before visual, template, asset, renderer, or content-engine work.
+- **`design/TEMPLATE_REGISTRY.json`** — approved template IDs, text zones, asset slots, export targets, and render-spec validation rules.
+- **`design/ASSET_SCHEMA.json`** and **`design/ASSET_INDEX.json`** — asset taxonomy, intake rules, existing committed assets, references, and planned asset categories.
 - **`OUTLOOK_DESIGN.md`** — full spec + safety rules for the Seismic Activity Outlook (aftershock probability). Read before touching any Outlook math or copy.
 - **`TIER2_PRESENTATION.md`** — the trust/presentation work (BotFather copy, pinned post, brand kit rationale).
 - **`studio/STUDIO_DESIGN.md`** — full spec + safety/brand rules for the optional Instagram content studio (branded shakemap cards). Read before touching anything in `studio/`.
