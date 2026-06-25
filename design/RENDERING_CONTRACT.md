@@ -73,12 +73,15 @@ The v1 SDK defines these template IDs:
 
 - `quake_alert_card`
 - `editorial_steps`
+- `checklist_card`
 - `poster_statement`
+- `story_card`
 - `carousel_cover`
 - `carousel_slide`
 
-Any new template must be added to `DESIGN_TOKENS.json`, documented in
-`VISUAL_LANGUAGE.md`, and covered by a renderer test before production use.
+Any new template must be added to `DESIGN_TOKENS.json`, specified in
+`TEMPLATE_REGISTRY.json`, documented in `VISUAL_LANGUAGE.md`, and covered by a
+renderer or render-spec validation test before production use.
 
 ## Export Targets
 
@@ -120,6 +123,7 @@ For `instagram_feed`:
 The live clone currently renders quake cards through:
 
 - `studio/design-sdk.js`
+- `studio/template-registry.js`
 - `studio/template.js`
 - `studio/render.js`
 - `studio/caption.js`
@@ -130,7 +134,9 @@ The renderer builds SVG strings and rasterizes them to PNG with
 `@resvg/resvg-js`, using bundled DejaVu fonts. `studio/design-sdk.js` is the
 Phase 2 bridge into `design/DESIGN_TOKENS.json`; it reads core colors, canvas
 dimensions, and mandatory footer copy while falling back to current values if a
-deployment image is missing `design/`.
+deployment image is missing `design/`. `studio/template-registry.js` is the
+Phase 3 bridge into `design/TEMPLATE_REGISTRY.json`; it validates structured
+render specs but does not render or deliver content.
 
 ## Future Renderer Direction
 
@@ -138,9 +144,10 @@ When implementation resumes, prefer an incremental path:
 
 1. Keep the current SVG-to-PNG renderer.
 2. Extract shared tokens and footer/header helpers from existing studio code.
-3. Add render-spec validation for template IDs, footer IDs, asset IDs, and export
-   targets.
-4. Add educational templates only after the SDK tokens and asset IDs exist.
+3. Keep render-spec validation for template IDs, footer IDs, asset IDs, and
+   export targets in place before rendering new layouts.
+4. Add educational template renderers only after the SDK tokens and asset IDs
+   exist.
 5. Add image-layer assets as curated, textless inputs.
 
 Do not introduce a model-generated image directly into final publication. If AI

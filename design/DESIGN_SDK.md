@@ -88,6 +88,8 @@ Layout composition, verified text overlays, and platform exports.
 Start with `RENDERING_CONTRACT.md`. Current production rendering remains the
 existing SVG-to-PNG studio pipeline. This SDK defines where the renderer should
 go next: from hand-coded prompt-like layouts toward structured render specs.
+`TEMPLATE_REGISTRY.json` defines the approved template IDs, required text zones,
+asset slots, export targets, and safety checks for those render specs.
 
 ## Non-Negotiables
 
@@ -112,8 +114,8 @@ Do not break the existing pipeline:
 - Watcher code in `src/` stays zero-dependency.
 - Studio remains optional and isolated under `studio/`.
 - This SDK does not introduce any install step.
-- This SDK does not alter `studio/template.js`, `studio/render.js`, prompts, or
-  message builders.
+- Studio may read SDK JSON through narrow bridge modules, but the watcher and
+  alert message builders remain unchanged.
 - Reference PNGs under `design/references/` are guidance, not runtime inputs.
 
 ## Reference Files In This SDK
@@ -122,6 +124,7 @@ Do not break the existing pipeline:
 - `RENDERING_CONTRACT.md` - structured rendering input/output contract.
 - `ILLUSTRATION_BIBLE.md` - imagery and iconography rules.
 - `DESIGN_TOKENS.json` - machine-readable token source for agents.
+- `TEMPLATE_REGISTRY.json` - machine-readable template contracts and zones.
 - `ASSET_INDEX.json` - machine-readable inventory of assets and references.
 - `references/` - local copies of the approved handover mockups.
 
@@ -129,7 +132,8 @@ Do not break the existing pipeline:
 
 1. Read this SDK and the safety docs before visual work.
 2. Choose the knowledge pillar and content type.
-3. Choose an approved layout ID from `DESIGN_TOKENS.json`.
+3. Choose an approved layout ID from `DESIGN_TOKENS.json` and
+   `TEMPLATE_REGISTRY.json`.
 4. Choose approved assets from `ASSET_INDEX.json`.
 5. Provide verified text payload only after source/copy checks.
 6. Let the renderer place text, footer, logo, images, and export dimensions.

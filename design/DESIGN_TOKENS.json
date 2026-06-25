@@ -191,30 +191,49 @@
       "status": "current",
       "contentTypes": ["reactive_quake"],
       "renderer": "studio/template.js",
+      "contract": "design/TEMPLATE_REGISTRY.json",
       "requiresFooter": true
     },
     "editorial_steps": {
       "status": "planned",
       "contentTypes": ["checklist", "explainer", "carousel_slide"],
       "reference": "design/references/dir1-editorial.png",
+      "contract": "design/TEMPLATE_REGISTRY.json",
+      "requiresFooter": true
+    },
+    "checklist_card": {
+      "status": "planned",
+      "contentTypes": ["checklist", "preparedness_steps"],
+      "reference": "design/references/dir1-editorial.png",
+      "contract": "design/TEMPLATE_REGISTRY.json",
       "requiresFooter": true
     },
     "poster_statement": {
       "status": "planned",
       "contentTypes": ["myth_bust", "quote", "single_takeaway"],
       "reference": "design/references/dir2-poster.png",
+      "contract": "design/TEMPLATE_REGISTRY.json",
+      "requiresFooter": true
+    },
+    "story_card": {
+      "status": "planned",
+      "contentTypes": ["quick_tip", "announcement", "recap_story"],
+      "exportTarget": "story_9_16",
+      "contract": "design/TEMPLATE_REGISTRY.json",
       "requiresFooter": true
     },
     "carousel_cover": {
       "status": "planned",
       "contentTypes": ["carousel_cover"],
       "reference": "design/references/cover-carousel.png",
+      "contract": "design/TEMPLATE_REGISTRY.json",
       "requiresFooter": true
     },
     "carousel_slide": {
       "status": "planned",
       "contentTypes": ["carousel_body"],
       "reference": "design/references/dir1-editorial.png",
+      "contract": "design/TEMPLATE_REGISTRY.json",
       "requiresFooter": true
     }
   }
