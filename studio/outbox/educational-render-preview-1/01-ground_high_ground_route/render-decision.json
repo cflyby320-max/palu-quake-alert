@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "editorial-dry-run-1",
+  "publicationStatus": "dry_run_not_approved",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "ground_high_ground_route",
+  "topicPath": "content/topic_backlog.json#ground_high_ground_route",
+  "selectedAt": "2026-06-27",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "know_your_ground",
+    "label": "Kenali Wilayahmu"
+  },
+  "templateId": "editorial_steps",
+  "sourceIds": ["bpbd_sulteng", "project_safety_rules"],
+  "sourceLabels": [
+    { "id": "bpbd_sulteng", "label": "BPBD Sulawesi Tengah" },
+    { "id": "project_safety_rules", "label": "Palu Earthquake Alerts safety rules" }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Keluarga di pesisir sering belum punya rute yang diingat saat panik setelah guncangan kuat.",
+    "localRelevance": "Teluk Palu, muara sungai, dan permukiman pesisir membuat rute ke tempat tinggi perlu diingat sebelum keadaan darurat.",
+    "practicalAction": "Pilih satu titik tinggi terdekat dan latih rutenya bersama keluarga saat kondisi tenang."
+  },
+  "imageStatus": "missing_educational_renderer",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "pillarId": "know_your_ground",
+    "sourceIds": ["bpbd_sulteng", "project_safety_rules"],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": ["reference_editorial_steps"]
+    },
+    "content": {
+      "kicker": "Kenali Wilayahmu",
+      "title": "Ingat Rute ke Tempat Tinggi",
+      "rows": [
+        { "label": "Kenali", "body": "Tentukan titik tinggi terdekat dari rumah." },
+        { "label": "Latih", "body": "Coba rute bersama keluarga saat kondisi tenang." },
+        { "label": "Prioritaskan", "body": "Setelah gempa kuat dan lama, jauhi pantai dan muara." }
+      ]
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "know_your_ground",
+      "sourceIds": ["bpbd_sulteng", "project_safety_rules"],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": ["reference_editorial_steps"]
+    },
+    "content": {
+      "kicker": "Kenali Wilayahmu",
+      "title": "Ingat Rute ke Tempat Tinggi",
+      "rows": [
+        { "label": "Kenali", "body": "Tentukan titik tinggi terdekat dari rumah." },
+        { "label": "Latih", "body": "Coba rute bersama keluarga saat kondisi tenang." },
+        { "label": "Prioritaskan", "body": "Setelah gempa kuat dan lama, jauhi pantai dan muara." }
+      ]
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}
+

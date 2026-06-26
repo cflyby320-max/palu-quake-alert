@@ -10,24 +10,26 @@ until a human reviewer says so.
 2. Read each `caption.txt` first.
 3. Check `render-decision.json` for the topic, pillar, template, sources,
    mandatory footer, and local editorial brief.
-4. Read `missing-image.md` so you know whether an image exists.
-5. Only after human approval should a future workflow update `last_used` in
+4. If the folder contains `card.png`, review the image against the caption and
+   render decision.
+5. If the folder contains `missing-image.md`, treat it as a dry run without a
+   generated image.
+6. Only after human approval should a future workflow update `last_used` in
    `content/topic_backlog.json`.
 
 ## Current Renderer Status
 
-The current Studio renderer creates quake-alert cards from live earthquake
-event data. It does not yet render evergreen educational templates such as
-`editorial_steps`, `checklist_card`, or `poster_statement`.
+The Studio now has two isolated render paths:
 
-For now, editorial dry runs include JSON, captions, and missing-image notes.
-No PNG or JPG files are expected in this folder.
+- `studio/render.js` renders quake-alert cards from live earthquake event data.
+- `studio/render-education.js` renders validated evergreen education specs for
+  `editorial_steps`, `checklist_card`, and `poster_statement`.
+
+`editorial-dry-run-1/` remains the original JSON/caption-only dry run. The
+rendered PNG/SVG previews live in `educational-render-preview-1/`.
 
 ## Next Small Implementation
 
-The smallest next step is a deterministic educational SVG renderer for
-`editorial_steps`, `checklist_card`, and `poster_statement`, using the existing
-Design SDK tokens, template registry, mandatory footer tokens, and Resvg
-rasterization path. Keep it text-first until approved textless assets are added
-to `design/ASSET_INDEX.json`.
-
+The next small step is review and polish: compare the generated PNGs against the
+Design SDK, tighten spacing/type where needed, then decide whether new textless
+assets are needed in `design/ASSET_INDEX.json`.

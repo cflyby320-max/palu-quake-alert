@@ -105,11 +105,17 @@ Completed design phases:
   five review-only evergreen content drafts with render decisions, captions,
   and missing-image notes. These are explicitly not approved for posting because
   educational template rendering is not implemented yet.
+- **Educational render preview:** `studio/education-template.js`,
+  `studio/render-education.js`, and `studio/render-educational-outbox.js`
+  render validated `editorial_steps`, `checklist_card`, and
+  `poster_statement` specs into deterministic SVG/PNG review cards under
+  `studio/outbox/educational-render-preview-1/`. This remains manual review
+  only; no auto-posting or watcher behavior changes.
 
-Next planned work after the editorial outbox dry run is a deterministic
-educational renderer for `editorial_steps`, `checklist_card`, and
-`poster_statement`. Preserve the rule that the renderer owns visible factual
-text, numbers, safety instructions, and footer placement.
+Next planned work after the educational render preview is visual QA/polish and
+then a small curated textless asset pass if the rendered cards need more
+distinctive local visual support. Preserve the rule that the renderer owns
+visible factual text, numbers, safety instructions, and footer placement.
 
 ## Safety-critical invariants — do not regress
 
@@ -137,10 +143,11 @@ classification cases, dedup matching, WITA conversion) plus
 coverage, prioritised by safety impact; P1 is the safety-critical cases).
 Design-system coverage now also includes Studio/SDK token loading, template
 registry validation, asset index/schema integrity, content engine validation,
-topic backlog eligibility, and editorial outbox dry-run validation. There are
+topic backlog eligibility, editorial outbox dry-run validation, and educational
+render preview validation. There are
 no network or integration tests by design (no credentials in CI). The
 `--test-name-pattern` example above filters by test name across the suite. As
-of the editorial outbox dry run, `npm.cmd test` passes 82 tests.
+of the educational render preview, `npm.cmd test` passes 91 tests.
 
 ## Deployment
 
@@ -160,6 +167,7 @@ All config is env-driven; see `.env.example` for the full annotated list and `sr
 - **`design/ASSET_SCHEMA.json`** and **`design/ASSET_INDEX.json`** — asset taxonomy, intake rules, existing committed assets, references, and planned asset categories.
 - **`content/CONTENT_ENGINE.md`**, **`content/CONTENT_SCHEMA.json`**, and **`content/SOURCE_INDEX.json`** — structured content-decision layer and approved source ID vocabulary.
 - **`content/topic_backlog.json`**, **`content/CALENDAR.md`**, and **`content/TOPIC_BACKLOG_GUIDE.md`** — manual topic planning workflow for long-term educational content. Human approval remains required.
+- **`studio/education-template.js`** and **`studio/render-education.js`** — deterministic educational card renderer for validated evergreen render specs. It is Studio-only and never imported by the watcher.
 - **`OUTLOOK_DESIGN.md`** — full spec + safety rules for the Seismic Activity Outlook (aftershock probability). Read before touching any Outlook math or copy.
 - **`TIER2_PRESENTATION.md`** — the trust/presentation work (BotFather copy, pinned post, brand kit rationale).
 - **`studio/STUDIO_DESIGN.md`** — full spec + safety/brand rules for the optional Instagram content studio (branded shakemap cards). Read before touching anything in `studio/`.
