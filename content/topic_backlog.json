@@ -1,0 +1,195 @@
+{
+  "schemaVersion": "1.0.0",
+  "updated": "2026-06-27",
+  "purpose": "Manual planning backlog for long-term civic education topics. This is not an automation queue and does not publish content.",
+  "rules": {
+    "humanApproval": "Every topic requires human approval before rendering or publishing.",
+    "noAutoPost": "Topic selection is planning-only. It must not post, render final visuals, or call external APIs.",
+    "sourceTraceability": "Ready topics must cite sourceIds from content/SOURCE_INDEX.json.",
+    "mandatoryFooter": "Downstream render specs must keep footerId=mandatory_honest_framing.",
+    "bmkgPositioning": "Emergency facts and Indonesian public-warning authority remain routed to BMKG first.",
+    "canonicalLayoutField": "Use templateId, never layoutId or layout_id."
+  },
+  "statuses": ["ready", "draft", "paused", "retired"],
+  "priorities": {
+    "1": "High-value evergreen safety content.",
+    "2": "Useful supporting education or seasonal reminders.",
+    "3": "Lower urgency, experimental, or needs more editorial development."
+  },
+  "topics": [
+    {
+      "id": "prep_drop_cover_hold",
+      "status": "ready",
+      "priority": 1,
+      "pillarId": "preparedness",
+      "contentType": "education_steps",
+      "reuse_after_days": 90,
+      "last_used": null,
+      "approval": "human_required",
+      "notes": "Evergreen protective action topic for earthquake shaking.",
+      "decision": {
+        "schemaVersion": "1.0.0",
+        "templateId": "editorial_steps",
+        "pillarId": "preparedness",
+        "sourceIds": ["bnpb", "project_safety_rules"],
+        "reviewStatus": "verified",
+        "assets": {
+          "referenceAssetIds": ["reference_editorial_steps"]
+        },
+        "content": {
+          "kicker": "Siap Sebelum Bencana",
+          "title": "Saat Gempa: 3 Langkah",
+          "rows": [
+            { "label": "Merunduk", "body": "Turun ke lantai sebelum terjatuh." },
+            { "label": "Lindungi", "body": "Jaga kepala dan leher dari benda jatuh." },
+            { "label": "Berpegangan", "body": "Tahan sampai guncangan berhenti." }
+          ]
+        }
+      }
+    },
+    {
+      "id": "prep_go_bag_basics",
+      "status": "ready",
+      "priority": 2,
+      "pillarId": "preparedness",
+      "contentType": "preparedness_steps",
+      "reuse_after_days": 120,
+      "last_used": null,
+      "approval": "human_required",
+      "notes": "Simple family preparedness list without implying self-rescue guarantees.",
+      "decision": {
+        "schemaVersion": "1.0.0",
+        "templateId": "checklist_card",
+        "pillarId": "preparedness",
+        "sourceIds": ["bnpb"],
+        "reviewStatus": "verified",
+        "assets": {
+          "referenceAssetIds": ["reference_editorial_steps"]
+        },
+        "content": {
+          "kicker": "Siap Sebelum Bencana",
+          "title": "Isi Tas Siaga Keluarga",
+          "items": [
+            { "label": "Air minum dan makanan ringan." },
+            { "label": "Obat pribadi dan P3K sederhana." },
+            { "label": "Senter, peluit, dan power bank." },
+            { "label": "Salinan dokumen penting." },
+            { "label": "Nomor keluarga dan kontak darurat." }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ground_high_ground_route",
+      "status": "ready",
+      "priority": 1,
+      "pillarId": "know_your_ground",
+      "contentType": "education_steps",
+      "reuse_after_days": 120,
+      "last_used": null,
+      "approval": "human_required",
+      "notes": "Grounded high-ground memory prompt for coastal households.",
+      "decision": {
+        "schemaVersion": "1.0.0",
+        "templateId": "editorial_steps",
+        "pillarId": "know_your_ground",
+        "sourceIds": ["bpbd_sulteng", "project_safety_rules"],
+        "reviewStatus": "verified",
+        "assets": {
+          "referenceAssetIds": ["reference_editorial_steps"]
+        },
+        "content": {
+          "kicker": "Kenali Wilayahmu",
+          "title": "Ingat Rute ke Tempat Tinggi",
+          "rows": [
+            { "label": "Kenali", "body": "Tentukan titik tinggi terdekat dari rumah." },
+            { "label": "Latih", "body": "Coba rute bersama keluarga saat kondisi tenang." },
+            { "label": "Prioritaskan", "body": "Setelah gempa kuat dan lama, jauhi pantai dan muara." }
+          ]
+        }
+      }
+    },
+    {
+      "id": "info_check_before_share",
+      "status": "ready",
+      "priority": 1,
+      "pillarId": "information_hygiene",
+      "contentType": "education_steps",
+      "reuse_after_days": 60,
+      "last_used": "2026-03-01",
+      "approval": "human_required",
+      "notes": "Repeatable anti-hoax guidance for fast-moving quake information.",
+      "decision": {
+        "schemaVersion": "1.0.0",
+        "templateId": "editorial_steps",
+        "pillarId": "information_hygiene",
+        "sourceIds": ["bmkg", "project_safety_rules"],
+        "reviewStatus": "verified",
+        "assets": {
+          "referenceAssetIds": ["reference_editorial_steps"]
+        },
+        "content": {
+          "kicker": "Saring Sebelum Sebar",
+          "title": "Sebelum Share Info Gempa",
+          "rows": [
+            { "label": "Berhenti", "body": "Jangan teruskan pesan yang membuat panik." },
+            { "label": "Periksa", "body": "Cari sumber resmi seperti BMKG atau BPBD." },
+            { "label": "Bagikan", "body": "Sebarkan hanya informasi yang jelas sumbernya." }
+          ]
+        }
+      }
+    },
+    {
+      "id": "info_no_prediction",
+      "status": "ready",
+      "priority": 2,
+      "pillarId": "information_hygiene",
+      "contentType": "myth_bust",
+      "reuse_after_days": 90,
+      "last_used": null,
+      "approval": "human_required",
+      "notes": "Myth-bust topic preserving no-prediction safety framing.",
+      "decision": {
+        "schemaVersion": "1.0.0",
+        "templateId": "poster_statement",
+        "pillarId": "information_hygiene",
+        "sourceIds": ["bmkg", "project_safety_rules"],
+        "reviewStatus": "verified",
+        "assets": {
+          "referenceAssetIds": ["reference_poster_statement"]
+        },
+        "content": {
+          "kicker": "Saring Sebelum Sebar",
+          "title": "Gempa tidak bisa diprediksi tanggal dan jamnya.",
+          "body": "Ikuti info resmi. Abaikan pesan berantai yang mengklaim waktu gempa berikutnya.",
+          "sourceLabel": "Rujukan: BMKG"
+        }
+      }
+    },
+    {
+      "id": "calendar_family_drill",
+      "status": "ready",
+      "priority": 2,
+      "pillarId": "preparedness",
+      "contentType": "quick_tip",
+      "reuse_after_days": 45,
+      "last_used": "2026-06-15",
+      "approval": "human_required",
+      "notes": "Recently used seed topic; useful for reuse_after_days eligibility tests.",
+      "decision": {
+        "schemaVersion": "1.0.0",
+        "templateId": "story_card",
+        "exportTarget": "story_9_16",
+        "pillarId": "preparedness",
+        "sourceIds": ["bnpb"],
+        "reviewStatus": "verified",
+        "assets": {},
+        "content": {
+          "kicker": "Siap Sebelum Bencana",
+          "title": "Latihan 10 Menit",
+          "body": "Pilih satu malam minggu ini untuk mengulang rute keluar rumah bersama keluarga."
+        }
+      }
+    }
+  ]
+}

@@ -1,7 +1,8 @@
 # Content Engine
 
-Status: Phase 5A foundation. This layer defines structured content decisions
-that can be converted into validated render specs. It does not render images,
+Status: Phase 5A foundation plus Phase 5B topic planning. This layer defines
+structured content decisions that can be converted into validated render specs,
+and a manual topic backlog for long-term planning. It does not render images,
 call an AI model, publish content, or change the alert pipeline.
 
 ## Purpose
@@ -95,3 +96,18 @@ matches the cited source before setting `reviewStatus` to `verified`.
 
 This object is still only a validated contract. Actual educational rendering is
 future work.
+
+## Phase 5B Topic Backlog
+
+`topic_backlog.json` is the manual planning layer for long-term education
+topics. It stores topic records with `status`, `priority`, `pillarId`,
+`reuse_after_days`, `last_used`, `approval`, and a Phase 5 content decision.
+
+The helper in `studio/topic-backlog.js` can:
+
+- load the backlog,
+- validate ready topics through this content engine,
+- select eligible topics by status, priority, pillar, and reuse window.
+
+It cannot render, publish, call external APIs, or update `last_used`. Human
+approval remains required before any future visual or posting workflow.
