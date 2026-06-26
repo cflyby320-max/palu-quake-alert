@@ -101,10 +101,15 @@ Completed design phases:
   `studio/topic-backlog.js` add manual long-term topic planning and eligibility
   selection. It is planning-only: no auto-posting, rendering, external APIs, or
   alert pipeline changes.
+- **Editorial outbox dry run:** `studio/outbox/editorial-dry-run-1/` contains
+  five review-only evergreen content drafts with render decisions, captions,
+  and missing-image notes. These are explicitly not approved for posting because
+  educational template rendering is not implemented yet.
 
-Next planned work after Phase 5B is a reviewed content bank expansion or a
-deterministic educational renderer. Preserve the rule that the renderer owns
-visible factual text, numbers, safety instructions, and footer placement.
+Next planned work after the editorial outbox dry run is a deterministic
+educational renderer for `editorial_steps`, `checklist_card`, and
+`poster_statement`. Preserve the rule that the renderer owns visible factual
+text, numbers, safety instructions, and footer placement.
 
 ## Safety-critical invariants — do not regress
 
@@ -132,10 +137,10 @@ classification cases, dedup matching, WITA conversion) plus
 coverage, prioritised by safety impact; P1 is the safety-critical cases).
 Design-system coverage now also includes Studio/SDK token loading, template
 registry validation, asset index/schema integrity, content engine validation,
-and topic backlog eligibility. There are no network or integration tests by
-design (no credentials in CI). The `--test-name-pattern` example above filters
-by test name across the suite. As of the Phase 5B topic backlog workflow,
-`npm.cmd test` passes 75 tests.
+topic backlog eligibility, and editorial outbox dry-run validation. There are
+no network or integration tests by design (no credentials in CI). The
+`--test-name-pattern` example above filters by test name across the suite. As
+of the editorial outbox dry run, `npm.cmd test` passes 82 tests.
 
 ## Deployment
 
