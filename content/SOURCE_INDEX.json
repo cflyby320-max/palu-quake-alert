@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0.0",
+  "updated": "2026-06-26",
+  "sources": [
+    {
+      "id": "bmkg",
+      "label": "BMKG / InaTEWS",
+      "type": "official",
+      "country": "ID",
+      "use": ["earthquake_event", "tsunami_status", "shakemap", "public_guidance"],
+      "authority": "primary",
+      "notes": "Indonesia official meteorology, climatology, and geophysics agency. Primary source for Indonesian quake and tsunami information."
+    },
+    {
+      "id": "bnpb",
+      "label": "BNPB",
+      "type": "official",
+      "country": "ID",
+      "use": ["preparedness", "disaster_guidance"],
+      "authority": "supporting",
+      "notes": "Indonesia national disaster management agency. Use for preparedness and disaster response education."
+    },
+    {
+      "id": "bpbd_sulteng",
+      "label": "BPBD Sulawesi Tengah",
+      "type": "official",
+      "country": "ID",
+      "use": ["local_preparedness", "local_response"],
+      "authority": "supporting",
+      "notes": "Central Sulawesi local disaster management authority. Use for local preparedness and response routing."
+    },
+    {
+      "id": "usgs",
+      "label": "USGS",
+      "type": "official",
+      "country": "US",
+      "use": ["earthquake_event", "cross_check"],
+      "authority": "cross_check",
+      "notes": "United States Geological Survey earthquake feed. Used as a cross-check/fallback source, not as Indonesian public-warning authority."
+    },
+    {
+      "id": "project_safety_rules",
+      "label": "Palu Earthquake Alerts safety rules",
+      "type": "project_policy",
+      "country": "ID",
+      "use": ["framing", "footer", "high_ground_rule", "no_all_clear"],
+      "authority": "project",
+      "notes": "Repository safety invariants derived from the project whitepaper and 2018 Palu lessons. Use only for framing, never as an official source."
+    }
+  ],
+  "rules": {
+    "verifiedBeforePublish": "A content decision may use reviewStatus=verified only after its content has been checked against the listed source IDs.",
+    "officialRouting": "Emergency and quake facts route to BMKG first. Preparedness education may also cite BNPB or BPBD Sulteng.",
+    "noSourceGuessing": "Do not invent source IDs. Add new sources here before using them in content decisions."
+  }
+}

@@ -92,12 +92,14 @@ Completed design phases:
 - **Phase 4A Asset library foundation:** `design/ASSET_SCHEMA.json`,
   `design/assets/`, and enriched `ASSET_INDEX.json` define asset taxonomy and
   intake rules. No new production asset packs have been generated yet.
+- **Phase 5A Content engine foundation:** `content/CONTENT_ENGINE.md`,
+  `content/CONTENT_SCHEMA.json`, `content/SOURCE_INDEX.json`, and
+  `studio/content-engine.js` convert structured content decisions into
+  validated render specs. No AI calls or educational renderers are added.
 
-Next planned work is **Phase 5 Content Engine**: make content decisions output
-structured render specs (`templateId`, `pillarId`, approved asset IDs,
-verified `content`, `footerId`, `exportTarget`) instead of freeform design
-instructions. Preserve the rule that the renderer owns visible factual text,
-numbers, safety instructions, and footer placement.
+Next planned work after Phase 5A is a reviewed content bank or deterministic
+educational renderer. Preserve the rule that the renderer owns visible factual
+text, numbers, safety instructions, and footer placement.
 
 ## Safety-critical invariants — do not regress
 
@@ -126,8 +128,8 @@ coverage, prioritised by safety impact; P1 is the safety-critical cases).
 Design-system coverage now also includes Studio/SDK token loading, template
 registry validation, and asset index/schema integrity. There are no network or
 integration tests by design (no credentials in CI). The `--test-name-pattern`
-example above filters by test name across the suite. As of the Phase 4A asset
-foundation, `npm.cmd test` passes 62 tests.
+example above filters by test name across the suite. As of the Phase 5A content
+engine foundation, `npm.cmd test` passes 68 tests.
 
 ## Deployment
 
@@ -145,6 +147,7 @@ All config is env-driven; see `.env.example` for the full annotated list and `sr
 - **`design/DESIGN_SDK.md`** — entry point for the civic design system. Read this before visual, template, asset, renderer, or content-engine work.
 - **`design/TEMPLATE_REGISTRY.json`** — approved template IDs, text zones, asset slots, export targets, and render-spec validation rules.
 - **`design/ASSET_SCHEMA.json`** and **`design/ASSET_INDEX.json`** — asset taxonomy, intake rules, existing committed assets, references, and planned asset categories.
+- **`content/CONTENT_ENGINE.md`**, **`content/CONTENT_SCHEMA.json`**, and **`content/SOURCE_INDEX.json`** — structured content-decision layer and approved source ID vocabulary.
 - **`OUTLOOK_DESIGN.md`** — full spec + safety rules for the Seismic Activity Outlook (aftershock probability). Read before touching any Outlook math or copy.
 - **`TIER2_PRESENTATION.md`** — the trust/presentation work (BotFather copy, pinned post, brand kit rationale).
 - **`studio/STUDIO_DESIGN.md`** — full spec + safety/brand rules for the optional Instagram content studio (branded shakemap cards). Read before touching anything in `studio/`.

@@ -19,7 +19,7 @@ approved primitives and return structured input:
 
 ```json
 {
-  "layoutId": "editorial_steps",
+  "templateId": "editorial_steps",
   "pillarId": "preparedness",
   "backgroundId": "p2_go_bag_flatlay",
   "illustrationIds": ["drop_cover_hold"],
@@ -92,6 +92,8 @@ existing SVG-to-PNG studio pipeline. This SDK defines where the renderer should
 go next: from hand-coded prompt-like layouts toward structured render specs.
 `TEMPLATE_REGISTRY.json` defines the approved template IDs, required text zones,
 asset slots, export targets, and safety checks for those render specs.
+`../content/` defines the Phase 5 structured content-decision layer that feeds
+those specs.
 
 ## Non-Negotiables
 
@@ -131,12 +133,15 @@ Do not break the existing pipeline:
 - `ASSET_INDEX.json` - machine-readable inventory of assets and references.
 - `assets/` - future production asset library folders; currently registry-only.
 - `references/` - local copies of the approved handover mockups.
+- `../content/CONTENT_ENGINE.md` - structured content-decision contract.
+- `../content/CONTENT_SCHEMA.json` - machine-readable content-decision shape.
+- `../content/SOURCE_INDEX.json` - approved source ID vocabulary.
 
 ## How Future Agents Should Work
 
 1. Read this SDK and the safety docs before visual work.
 2. Choose the knowledge pillar and content type.
-3. Choose an approved layout ID from `DESIGN_TOKENS.json` and
+3. Choose an approved `templateId` from `DESIGN_TOKENS.json` and
    `TEMPLATE_REGISTRY.json`.
 4. Choose approved assets from `ASSET_INDEX.json`.
 5. Provide verified text payload only after source/copy checks.
