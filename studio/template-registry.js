@@ -69,7 +69,66 @@ function collectAssetIds(assets = {}) {
   for (const key of ['illustrationIds', 'objectIds', 'iconIds', 'patternIds', 'referenceAssetIds']) {
     if (Array.isArray(assets[key])) ids.push(...assets[key]);
   }
+  for (const value of Object.values(assets.slots || {})) {
+    if (Array.isArray(value)) ids.push(...value);
+    else if (value) ids.push(value);
+  }
   return ids;
+}
+
+function validateAssetSlots(spec, template, assetIndex, errors) {
+  const assignedSlots = spec.assets?.slots;
+  if (assignedSlots === undefined) return;
+  if (!assignedSlots || typeof assignedSlots !== 'object' || Array.isArray(assignedSlots)) {
+    errors.push('assets.slots must be an object');
+    return;
+  }
+
+  const slotSpecs = new Map((template.assetSlots || []).map((slot) => [slot.id, slot]));
+  const indexedAssets = new Map((assetIndex.assets || []).map((asset) => [asset.id, asset]));
+
+  for (const [slotId, assigned] of Object.entries(assignedSlots)) {
+    const slot = slotSpecs.get(slotId);
+    if (!slot) {
+      errors.push(`asset slot "${slotId}" is not allowed for ${spec.templateId}`);
+      continue;
+    }
+
+    const ids = Array.isArray(assigned) ? assigned : [assigned];
+    if (ids.length === 0 || ids.some((assetId) => typeof assetId !== 'string' || !assetId.trim())) {
+      errors.push(`asset slot "${slotId}" must contain non-empty asset IDs`);
+      continue;
+    }
+    if (!slot.multiple && ids.length > 1) {
+      errors.push(`asset slot "${slotId}" accepts only one asset`);
+    }
+    if (slot.maxItems && ids.length > slot.maxItems) {
+      errors.push(`asset slot "${slotId}" accepts at most ${slot.maxItems} assets`);
+    }
+    if (slotId === 'row_icons' && Array.isArray(spec.content?.rows) && ids.length !== spec.content.rows.length) {
+      errors.push(`asset slot "row_icons" must contain one icon per content row`);
+    }
+
+    for (const assetId of ids) {
+      const asset = indexedAssets.get(assetId);
+      if (!asset) continue;
+      if (asset.status !== 'committed' || asset.safetyReview !== 'approved') {
+        errors.push(`asset "${assetId}" is not committed and approved`);
+      }
+      if (slot.textless && asset.textPolicy !== 'textless') {
+        errors.push(`asset "${assetId}" must be textless in slot "${slotId}"`);
+      }
+      if (!slot.allowedTypes?.includes(asset.type)) {
+        errors.push(`asset "${assetId}" type "${asset.type}" is not allowed in slot "${slotId}"`);
+      }
+      if (!asset.allowedTemplateIds?.includes(spec.templateId)) {
+        errors.push(`asset "${assetId}" is not approved for template "${spec.templateId}"`);
+      }
+      if (asset.pillarId && asset.pillarId !== spec.knowledge?.pillarId) {
+        errors.push(`asset "${assetId}" is not approved for pillar "${spec.knowledge?.pillarId}"`);
+      }
+    }
+  }
 }
 
 function validateContentShape(content, shape, errors) {
@@ -152,6 +211,7 @@ export function validateRenderSpec(
     }
     validateSourceIds(spec, template, errors);
     validateContentShape(spec.content, template.contentShape, errors);
+    validateAssetSlots(spec, template, assetIndex, errors);
   }
 
   if (spec.language !== registry.rules?.language) {

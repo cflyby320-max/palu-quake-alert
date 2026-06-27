@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "educational-render-preview-3",
+  "sourceBatchId": "editorial-dry-run-1",
+  "batchType": "educational_render_preview",
+  "visualQaRevision": 3,
+  "publicationStatus": "review_rejected_revision_required",
+  "created": "2026-06-27",
+  "renderer": "studio/render-education.js",
+  "sourceRendererInput": "studio/outbox/editorial-dry-run-1",
+  "assetAssignment": "studio/render-educational-outbox.js#APPROVED_ASSET_ASSIGNMENTS",
+  "reviewArtifacts": [
+    "contact-sheet.png",
+    "contact-sheet.svg"
+  ],
+  "humanReview": {
+    "status": "rejected",
+    "reviewed": "2026-06-27",
+    "successorBatchId": "educational-render-preview-4",
+    "issues": [
+      "Cards 2 and 3 crop their pattern banners badly.",
+      "Card 4 stacks too many competing teal and purple motifs.",
+      "Card 5 overlaps the go-bag illustration with the route-grid pattern.",
+      "The renderer needs role-specific fit, clear-space, and layering constraints."
+    ]
+  },
+  "frozenRenderSha256": {
+    "01-ground_high_ground_route/card.png": "C70E47C65D0C59ACE36848714C651F678C84497855EBC3EDA26B2E9A78086503",
+    "01-ground_high_ground_route/card.svg": "A9A41BF8BFC378204B836238696AC968D72DCBA0A4E05613F477FB732EF080B3",
+    "02-prep_drop_cover_hold/card.png": "EE394E7F68AC769C00FC3538CB259D346AE242A7976F186471CFB04F833D44A0",
+    "02-prep_drop_cover_hold/card.svg": "25CAC9B90CF4F00723D1DD94D07232508B38732FB03F49F9B324F4F66287D5D7",
+    "03-info_check_before_share/card.png": "2AD8A7D9681A43A26B167D1BD6DCFAA0BA40060BEA3ABBD1D5B4433482C5661D",
+    "03-info_check_before_share/card.svg": "C60E8E723BAAB237EB9D59F51C948C5309E720A14B47C87FCD9972624C7E9435",
+    "04-info_no_prediction/card.png": "CF68052171045BC9D88B383E424FFB6ABCF8C135B5E1923E3905F891F1F5741C",
+    "04-info_no_prediction/card.svg": "B0FC8C204A02F1BC7E4A4819C633EC46940E98F5DB987530D431CBCF4E09D2A7",
+    "05-prep_go_bag_basics/card.png": "3DD2BE0F69FE80BAB9071C9833C316D00CEC313B70ADFAE2F0B34D5EBCEFE059",
+    "05-prep_go_bag_basics/card.svg": "7766627DAEF4AFA1BBD0C7E906BE8AC5705152584A5308637A4D4F13CE5B1C27",
+    "contact-sheet.png": "B4A7C64F2845EDB4745A9131C95DDDA572D06AF5D583628E0219ADD03B9AF5FC",
+    "contact-sheet.svg": "5E128DCEBA8CFAFA4554B949096CC7A1A3EF768F1BB80516FB67B97D0D1E2998"
+  },
+  "rules": {
+    "noAutoPost": true,
+    "noExternalApis": true,
+    "noWatcherChanges": true,
+    "humanApprovalRequired": true,
+    "mandatoryFooterId": "mandatory_honest_framing"
+  },
+  "rendered": [
+    {
+      "topicId": "ground_high_ground_route",
+      "folder": "01-ground_high_ground_route",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "prep_drop_cover_hold",
+      "folder": "02-prep_drop_cover_hold",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "info_check_before_share",
+      "folder": "03-info_check_before_share",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "info_no_prediction",
+      "folder": "04-info_no_prediction",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "prep_go_bag_basics",
+      "folder": "05-prep_go_bag_basics",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    }
+  ]
+}

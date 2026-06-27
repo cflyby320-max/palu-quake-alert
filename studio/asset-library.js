@@ -59,6 +59,16 @@ export function loadAssetIndex({ url = ASSET_INDEX_URL } = {}) {
   return { source: 'design/ASSET_INDEX.json', index };
 }
 
+export function isApprovedRenderAsset(asset) {
+  return Boolean(
+    asset
+    && asset.status === 'committed'
+    && asset.safetyReview === 'approved'
+    && asset.textPolicy === 'textless'
+    && asset.path?.startsWith('design/assets/')
+  );
+}
+
 export function loadLocalSvgAsset(assetId, { index = loadAssetIndex().index } = {}) {
   const asset = (index.assets || []).find((entry) => entry.id === assetId);
   if (!asset) throw new Error(`asset "${assetId}" is not indexed`);
@@ -93,4 +103,13 @@ export function loadLocalSvgAsset(assetId, { index = loadAssetIndex().index } = 
     svg,
     dataUri: `data:image/svg+xml;base64,${Buffer.from(svg).toString('base64')}`,
   };
+}
+
+export function loadApprovedLocalSvgAsset(assetId, options = {}) {
+  const index = options.index || loadAssetIndex().index;
+  const asset = (index.assets || []).find((entry) => entry.id === assetId);
+  if (!isApprovedRenderAsset(asset)) {
+    throw new Error(`asset "${assetId}" is not eligible for approved rendering`);
+  }
+  return loadLocalSvgAsset(assetId, { ...options, index });
 }

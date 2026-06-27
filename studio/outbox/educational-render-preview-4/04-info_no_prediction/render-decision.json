@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "editorial-dry-run-1",
+  "publicationStatus": "dry_run_not_approved",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "info_no_prediction",
+  "topicPath": "content/topic_backlog.json#info_no_prediction",
+  "selectedAt": "2026-06-27",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "information_hygiene",
+    "label": "Saring Sebelum Sebar"
+  },
+  "templateId": "poster_statement",
+  "sourceIds": [
+    "bmkg",
+    "project_safety_rules"
+  ],
+  "sourceLabels": [
+    {
+      "id": "bmkg",
+      "label": "BMKG / InaTEWS"
+    },
+    {
+      "id": "project_safety_rules",
+      "label": "Palu Earthquake Alerts safety rules"
+    }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Kecemasan setelah pengalaman gempa besar membuat klaim waktu gempa berikutnya terasa meyakinkan meski tidak benar.",
+    "localRelevance": "Di Palu dan Sulawesi Tengah, pesan berantai tentang prediksi gempa bisa memicu panik keluarga dan tetangga.",
+    "practicalAction": "Abaikan pesan yang mengklaim tanggal atau jam gempa berikutnya dan arahkan keluarga ke informasi resmi BMKG."
+  },
+  "imageStatus": "intentionally_asset_free_review_required",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "poster_statement",
+    "pillarId": "information_hygiene",
+    "sourceIds": [
+      "bmkg",
+      "project_safety_rules"
+    ],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": [
+        "reference_poster_statement"
+      ],
+      "slots": {}
+    },
+    "content": {
+      "kicker": "Saring Sebelum Sebar",
+      "title": "Gempa tidak bisa diprediksi tanggal dan jamnya.",
+      "body": "Ikuti info resmi. Abaikan pesan berantai yang mengklaim waktu gempa berikutnya.",
+      "sourceLabel": "Rujukan: BMKG"
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "poster_statement",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "information_hygiene",
+      "sourceIds": [
+        "bmkg",
+        "project_safety_rules"
+      ],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": [
+        "reference_poster_statement"
+      ],
+      "slots": {}
+    },
+    "content": {
+      "kicker": "Saring Sebelum Sebar",
+      "title": "Gempa tidak bisa diprediksi tanggal dan jamnya.",
+      "body": "Ikuti info resmi. Abaikan pesan berantai yang mengklaim waktu gempa berikutnya.",
+      "sourceLabel": "Rujukan: BMKG"
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}

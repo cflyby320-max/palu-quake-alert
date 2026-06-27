@@ -68,8 +68,34 @@
         { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
       ],
       "assetSlots": [
-        { "id": "hero_image", "allowedTypes": ["background", "illustration"], "required": false, "textless": true },
-        { "id": "row_icons", "allowedTypes": ["icon"], "required": false, "textless": true }
+        {
+          "id": "ambient_pattern",
+          "allowedTypes": ["pattern"],
+          "required": false,
+          "textless": true,
+          "presentation": {
+            "role": "secondary_header_motif",
+            "region": "header_right",
+            "fit": "contain",
+            "maxOpacity": 0.24,
+            "clearTextZone": "header_left",
+            "layer": "below_text"
+          }
+        },
+        {
+          "id": "row_icons",
+          "allowedTypes": ["icon"],
+          "required": false,
+          "textless": true,
+          "multiple": true,
+          "maxItems": 4,
+          "presentation": {
+            "role": "action_markers",
+            "region": "rows",
+            "fit": "contain",
+            "layer": "with_body"
+          }
+        }
       ],
       "safetyChecks": ["verified_sources", "mandatory_footer", "bahasa_indonesia", "no_prediction"]
     },
@@ -92,8 +118,20 @@
         { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
       ],
       "assetSlots": [
-        { "id": "check_icons", "allowedTypes": ["icon"], "required": false, "textless": true },
-        { "id": "background", "allowedTypes": ["background", "pattern"], "required": false, "textless": true }
+        {
+          "id": "focal_illustration",
+          "allowedTypes": ["illustration"],
+          "required": false,
+          "textless": true,
+          "presentation": {
+            "role": "single_visual_anchor",
+            "region": "content_top",
+            "fit": "contain",
+            "surface": "solid_paper",
+            "clearTextZone": "header",
+            "layer": "above_surface"
+          }
+        }
       ],
       "safetyChecks": ["verified_sources", "mandatory_footer", "bahasa_indonesia", "practical_action"]
     },
@@ -116,7 +154,19 @@
         { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
       ],
       "assetSlots": [
-        { "id": "background", "allowedTypes": ["background", "photo", "illustration"], "required": false, "textless": true }
+        {
+          "id": "poster_background",
+          "allowedTypes": ["background", "photo", "illustration"],
+          "required": false,
+          "textless": true,
+          "presentation": {
+            "role": "single_visual_anchor",
+            "region": "poster_canvas",
+            "fit": "cover",
+            "clearTextZone": "statement",
+            "layer": "below_scrim"
+          }
+        }
       ],
       "safetyChecks": ["verified_sources", "mandatory_footer", "no_alarmist_imagery", "no_prediction"]
     },

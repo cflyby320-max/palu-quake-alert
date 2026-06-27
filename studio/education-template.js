@@ -4,7 +4,8 @@
 // The renderer owns every visible text position and never calls the network.
 
 import { CORE_COLORS, DESIGN_TOKENS, FEED_CANVAS, MANDATORY_FOOTER } from './design-sdk.js';
-import { validateRenderSpec } from './template-registry.js';
+import { loadApprovedLocalSvgAsset } from './asset-library.js';
+import { getTemplateSpec, validateRenderSpec } from './template-registry.js';
 
 const SUPPORTED_TEMPLATES = new Set(['editorial_steps', 'checklist_card', 'poster_statement']);
 const PAGE_MARGIN = 60;
@@ -42,6 +43,47 @@ function wrapText(text, maxChars, maxLines = 4) {
   const clipped = lines.slice(0, maxLines);
   clipped[maxLines - 1] = clipped[maxLines - 1].replace(/[,. ]+$/, '') + '...';
   return clipped;
+}
+
+function slotIds(spec, slotId) {
+  const assigned = spec.assets?.slots?.[slotId];
+  if (!assigned) return [];
+  return Array.isArray(assigned) ? assigned : [assigned];
+}
+
+function slotPresentation(spec, slotId) {
+  const template = getTemplateSpec(spec.templateId);
+  const slot = template?.assetSlots?.find((entry) => entry.id === slotId);
+  if (!slot?.presentation) throw new Error(`asset slot "${slotId}" has no presentation contract`);
+  return slot.presentation;
+}
+
+function svgFit(fit) {
+  if (fit === 'contain') return 'xMidYMid meet';
+  if (fit === 'cover') return 'xMidYMid slice';
+  throw new Error(`unsupported registry asset fit: ${fit}`);
+}
+
+function assetImage(assetId, {
+  slotId,
+  presentation,
+  x,
+  y,
+  width,
+  height,
+  opacity = presentation.maxOpacity ?? 1,
+}) {
+  const { dataUri } = loadApprovedLocalSvgAsset(assetId);
+  return [
+    `<image data-asset-id="${esc(assetId)}"`,
+    ` data-slot="${esc(slotId)}"`,
+    ` data-role="${esc(presentation.role)}"`,
+    ` data-region="${esc(presentation.region)}"`,
+    ` data-fit="${esc(presentation.fit)}"`,
+    ` data-layer="${esc(presentation.layer)}"`,
+    ` href="${dataUri}" x="${x}" y="${y}" width="${width}" height="${height}"`,
+    ` preserveAspectRatio="${svgFit(presentation.fit)}" opacity="${opacity}"/>`,
+  ].join('');
 }
 
 function textBlock({
@@ -141,13 +183,13 @@ function footer() {
   ].join('');
 }
 
-function headerTitle(title) {
+function headerTitle(title, { compact = false } = {}) {
   const length = String(title).length;
-  const size = length > 36 ? 52 : length > 26 ? 58 : 64;
-  const maxChars = length > 36 ? 30 : length > 26 ? 27 : 24;
+  const size = compact ? (length > 26 ? 54 : 58) : length > 36 ? 52 : length > 26 ? 58 : 64;
+  const maxChars = compact ? 18 : length > 36 ? 30 : length > 26 ? 27 : 24;
   return textBlock({
     x: PAGE_MARGIN,
-    y: 206,
+    y: compact ? 194 : 206,
     lines: wrapText(title, maxChars, 2),
     size,
     fill: CORE_COLORS.off_white,
@@ -158,14 +200,28 @@ function headerTitle(title) {
 
 function editorialHeader(spec) {
   const pillar = pillarMeta(spec.knowledge.pillarId);
+  const ambientIds = slotIds(spec, 'ambient_pattern');
+  const hasAmbient = ambientIds.length > 0;
+  const ambientPresentation = hasAmbient ? slotPresentation(spec, 'ambient_pattern') : null;
   return [
     `<rect x="0" y="0" width="${FEED_CANVAS.width}" height="326" fill="${CORE_COLORS.teal}"/>`,
-    `<circle cx="970" cy="82" r="210" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.18"/>`,
-    `<circle cx="970" cy="82" r="150" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.14"/>`,
-    `<path d="M0 284 L180 210 L335 292 L520 172 L700 290 L870 205 L1080 278 L1080 326 L0 326 Z" fill="${CORE_COLORS.teal_deep}" opacity="0.58"/>`,
+    hasAmbient
+      ? assetImage(ambientIds[0], {
+          slotId: 'ambient_pattern',
+          presentation: ambientPresentation,
+          x: 700,
+          y: 136,
+          width: 320,
+          height: 154,
+        })
+      : [
+          `<circle cx="970" cy="82" r="210" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.18"/>`,
+          `<circle cx="970" cy="82" r="150" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.14"/>`,
+          `<path d="M0 284 L180 210 L335 292 L520 172 L700 290 L870 205 L1080 278 L1080 326 L0 326 Z" fill="${CORE_COLORS.teal_deep}" opacity="0.58"/>`,
+        ].join(''),
     brandLockup(),
     pillarTag(pillar),
-    headerTitle(spec.content.title),
+    headerTitle(spec.content.title, { compact: hasAmbient }),
   ].join('');
 }
 
@@ -183,30 +239,47 @@ function editorialShell(spec, content) {
 function editorialSteps(spec) {
   const rows = spec.content.rows || [];
   const pillar = pillarMeta(spec.knowledge.pillarId);
+  const rowIconIds = slotIds(spec, 'row_icons');
+  const rowIconPresentation = rowIconIds.length ? slotPresentation(spec, 'row_icons') : null;
   const areaTop = 358;
   const areaBottom = FOOTER_Y - 34;
   const gap = 24;
   const rowHeight = Math.floor((areaBottom - areaTop - gap * (rows.length - 1)) / rows.length);
 
-  const content = rows.map((row, index) => {
+  const rowsContent = rows.map((row, index) => {
     const y = areaTop + index * (rowHeight + gap);
     const bodyLines = wrapText(row.body, 39, 3);
     const contentHeight = 42 + bodyLines.length * 39;
     const contentTop = y + Math.round((rowHeight - contentHeight) / 2);
+    const iconId = rowIconIds[index];
 
     return [
       `<rect x="${PAGE_MARGIN}" y="${y}" width="960" height="${rowHeight}" rx="12" fill="${CORE_COLORS.off_white}"/>`,
       `<rect x="${PAGE_MARGIN}" y="${y}" width="10" height="${rowHeight}" rx="5" fill="${pillar.color}"/>`,
-      `<circle cx="124" cy="${y + rowHeight / 2}" r="38" fill="${pillar.color}"/>`,
-      textBlock({
-        x: 124,
-        y: y + rowHeight / 2 + 12,
-        lines: [String(index + 1)],
-        size: 32,
-        fill: CORE_COLORS.off_white,
-        weight: 700,
-        anchor: 'middle',
-      }),
+      iconId
+        ? [
+            `<rect x="82" y="${y + rowHeight / 2 - 46}" width="92" height="92" rx="18" fill="${DESIGN_TOKENS.colors.core.paper}"/>`,
+            assetImage(iconId, {
+              slotId: 'row_icons',
+              presentation: rowIconPresentation,
+              x: 90,
+              y: y + rowHeight / 2 - 38,
+              width: 76,
+              height: 76,
+            }),
+          ].join('')
+        : [
+            `<circle cx="124" cy="${y + rowHeight / 2}" r="38" fill="${pillar.color}"/>`,
+            textBlock({
+              x: 124,
+              y: y + rowHeight / 2 + 12,
+              lines: [String(index + 1)],
+              size: 32,
+              fill: CORE_COLORS.off_white,
+              weight: 700,
+              anchor: 'middle',
+            }),
+          ].join(''),
       textBlock({
         x: 190,
         y: contentTop + 34,
@@ -226,17 +299,36 @@ function editorialSteps(spec) {
     ].join('');
   }).join('');
 
-  return editorialShell(spec, content);
+  return editorialShell(spec, rowsContent);
 }
 
 function checklistCard(spec) {
   const items = spec.content.items || [];
   const pillar = pillarMeta(spec.knowledge.pillarId);
-  const panelY = 356;
+  const focalIds = slotIds(spec, 'focal_illustration');
+  const hasFocal = focalIds.length > 0;
+  const focalPresentation = hasFocal ? slotPresentation(spec, 'focal_illustration') : null;
+  const heroY = 344;
+  const heroHeight = 270;
+  const panelY = hasFocal ? 638 : 356;
   const panelHeight = FOOTER_Y - panelY - 34;
   const rowHeight = panelHeight / items.length;
 
   const content = [
+    hasFocal
+      ? [
+          `<rect data-surface="solid_paper" x="${PAGE_MARGIN}" y="${heroY}" width="960" height="${heroHeight}" rx="12" fill="${DESIGN_TOKENS.colors.core.paper}"/>`,
+          `<rect x="${PAGE_MARGIN}" y="${heroY}" width="8" height="${heroHeight}" rx="4" fill="${pillar.color}"/>`,
+          assetImage(focalIds[0], {
+            slotId: 'focal_illustration',
+            presentation: focalPresentation,
+            x: 170,
+            y: heroY + 8,
+            width: 740,
+            height: heroHeight - 16,
+          }),
+        ].join('')
+      : '',
     `<rect x="${PAGE_MARGIN}" y="${panelY}" width="960" height="${panelHeight}" rx="12" fill="${CORE_COLORS.off_white}"/>`,
     ...items.map((item, index) => {
       const y = panelY + index * rowHeight;
@@ -265,6 +357,10 @@ function checklistCard(spec) {
 
 function posterStatement(spec) {
   const pillar = pillarMeta(spec.knowledge.pillarId);
+  const backgroundIds = slotIds(spec, 'poster_background');
+  const backgroundPresentation = backgroundIds.length
+    ? slotPresentation(spec, 'poster_background')
+    : null;
   const titleLines = wrapText(spec.content.title, 20, 5);
   const bodyLines = spec.content.body ? wrapText(spec.content.body, 38, 4) : [];
   const sourceLines = spec.content.sourceLabel ? wrapText(spec.content.sourceLabel, 42, 1) : [];
@@ -284,6 +380,17 @@ function posterStatement(spec) {
     `<circle cx="540" cy="980" r="390" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.10"/>`,
     `<circle cx="540" cy="980" r="290" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.08"/>`,
     `<path d="M0 884 L230 620 L380 805 L610 392 L820 760 L1080 548 L1080 1232 L0 1232 Z" fill="${CORE_COLORS.teal}" opacity="0.34"/>`,
+    backgroundIds[0]
+      ? assetImage(backgroundIds[0], {
+          slotId: 'poster_background',
+          presentation: backgroundPresentation,
+          x: 0,
+          y: 270,
+          width: FEED_CANVAS.width,
+          height: 690,
+          opacity: 0.34,
+        })
+      : '',
     brandLockup({ y: 64 }),
     pillarTag(pillar, { y: 116 }),
     statement,

@@ -108,6 +108,34 @@ Renderers should compose back to front:
 
 The footer should be drawn last or otherwise guaranteed to remain readable.
 
+## Educational Asset Composition
+
+Approved assets are available primitives, not a per-batch usage quota. An
+educational render spec may intentionally leave every optional asset slot empty.
+
+The active educational slot roles are:
+
+- `ambient_pattern`: one textless pattern in the template-owned header-right
+  region. It uses `contain`, preserves the complete source viewBox, sits below
+  text, and never enters the body or footer.
+- `row_icons`: one textless icon for each matching row. Icons use `contain` in
+  fixed renderer-owned boxes.
+- `focal_illustration`: one textless illustration on a quiet solid surface. It
+  may not overlap an ambient pattern.
+- `poster_background`: one background, photo, or illustration below a tonal
+  scrim. Patterns are not valid poster backgrounds.
+
+Render specs select asset IDs only. `TEMPLATE_REGISTRY.json` owns role, region,
+fit, opacity ceiling, clear-text zone, layer, and cardinality. The renderer owns
+the final coordinates. Assigned assets that fail eligibility, compatibility,
+checksum, or safe-local-load validation abort the entire review batch; there is
+no partial or silent asset-free fallback.
+
+Each card has one visual anchor and one pillar motif family. Pillar color may
+serve at most two visual roles: the pillar tag plus either text emphasis or the
+artwork/action-marker family. Ambient patterns replace the default decorative
+header geometry rather than stacking on top of it.
+
 ## Safe Areas
 
 For `instagram_feed`:
