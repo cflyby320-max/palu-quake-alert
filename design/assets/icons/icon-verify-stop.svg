@@ -1,0 +1,4 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Pause before sharing">
+  <path d="m256 44 150 62 62 150-62 150-150 62-150-62-62-150 62-150Z" fill="none" stroke="#6B4EFF" stroke-width="30" stroke-linejoin="round"/>
+  <path d="M184 158v196M328 158v196" stroke="#0F4C5C" stroke-width="54" stroke-linecap="round"/>
+</svg>

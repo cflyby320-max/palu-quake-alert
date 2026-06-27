@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 520" role="img" aria-label="Abstract information verification trail">
+  <g fill="none" stroke="#7FB7B8" stroke-width="4" opacity="0.22">
+    <circle cx="174" cy="260" r="126"/>
+    <circle cx="540" cy="260" r="126"/>
+    <circle cx="906" cy="260" r="126"/>
+    <path d="M300 260h114M666 260h114"/>
+  </g>
+  <g fill="#0F4C5C" stroke="#6B4EFF" stroke-width="12">
+    <rect x="112" y="154" width="124" height="212" rx="22"/>
+    <circle cx="540" cy="244" r="72"/>
+    <path d="M856 166h100a28 28 0 0 1 28 28v132a28 28 0 0 1-28 28H856a28 28 0 0 1-28-28V194a28 28 0 0 1 28-28Z"/>
+  </g>
+  <path d="m496 244 30 30 62-70M862 258l28 28 62-70" fill="none" stroke="#FBFCFB" stroke-width="15" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="m586 300 58 58" stroke="#6B4EFF" stroke-width="18" stroke-linecap="round"/>
+  <g fill="#6B4EFF">
+    <circle cx="356" cy="260" r="10"/>
+    <circle cx="390" cy="260" r="7"/>
+    <circle cx="722" cy="260" r="10"/>
+    <circle cx="756" cy="260" r="7"/>
+  </g>
+</svg>

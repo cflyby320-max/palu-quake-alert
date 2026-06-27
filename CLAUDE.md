@@ -92,6 +92,13 @@ Completed design phases:
 - **Phase 4A Asset library foundation:** `design/ASSET_SCHEMA.json`,
   `design/assets/`, and enriched `ASSET_INDEX.json` define asset taxonomy and
   intake rules. No new production asset packs have been generated yet.
+- **Asset Bank Sprint 1:** eleven local, textless SVG patterns, icons, and one
+  preparedness illustration were approved on 2026-06-27 and are indexed as
+  `committed` with `approved` safety review. `studio/asset-library.js` loads
+  them fail-closed and `studio/outbox/asset-bank-review-2/` preserves the
+  approved contact sheet. Four revised assets use locally vendored, adapted
+  CC0 sources with recorded provenance. They are not connected to post render
+  specs yet.
 - **Phase 5A Content engine foundation:** `content/CONTENT_ENGINE.md`,
   `content/CONTENT_SCHEMA.json`, `content/SOURCE_INDEX.json`, and
   `studio/content-engine.js` convert structured content decisions into
@@ -114,10 +121,28 @@ Completed design phases:
   and distinct template families. This remains manual review only; no
   auto-posting or watcher behavior changes.
 
-Next planned work is a small curated textless Asset Bank for distinctive local
-visual support, followed by a human-approved production batch. Preserve the
-rule that the renderer owns
-visible factual text, numbers, safety instructions, and footer placement.
+## Next session: start here
+
+Do not re-read the entire repository. For the next roadmap sprint, read these
+in order:
+
+1. This `Design SDK and roadmap status` section.
+2. `design/DESIGN_SDK.md` and `design/RENDERING_CONTRACT.md`.
+3. `design/ASSET_INDEX.json` and `design/TEMPLATE_REGISTRY.json`.
+4. `studio/asset-library.js`, `studio/education-template.js`, and
+   `studio/render-educational-outbox.js`.
+5. `studio/outbox/asset-bank-review-2/manifest.json` and the five existing
+   decisions under `studio/outbox/editorial-dry-run-1/`.
+
+The next smallest roadmap step is **approved asset integration**: assign only
+the approved asset IDs to the five existing educational decisions, make the
+educational renderer compose those assets in registry-approved slots, and
+generate a third review-only preview batch. Do not create more assets, alter
+copy, auto-post, call external APIs, or touch watcher/alert behavior in that
+sprint. After visual approval, generate the first human-approved production
+batch from those same validated decisions. Preserve renderer-owned factual
+text, numbers, safety instructions, mandatory footer placement, and BMKG
+positioning.
 
 ## Safety-critical invariants — do not regress
 
@@ -149,7 +174,7 @@ topic backlog eligibility, editorial outbox dry-run validation, and educational
 render preview validation. There are
 no network or integration tests by design (no credentials in CI). The
 `--test-name-pattern` example above filters by test name across the suite. As
-of the visual QA preview, `npm.cmd test` passes 96 tests.
+of Asset Bank Sprint 1, `npm.cmd test` passes 101 tests.
 
 ## Deployment
 

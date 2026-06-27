@@ -39,3 +39,9 @@ publication.
 The next phase is a small curated Asset Bank. Add only approved textless assets
 with stable IDs and metadata in `design/ASSET_INDEX.json`; do not bake factual
 copy into image files.
+
+`asset-bank-review-1/` preserves the initial candidate contact sheet.
+`asset-bank-review-2/` is the approved review: four flagged candidates were
+replaced with locally vendored, adapted CC0 material while retaining stable
+asset IDs. Approval was recorded on 2026-06-27; the assets remain outside
+educational render specs until the next renderer-integration sprint.

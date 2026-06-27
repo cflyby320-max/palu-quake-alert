@@ -14,3 +14,9 @@ Folders:
 
 The renderer owns all factual text, warning copy, numbers, source labels, and
 the mandatory footer.
+
+Asset Bank Sprint 1 adds 11 textless SVG candidates for the five educational
+preview topics. Review 02 replaces four weaker candidates with locally
+vendored, adapted CC0 source material while preserving their stable IDs. The
+pack was approved on 2026-06-27 and is indexed as `committed` with `approved`
+safety review. It is not yet connected to production render specs.

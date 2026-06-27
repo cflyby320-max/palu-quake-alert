@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "updated": "2026-06-26",
+  "updated": "2026-06-27",
   "purpose": "Defines metadata rules for assets referenced by ASSET_INDEX.json and future render specs.",
   "assetTypes": [
     "logo",
@@ -48,7 +48,12 @@
     "allAssets": ["id", "type", "status", "sourceType", "usageScope", "safetyReview", "description"],
     "committedAssets": ["path", "sha256"],
     "rasterAssets": ["width", "height"],
-    "templateScopedAssets": ["allowedTemplateIds"]
+    "templateScopedAssets": ["allowedTemplateIds"],
+    "externalAssets": ["sourceUrl", "licenseId", "licenseUrl", "adaptationNote"]
+  },
+  "externalSourcePolicy": {
+    "appliesToSourceTypes": ["bundled_open_source", "licensed", "public_domain"],
+    "rule": "Vendor the asset locally, preserve its source and license metadata, document adaptations, sanitize external references, and checksum the committed result."
   },
   "textPolicy": {
     "allowedValues": ["textless", "renderer_text_only", "reference_contains_text"],

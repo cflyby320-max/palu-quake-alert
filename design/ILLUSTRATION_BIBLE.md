@@ -117,6 +117,31 @@ Before committing a new asset:
 - Confirm committed paths exist and checksums are recorded.
 - Confirm allowed template IDs exist in `TEMPLATE_REGISTRY.json`.
 
+### External Asset Discovery
+
+SVG Repo is an approved discovery source for icons, SVGs, PNGs, and other
+visual assets. Treat every asset page as a separate licensing decision; the
+website contains multiple licenses, so "free" must not be interpreted as
+unlicensed.
+
+For assets sourced from SVG Repo:
+
+- Prefer CC0/Public Domain; MIT and Apache assets are acceptable when their
+  required notices are preserved.
+- Record the exact asset-page URL, original author or collection, license ID,
+  license URL, and any attribution requirement in `ASSET_INDEX.json`.
+- Download and commit the selected file locally. Never hotlink production
+  rendering to SVG Repo or another asset website.
+- Sanitize SVG files before use: reject scripts, external references, embedded
+  raster images, `foreignObject`, and baked-in text.
+- Normalize color and stroke only when the license permits modification, and
+  record that the project adapted the source.
+- Recalculate the checksum after every local modification.
+
+Flaticon and similar libraries may be used only when the selected asset's
+license and attribution obligations fit the publishing workflow. Their free
+tier must not be treated as attribution-free by default.
+
 ## Background Rules
 
 For editorial templates:

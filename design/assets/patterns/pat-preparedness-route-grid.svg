@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 520" role="img" aria-label="Abstract household route grid">
+  <g fill="none" stroke="#7FB7B8" stroke-width="3" opacity="0.24">
+    <path d="M0 88h1080M0 196h1080M0 304h1080M0 412h1080"/>
+    <path d="M108 0v520M270 0v520M432 0v520M594 0v520M756 0v520M918 0v520"/>
+  </g>
+  <path d="M92 420h216V292h180V164h206v102h188V82h120" fill="none" stroke="#148A87" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/>
+  <g fill="#FBFCFB" stroke="#148A87" stroke-width="10">
+    <circle cx="92" cy="420" r="24"/>
+    <circle cx="488" cy="164" r="24"/>
+    <circle cx="882" cy="82" r="24"/>
+  </g>
+  <path d="m950 48 52 34-52 34" fill="none" stroke="#148A87" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M650 520 820 326l134 194" fill="#0F4C5C" opacity="0.32"/>
+</svg>
