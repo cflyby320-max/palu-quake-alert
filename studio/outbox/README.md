@@ -25,11 +25,17 @@ The Studio now has two isolated render paths:
 - `studio/render-education.js` renders validated evergreen education specs for
   `editorial_steps`, `checklist_card`, and `poster_statement`.
 
-`editorial-dry-run-1/` remains the original JSON/caption-only dry run. The
-rendered PNG/SVG previews live in `educational-render-preview-1/`.
+`editorial-dry-run-1/` remains the original JSON/caption-only dry run.
+`educational-render-preview-1/` is the first renderer baseline.
+`educational-render-preview-2/` is the visually polished batch and the current
+folder for human review.
 
-## Next Small Implementation
+## Visual QA Status
 
-The next small step is review and polish: compare the generated PNGs against the
-Design SDK, tighten spacing/type where needed, then decide whether new textless
-assets are needed in `design/ASSET_INDEX.json`.
+The second preview strengthens shared hierarchy, canvas use, footer contrast,
+and template differentiation. It remains review-only and is not approved for
+publication.
+
+The next phase is a small curated Asset Bank. Add only approved textless assets
+with stable IDs and metadata in `design/ASSET_INDEX.json`; do not bake factual
+copy into image files.

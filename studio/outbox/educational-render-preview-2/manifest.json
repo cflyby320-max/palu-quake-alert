@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "educational-render-preview-2",
+  "sourceBatchId": "editorial-dry-run-1",
+  "batchType": "educational_render_preview",
+  "visualQaRevision": 2,
+  "publicationStatus": "review_required_not_auto_posted",
+  "created": "2026-06-27",
+  "renderer": "studio/render-education.js",
+  "sourceRendererInput": "studio/outbox/editorial-dry-run-1",
+  "rules": {
+    "noAutoPost": true,
+    "noExternalApis": true,
+    "noWatcherChanges": true,
+    "humanApprovalRequired": true,
+    "mandatoryFooterId": "mandatory_honest_framing"
+  },
+  "rendered": [
+    {
+      "topicId": "ground_high_ground_route",
+      "folder": "01-ground_high_ground_route",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "prep_drop_cover_hold",
+      "folder": "02-prep_drop_cover_hold",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "info_check_before_share",
+      "folder": "03-info_check_before_share",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "info_no_prediction",
+      "folder": "04-info_no_prediction",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "prep_go_bag_basics",
+      "folder": "05-prep_go_bag_basics",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    }
+  ]
+}

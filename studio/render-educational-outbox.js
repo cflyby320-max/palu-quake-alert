@@ -3,13 +3,13 @@
 // Manual operator tool only. It reads committed render decisions and writes
 // SVG/PNG previews. It does not post, call APIs, or update topic backlog usage.
 
-import { copyFileSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { basename } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { renderEducationalCard } from './render-education.js';
 
 const INPUT_BATCH = new URL('./outbox/editorial-dry-run-1/', import.meta.url);
-const OUTPUT_BATCH = new URL('./outbox/educational-render-preview-1/', import.meta.url);
+const OUTPUT_BATCH = new URL('./outbox/educational-render-preview-2/', import.meta.url);
 
 const TOPIC_DIRS = [
   '01-ground_high_ground_route',
@@ -44,8 +44,16 @@ export function renderEducationalOutbox({ inputBatch = INPUT_BATCH, outputBatch 
     const decision = readJson(new URL('render-decision.json', inputDir));
     const { svg, png } = renderEducationalCard(decision.renderSpec);
 
-    copyFileSync(new URL('caption.txt', inputDir), new URL('caption.txt', outDir));
-    copyFileSync(new URL('render-decision.json', inputDir), new URL('render-decision.json', outDir));
+    writeFileSync(
+      new URL('caption.txt', outDir),
+      `${readFileSync(new URL('caption.txt', inputDir), 'utf8').trimEnd()}\n`,
+      'utf8'
+    );
+    writeFileSync(
+      new URL('render-decision.json', outDir),
+      `${readFileSync(new URL('render-decision.json', inputDir), 'utf8').trimEnd()}\n`,
+      'utf8'
+    );
     writeFileSync(new URL('card.svg', outDir), svg, 'utf8');
     writeFileSync(new URL('card.png', outDir), png);
     writeFileSync(
@@ -70,9 +78,10 @@ export function renderEducationalOutbox({ inputBatch = INPUT_BATCH, outputBatch 
 
   const manifest = {
     schemaVersion: '1.0.0',
-    batchId: 'educational-render-preview-1',
+    batchId: 'educational-render-preview-2',
     sourceBatchId: sourceManifest.batchId,
     batchType: 'educational_render_preview',
+    visualQaRevision: 2,
     publicationStatus: 'review_required_not_auto_posted',
     created: '2026-06-27',
     renderer: 'studio/render-education.js',

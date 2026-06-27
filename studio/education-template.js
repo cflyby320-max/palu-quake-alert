@@ -1,12 +1,15 @@
 // Deterministic educational card SVG builder.
 //
-// This is the first renderer for evergreen content. It consumes a validated
-// render spec and returns SVG only: no network, no posting, no watcher imports.
+// Evergreen cards use the Design SDK for color, canvas, and footer values.
+// The renderer owns every visible text position and never calls the network.
 
 import { CORE_COLORS, DESIGN_TOKENS, FEED_CANVAS, MANDATORY_FOOTER } from './design-sdk.js';
 import { validateRenderSpec } from './template-registry.js';
 
 const SUPPORTED_TEMPLATES = new Set(['editorial_steps', 'checklist_card', 'poster_statement']);
+const PAGE_MARGIN = 60;
+const FOOTER_HEIGHT = 118;
+const FOOTER_Y = FEED_CANVAS.height - FOOTER_HEIGHT;
 
 function esc(value) {
   return String(value ?? '')
@@ -41,18 +44,20 @@ function wrapText(text, maxChars, maxLines = 4) {
   return clipped;
 }
 
-function textBlock({ x, y, lines, size, fill, weight = 400, lineHeight = Math.round(size * 1.22), anchor = 'start' }) {
+function textBlock({
+  x,
+  y,
+  lines,
+  size,
+  fill,
+  weight = 400,
+  lineHeight = Math.round(size * 1.22),
+  anchor = 'start',
+}) {
   return [
-    `<text x="${x}" y="${y}" font-family="'DejaVu Sans', Arial, sans-serif" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}">`,
+    `<text x="${x}" y="${y}" font-family="'DejaVu Sans'" font-size="${size}" font-weight="${weight}" fill="${fill}" text-anchor="${anchor}">`,
     ...lines.map((line, index) => `<tspan x="${x}" dy="${index === 0 ? 0 : lineHeight}">${esc(line)}</tspan>`),
     '</text>',
-  ].join('');
-}
-
-function pill({ x, y, width, height, fill, text, ink = CORE_COLORS.off_white }) {
-  return [
-    `<rect x="${x}" y="${y}" width="${width}" height="${height}" rx="${height / 2}" fill="${fill}"/>`,
-    textBlock({ x: x + width / 2, y: y + height / 2 + 11, lines: [text], size: 28, fill: ink, weight: 700, anchor: 'middle' }),
   ].join('');
 }
 
@@ -66,32 +71,110 @@ function pillarMeta(pillarId) {
   };
 }
 
-function footer() {
-  const y = FEED_CANVAS.height - 118;
+function svgOpen(title, background) {
   return [
-    `<rect x="0" y="${y}" width="${FEED_CANVAS.width}" height="118" fill="${CORE_COLORS.teal_deep}"/>`,
-    textBlock({ x: 60, y: y + 46, lines: [MANDATORY_FOOTER.currentLines[0]], size: 26, fill: CORE_COLORS.teal_accent }),
-    textBlock({ x: 60, y: y + 82, lines: [MANDATORY_FOOTER.currentLines[1]], size: 26, fill: CORE_COLORS.teal_accent }),
-    textBlock({ x: FEED_CANVAS.width - 60, y: y + 66, lines: [MANDATORY_FOOTER.handle], size: 30, fill: CORE_COLORS.off_white, weight: 700, anchor: 'end' }),
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FEED_CANVAS.width} ${FEED_CANVAS.height}" width="${FEED_CANVAS.width}" height="${FEED_CANVAS.height}" role="img">`,
+    `<title>${esc(title)}</title>`,
+    `<rect x="0" y="0" width="${FEED_CANVAS.width}" height="${FEED_CANVAS.height}" fill="${background}"/>`,
   ].join('');
 }
 
-function shell(spec, inner, { displayTitle } = {}) {
-  const pillar = pillarMeta(spec.knowledge.pillarId);
-  const title = displayTitle || spec.content.title || 'Palu Earthquake Alerts';
-  const tagText = `${pillar.shortCode ? `${pillar.shortCode} / ` : ''}${pillar.label}`;
-
+function brandLockup({ y = 48, fill = CORE_COLORS.off_white } = {}) {
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FEED_CANVAS.width} ${FEED_CANVAS.height}" width="${FEED_CANVAS.width}" height="${FEED_CANVAS.height}" role="img">`,
-    `<title>${esc(`${spec.content.kicker || pillar.label} - ${title}`)}</title>`,
-    `<rect x="0" y="0" width="${FEED_CANVAS.width}" height="${FEED_CANVAS.height}" fill="${DESIGN_TOKENS.colors.core.paper || '#EEF3F2'}"/>`,
-    `<rect x="0" y="0" width="${FEED_CANVAS.width}" height="300" fill="${CORE_COLORS.teal}"/>`,
-    `<circle cx="945" cy="120" r="180" fill="${CORE_COLORS.teal_deep}" opacity="0.45"/>`,
-    `<path d="M0 260 C210 218 345 318 540 270 C760 214 870 254 1080 224 L1080 342 L0 342 Z" fill="${CORE_COLORS.teal_deep}" opacity="0.55"/>`,
-    pill({ x: 60, y: 56, width: Math.min(520, 120 + tagText.length * 15), height: 58, fill: pillar.color, text: tagText }),
-    textBlock({ x: 60, y: 166, lines: wrapText(spec.content.kicker || pillar.label, 34, 1), size: 28, fill: CORE_COLORS.mint, weight: 700 }),
-    textBlock({ x: 60, y: 234, lines: wrapText(title, 24, 2), size: 64, fill: CORE_COLORS.off_white, weight: 700, lineHeight: 74 }),
-    inner,
+    `<circle cx="76" cy="${y - 8}" r="18" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3"/>`,
+    `<path d="M64 ${y - 8} L70 ${y - 8} L74 ${y - 19} L80 ${y + 3} L85 ${y - 12} L91 ${y - 12}" fill="none" stroke="${CORE_COLORS.amber}" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`,
+    textBlock({
+      x: 108,
+      y,
+      lines: ['PALU EARTHQUAKE ALERTS'],
+      size: 23,
+      fill,
+      weight: 700,
+    }),
+  ].join('');
+}
+
+function pillarTag(pillar, { x = PAGE_MARGIN, y = 72 } = {}) {
+  const text = `${pillar.shortCode ? `${pillar.shortCode} / ` : ''}${pillar.label}`;
+  const width = Math.min(520, 100 + text.length * 14);
+  return [
+    `<rect x="${x}" y="${y}" width="${width}" height="52" rx="26" fill="${pillar.color}"/>`,
+    textBlock({
+      x: x + width / 2,
+      y: y + 36,
+      lines: [text],
+      size: 26,
+      fill: CORE_COLORS.off_white,
+      weight: 700,
+      anchor: 'middle',
+    }),
+  ].join('');
+}
+
+function footer() {
+  return [
+    `<rect x="0" y="${FOOTER_Y}" width="${FEED_CANVAS.width}" height="${FOOTER_HEIGHT}" fill="${CORE_COLORS.teal_deep}"/>`,
+    `<rect x="0" y="${FOOTER_Y}" width="${FEED_CANVAS.width}" height="3" fill="${CORE_COLORS.amber}"/>`,
+    textBlock({
+      x: PAGE_MARGIN,
+      y: FOOTER_Y + 46,
+      lines: [MANDATORY_FOOTER.currentLines[0]],
+      size: 27,
+      fill: CORE_COLORS.mint,
+    }),
+    textBlock({
+      x: PAGE_MARGIN,
+      y: FOOTER_Y + 82,
+      lines: [MANDATORY_FOOTER.currentLines[1]],
+      size: 27,
+      fill: CORE_COLORS.mint,
+    }),
+    textBlock({
+      x: FEED_CANVAS.width - PAGE_MARGIN,
+      y: FOOTER_Y + 67,
+      lines: [MANDATORY_FOOTER.handle],
+      size: 30,
+      fill: CORE_COLORS.off_white,
+      weight: 700,
+      anchor: 'end',
+    }),
+  ].join('');
+}
+
+function headerTitle(title) {
+  const length = String(title).length;
+  const size = length > 36 ? 52 : length > 26 ? 58 : 64;
+  const maxChars = length > 36 ? 30 : length > 26 ? 27 : 24;
+  return textBlock({
+    x: PAGE_MARGIN,
+    y: 206,
+    lines: wrapText(title, maxChars, 2),
+    size,
+    fill: CORE_COLORS.off_white,
+    weight: 700,
+    lineHeight: size + 10,
+  });
+}
+
+function editorialHeader(spec) {
+  const pillar = pillarMeta(spec.knowledge.pillarId);
+  return [
+    `<rect x="0" y="0" width="${FEED_CANVAS.width}" height="326" fill="${CORE_COLORS.teal}"/>`,
+    `<circle cx="970" cy="82" r="210" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.18"/>`,
+    `<circle cx="970" cy="82" r="150" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.14"/>`,
+    `<path d="M0 284 L180 210 L335 292 L520 172 L700 290 L870 205 L1080 278 L1080 326 L0 326 Z" fill="${CORE_COLORS.teal_deep}" opacity="0.58"/>`,
+    brandLockup(),
+    pillarTag(pillar),
+    headerTitle(spec.content.title),
+  ].join('');
+}
+
+function editorialShell(spec, content) {
+  const title = `${spec.content.kicker || pillarMeta(spec.knowledge.pillarId).label} - ${spec.content.title}`;
+  return [
+    svgOpen(title, DESIGN_TOKENS.colors.core.paper || '#EEF3F2'),
+    editorialHeader(spec),
+    content,
     footer(),
     '</svg>',
   ].join('');
@@ -100,53 +183,133 @@ function shell(spec, inner, { displayTitle } = {}) {
 function editorialSteps(spec) {
   const rows = spec.content.rows || [];
   const pillar = pillarMeta(spec.knowledge.pillarId);
-  const startY = 440;
-  const gap = rows.length >= 4 ? 174 : 205;
+  const areaTop = 358;
+  const areaBottom = FOOTER_Y - 34;
+  const gap = 24;
+  const rowHeight = Math.floor((areaBottom - areaTop - gap * (rows.length - 1)) / rows.length);
 
-  return shell(spec, rows.map((row, index) => {
-    const y = startY + index * gap;
-    const bodyLines = wrapText(row.body, 42, 3);
+  const content = rows.map((row, index) => {
+    const y = areaTop + index * (rowHeight + gap);
+    const bodyLines = wrapText(row.body, 39, 3);
+    const contentHeight = 42 + bodyLines.length * 39;
+    const contentTop = y + Math.round((rowHeight - contentHeight) / 2);
+
     return [
-      `<rect x="60" y="${y - 78}" width="960" height="${Math.max(138, 72 + bodyLines.length * 38)}" rx="14" fill="${CORE_COLORS.off_white}"/>`,
-      `<circle cx="116" cy="${y - 28}" r="34" fill="${pillar.color}"/>`,
-      textBlock({ x: 116, y: y - 16, lines: [String(index + 1)], size: 32, fill: CORE_COLORS.off_white, weight: 700, anchor: 'middle' }),
-      textBlock({ x: 176, y: y - 36, lines: wrapText(row.label, 24, 1), size: 34, fill: CORE_COLORS.teal_deep, weight: 700 }),
-      textBlock({ x: 176, y: y + 8, lines: bodyLines, size: 30, fill: '#293635', lineHeight: 38 }),
+      `<rect x="${PAGE_MARGIN}" y="${y}" width="960" height="${rowHeight}" rx="12" fill="${CORE_COLORS.off_white}"/>`,
+      `<rect x="${PAGE_MARGIN}" y="${y}" width="10" height="${rowHeight}" rx="5" fill="${pillar.color}"/>`,
+      `<circle cx="124" cy="${y + rowHeight / 2}" r="38" fill="${pillar.color}"/>`,
+      textBlock({
+        x: 124,
+        y: y + rowHeight / 2 + 12,
+        lines: [String(index + 1)],
+        size: 32,
+        fill: CORE_COLORS.off_white,
+        weight: 700,
+        anchor: 'middle',
+      }),
+      textBlock({
+        x: 190,
+        y: contentTop + 34,
+        lines: wrapText(row.label, 25, 1),
+        size: 35,
+        fill: CORE_COLORS.teal_deep,
+        weight: 700,
+      }),
+      textBlock({
+        x: 190,
+        y: contentTop + 80,
+        lines: bodyLines,
+        size: 30,
+        fill: '#293635',
+        lineHeight: 39,
+      }),
     ].join('');
-  }).join(''));
+  }).join('');
+
+  return editorialShell(spec, content);
 }
 
 function checklistCard(spec) {
   const items = spec.content.items || [];
   const pillar = pillarMeta(spec.knowledge.pillarId);
-  const startY = 430;
-  const gap = items.length > 5 ? 116 : 132;
+  const panelY = 356;
+  const panelHeight = FOOTER_Y - panelY - 34;
+  const rowHeight = panelHeight / items.length;
 
-  return shell(spec, [
-    `<rect x="60" y="356" width="960" height="730" rx="18" fill="${CORE_COLORS.off_white}"/>`,
+  const content = [
+    `<rect x="${PAGE_MARGIN}" y="${panelY}" width="960" height="${panelHeight}" rx="12" fill="${CORE_COLORS.off_white}"/>`,
     ...items.map((item, index) => {
-      const y = startY + index * gap;
+      const y = panelY + index * rowHeight;
+      const centerY = y + rowHeight / 2;
       return [
-        `<circle cx="122" cy="${y - 10}" r="26" fill="${pillar.color}"/>`,
-        `<path d="M110 ${y - 10} L120 ${y + 2} L138 ${y - 20}" fill="none" stroke="${CORE_COLORS.off_white}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`,
-        textBlock({ x: 174, y, lines: wrapText(item.label, 44, 2), size: 32, fill: CORE_COLORS.teal_deep, weight: 600, lineHeight: 40 }),
+        index > 0
+          ? `<line x1="96" y1="${y}" x2="984" y2="${y}" stroke="${DESIGN_TOKENS.colors.core.paper}" stroke-width="3"/>`
+          : '',
+        `<circle cx="124" cy="${centerY}" r="29" fill="${pillar.color}"/>`,
+        `<path d="M111 ${centerY} L121 ${centerY + 11} L139 ${centerY - 13}" fill="none" stroke="${CORE_COLORS.off_white}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>`,
+        textBlock({
+          x: 184,
+          y: centerY + 11,
+          lines: wrapText(item.label, 43, 2),
+          size: 32,
+          fill: CORE_COLORS.teal_deep,
+          weight: 700,
+          lineHeight: 40,
+        }),
       ].join('');
     }),
-  ].join(''));
+  ].join('');
+
+  return editorialShell(spec, content);
 }
 
 function posterStatement(spec) {
   const pillar = pillarMeta(spec.knowledge.pillarId);
-  const body = spec.content.body ? wrapText(spec.content.body, 38, 4) : [];
-  const source = spec.content.sourceLabel ? wrapText(spec.content.sourceLabel, 42, 1) : [];
+  const titleLines = wrapText(spec.content.title, 20, 5);
+  const bodyLines = spec.content.body ? wrapText(spec.content.body, 38, 4) : [];
+  const sourceLines = spec.content.sourceLabel ? wrapText(spec.content.sourceLabel, 42, 1) : [];
 
-  return shell(spec, [
-    `<rect x="60" y="380" width="960" height="642" rx="22" fill="${CORE_COLORS.off_white}"/>`,
-    `<rect x="60" y="380" width="16" height="642" fill="${pillar.color}"/>`,
-    textBlock({ x: 118, y: 504, lines: wrapText(spec.content.title, 22, 5), size: 68, fill: CORE_COLORS.teal_deep, weight: 700, lineHeight: 80 }),
-    body.length ? textBlock({ x: 118, y: 820, lines: body, size: 34, fill: '#293635', lineHeight: 44 }) : '',
-    source.length ? textBlock({ x: 118, y: 960, lines: source, size: 28, fill: CORE_COLORS.amber_ink, weight: 700 }) : '',
-  ].join(''), { displayTitle: spec.content.kicker || 'Pesan penting' });
+  const statement = [
+    `<text x="${PAGE_MARGIN}" y="570" font-family="'DejaVu Sans'" font-size="78" font-weight="700" text-anchor="start">`,
+    ...titleLines.map((line, index) => {
+      const fill = index === titleLines.length - 1 ? pillar.color : CORE_COLORS.off_white;
+      return `<tspan x="${PAGE_MARGIN}" dy="${index === 0 ? 0 : 90}" fill="${fill}">${esc(line)}</tspan>`;
+    }),
+    '</text>',
+  ].join('');
+
+  return [
+    svgOpen(`${spec.content.kicker || pillar.label} - ${spec.content.title}`, CORE_COLORS.teal_deep),
+    `<circle cx="540" cy="980" r="490" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.12"/>`,
+    `<circle cx="540" cy="980" r="390" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.10"/>`,
+    `<circle cx="540" cy="980" r="290" fill="none" stroke="${CORE_COLORS.teal_accent}" stroke-width="3" opacity="0.08"/>`,
+    `<path d="M0 884 L230 620 L380 805 L610 392 L820 760 L1080 548 L1080 1232 L0 1232 Z" fill="${CORE_COLORS.teal}" opacity="0.34"/>`,
+    brandLockup({ y: 64 }),
+    pillarTag(pillar, { y: 116 }),
+    statement,
+    bodyLines.length
+      ? textBlock({
+          x: PAGE_MARGIN,
+          y: 922,
+          lines: bodyLines,
+          size: 34,
+          fill: CORE_COLORS.mint,
+          lineHeight: 46,
+        })
+      : '',
+    sourceLines.length
+      ? textBlock({
+          x: PAGE_MARGIN,
+          y: 1112,
+          lines: sourceLines,
+          size: 29,
+          fill: CORE_COLORS.teal_accent,
+          weight: 700,
+        })
+      : '',
+    footer(),
+    '</svg>',
+  ].join('');
 }
 
 export function buildEducationalSvg(renderSpec) {

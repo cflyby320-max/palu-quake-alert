@@ -109,12 +109,14 @@ Completed design phases:
   `studio/render-education.js`, and `studio/render-educational-outbox.js`
   render validated `editorial_steps`, `checklist_card`, and
   `poster_statement` specs into deterministic SVG/PNG review cards under
-  `studio/outbox/educational-render-preview-1/`. This remains manual review
-  only; no auto-posting or watcher behavior changes.
+  `studio/outbox/educational-render-preview-2/`. The second batch completes the
+  first visual QA pass with stronger hierarchy, canvas use, footer contrast,
+  and distinct template families. This remains manual review only; no
+  auto-posting or watcher behavior changes.
 
-Next planned work after the educational render preview is visual QA/polish and
-then a small curated textless asset pass if the rendered cards need more
-distinctive local visual support. Preserve the rule that the renderer owns
+Next planned work is a small curated textless Asset Bank for distinctive local
+visual support, followed by a human-approved production batch. Preserve the
+rule that the renderer owns
 visible factual text, numbers, safety instructions, and footer placement.
 
 ## Safety-critical invariants — do not regress
@@ -147,7 +149,7 @@ topic backlog eligibility, editorial outbox dry-run validation, and educational
 render preview validation. There are
 no network or integration tests by design (no credentials in CI). The
 `--test-name-pattern` example above filters by test name across the suite. As
-of the educational render preview, `npm.cmd test` passes 91 tests.
+of the visual QA preview, `npm.cmd test` passes 96 tests.
 
 ## Deployment
 
