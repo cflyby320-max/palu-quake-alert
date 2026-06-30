@@ -79,6 +79,13 @@ The design-system roadmap is now tracked in `design/`. Do not re-audit the full
 repository for routine design work; start with the SDK files and then inspect
 only the runtime files touched by the task.
 
+Latest completed commit: **`aa2a9eb` "studio: integrate approved educational
+assets"** — the Asset Bank Sprint 1 assets are now composed into the educational
+templates and the corrected preview batch (Preview 4) is committed. The full
+offline suite **passed 112 tests**. Nothing in the watcher, alerts, severity
+classification, prompts, captions, posting, or external-API behavior changed —
+this remains review-only, manual-post studio work.
+
 Completed design phases:
 
 - **Phase 1 Foundation:** `design/DESIGN_SDK.md`, `VISUAL_LANGUAGE.md`,
@@ -92,13 +99,24 @@ Completed design phases:
 - **Phase 4A Asset library foundation:** `design/ASSET_SCHEMA.json`,
   `design/assets/`, and enriched `ASSET_INDEX.json` define asset taxonomy and
   intake rules. No new production asset packs have been generated yet.
-- **Asset Bank Sprint 1:** eleven local, textless SVG patterns, icons, and one
-  preparedness illustration were approved on 2026-06-27 and are indexed as
-  `committed` with `approved` safety review. `studio/asset-library.js` loads
-  them fail-closed and `studio/outbox/asset-bank-review-2/` preserves the
-  approved contact sheet. Four revised assets use locally vendored, adapted
-  CC0 sources with recorded provenance. They are not connected to post render
-  specs yet.
+- **Asset Bank Sprint 1 (integrated):** eleven local, textless SVG patterns,
+  icons, and one preparedness illustration were approved on 2026-06-27, indexed
+  as `committed` with `approved` safety review, and are **now composed into the
+  educational templates** (no longer intake-only). `studio/asset-library.js`
+  loads them fail-closed, `studio/outbox/asset-bank-review-2/` preserves the
+  approved contact sheet, and four revised assets use locally vendored, adapted
+  CC0 sources with recorded provenance. Approved assets are **available
+  primitives, not a per-batch usage quota** — a render spec may intentionally
+  leave every optional asset slot empty (e.g. Card 4 uses none). The four active
+  slot roles are `ambient_pattern` (one uncropped textless pattern in the
+  template-owned `header_right` region, `contain` fit, opacity ceiling 0.24,
+  below text), `row_icons` (one textless icon per matching row, `contain` in
+  fixed boxes), `focal_illustration` (one textless illustration on a quiet solid
+  surface — never alongside an ambient pattern), and `poster_background` (one
+  background/photo/illustration below a tonal scrim; patterns are not valid
+  here). `design/TEMPLATE_REGISTRY.json` owns each slot's role, region, fit,
+  opacity ceiling, clear-text zone, layer, and cardinality; render specs select
+  asset IDs only.
 - **Phase 5A Content engine foundation:** `content/CONTENT_ENGINE.md`,
   `content/CONTENT_SCHEMA.json`, `content/SOURCE_INDEX.json`, and
   `studio/content-engine.js` convert structured content decisions into
@@ -112,14 +130,28 @@ Completed design phases:
   five review-only evergreen content drafts with render decisions, captions,
   and missing-image notes. These are explicitly not approved for posting because
   educational template rendering is not implemented yet.
-- **Educational render preview:** `studio/education-template.js`,
-  `studio/render-education.js`, and `studio/render-educational-outbox.js`
-  render validated `editorial_steps`, `checklist_card`, and
-  `poster_statement` specs into deterministic SVG/PNG review cards under
-  `studio/outbox/educational-render-preview-2/`. The second batch completes the
-  first visual QA pass with stronger hierarchy, canvas use, footer contrast,
-  and distinct template families. This remains manual review only; no
-  auto-posting or watcher behavior changes.
+- **Approved asset integration (Preview 3 → Preview 4):**
+  `studio/education-template.js` now composes the approved assets into their
+  registry-approved slots, loading each through `studio/asset-library.js`, which
+  **fails closed** — an asset that is not indexed, not `committed`+`approved`,
+  not textless, outside `design/assets/`, path-escaping, or checksum-mismatched
+  throws — while `studio/template-registry.js` rejects incompatible asset types,
+  wrong row cardinality, and unapproved metadata. One invalid assigned asset
+  aborts the entire `studio/render-educational-outbox.js` batch: there is **no
+  partial or silent asset-free fallback**. **Preview 3 was rejected** by human
+  review (badly cropped pattern banners, too many competing teal/purple motifs
+  on Card 4, and the go-bag illustration overlapping the route-grid pattern on
+  Card 5) and is **preserved frozen** under
+  `studio/outbox/educational-render-preview-3/`, with per-file
+  `frozenRenderSha256` hashes asserted by the tests. **Preview 4** added the
+  role-specific fit / clear-space / layering constraints that fixed the
+  cropping, the excessive motif layering, and the illustration overlap; it was
+  **human-approved and committed** in `aa2a9eb` and **preserves all copy, source
+  IDs, captions, the mandatory honest-framing footer, and BMKG positioning**
+  unchanged from the source decisions. It still carries
+  `review_required_not_auto_posted` / `humanApprovalRequired` — approval means
+  the corrected render direction is accepted, not that any card is auto-posted.
+  Covered by `test/approved_asset_integration.test.js`.
 
 ## Next session: start here
 
@@ -127,22 +159,22 @@ Do not re-read the entire repository. For the next roadmap sprint, read these
 in order:
 
 1. This `Design SDK and roadmap status` section.
-2. `design/DESIGN_SDK.md` and `design/RENDERING_CONTRACT.md`.
+2. `design/DESIGN_SDK.md` and `design/RENDERING_CONTRACT.md` (especially the
+   "Educational Asset Composition" section).
 3. `design/ASSET_INDEX.json` and `design/TEMPLATE_REGISTRY.json`.
-4. `studio/asset-library.js`, `studio/education-template.js`, and
-   `studio/render-educational-outbox.js`.
-5. `studio/outbox/asset-bank-review-2/manifest.json` and the five existing
-   decisions under `studio/outbox/editorial-dry-run-1/`.
+4. `studio/asset-library.js`, `studio/template-registry.js`,
+   `studio/education-template.js`, and `studio/render-educational-outbox.js`.
+5. `studio/outbox/educational-render-preview-4/manifest.json`, the five
+   per-topic `render-decision.json` files under it, and
+   `test/approved_asset_integration.test.js`.
 
-The next smallest roadmap step is **approved asset integration**: assign only
-the approved asset IDs to the five existing educational decisions, make the
-educational renderer compose those assets in registry-approved slots, and
-generate a third review-only preview batch. Do not create more assets, alter
-copy, auto-post, call external APIs, or touch watcher/alert behavior in that
-sprint. After visual approval, generate the first human-approved production
-batch from those same validated decisions. Preserve renderer-owned factual
-text, numbers, safety instructions, mandatory footer placement, and BMKG
-positioning.
+The next smallest roadmap step is to **generate the first human-approved
+production batch** from the same validated Preview 4 decisions: take the
+approved per-topic decisions, render the production-ready cards from them, and
+record explicit per-card human approval. Do **not** introduce auto-posting, call
+external/Graph APIs, create new assets, alter copy, or touch watcher/alert
+behavior in that sprint. Preserve renderer-owned factual text, numbers, safety
+instructions, mandatory footer placement, and BMKG positioning.
 
 ## Safety-critical invariants — do not regress
 
