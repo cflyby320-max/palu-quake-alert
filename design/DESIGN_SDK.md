@@ -19,7 +19,7 @@ approved primitives and return structured input:
 
 ```json
 {
-  "layoutId": "editorial_steps",
+  "templateId": "editorial_steps",
   "pillarId": "preparedness",
   "backgroundId": "p2_go_bag_flatlay",
   "illustrationIds": ["drop_cover_hold"],
@@ -60,6 +60,10 @@ pillars:
 | `preparedness` | Siap Sebelum Bencana | Cheap, simple actions that help families. | Do one thing today |
 | `information_hygiene` | Saring Sebelum Sebar | Stop panic and hoaxes from causing more harm. | Verify, then share |
 
+Content-pillar colors are intentionally separate from quake severity colors:
+P1 `#4169E1`, P2 `#148A87`, P3 `#6B4EFF`. Severity colors remain reserved for
+reactive earthquake alert levels.
+
 ### 2. Design
 
 Brand, visual language, typography, layout families, spacing, and accessibility.
@@ -75,7 +79,9 @@ objects, textures, and background IDs.
 
 Start with `ASSET_INDEX.json`. Assets must be reusable, credited or traceable,
 and safe for civic disaster communication. Generated imagery, if used later,
-must be textless and composited behind deterministic text.
+must be textless and composited behind deterministic text. `ASSET_SCHEMA.json`
+defines the metadata contract, and `design/assets/` contains the future library
+folders for backgrounds, illustrations, icons, objects, and patterns.
 
 ### 4. Rendering
 
@@ -84,6 +90,10 @@ Layout composition, verified text overlays, and platform exports.
 Start with `RENDERING_CONTRACT.md`. Current production rendering remains the
 existing SVG-to-PNG studio pipeline. This SDK defines where the renderer should
 go next: from hand-coded prompt-like layouts toward structured render specs.
+`TEMPLATE_REGISTRY.json` defines the approved template IDs, required text zones,
+asset slots, export targets, and safety checks for those render specs.
+`../content/` defines the Phase 5 structured content-decision layer that feeds
+those specs.
 
 ## Non-Negotiables
 
@@ -108,8 +118,8 @@ Do not break the existing pipeline:
 - Watcher code in `src/` stays zero-dependency.
 - Studio remains optional and isolated under `studio/`.
 - This SDK does not introduce any install step.
-- This SDK does not alter `studio/template.js`, `studio/render.js`, prompts, or
-  message builders.
+- Studio may read SDK JSON through narrow bridge modules, but the watcher and
+  alert message builders remain unchanged.
 - Reference PNGs under `design/references/` are guidance, not runtime inputs.
 
 ## Reference Files In This SDK
@@ -118,14 +128,21 @@ Do not break the existing pipeline:
 - `RENDERING_CONTRACT.md` - structured rendering input/output contract.
 - `ILLUSTRATION_BIBLE.md` - imagery and iconography rules.
 - `DESIGN_TOKENS.json` - machine-readable token source for agents.
+- `TEMPLATE_REGISTRY.json` - machine-readable template contracts and zones.
+- `ASSET_SCHEMA.json` - machine-readable asset metadata and safety taxonomy.
 - `ASSET_INDEX.json` - machine-readable inventory of assets and references.
+- `assets/` - future production asset library folders; currently registry-only.
 - `references/` - local copies of the approved handover mockups.
+- `../content/CONTENT_ENGINE.md` - structured content-decision contract.
+- `../content/CONTENT_SCHEMA.json` - machine-readable content-decision shape.
+- `../content/SOURCE_INDEX.json` - approved source ID vocabulary.
 
 ## How Future Agents Should Work
 
 1. Read this SDK and the safety docs before visual work.
 2. Choose the knowledge pillar and content type.
-3. Choose an approved layout ID from `DESIGN_TOKENS.json`.
+3. Choose an approved `templateId` from `DESIGN_TOKENS.json` and
+   `TEMPLATE_REGISTRY.json`.
 4. Choose approved assets from `ASSET_INDEX.json`.
 5. Provide verified text payload only after source/copy checks.
 6. Let the renderer place text, footer, logo, images, and export dimensions.

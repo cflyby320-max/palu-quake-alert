@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "editorial-dry-run-1",
+  "publicationStatus": "dry_run_not_approved",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "info_check_before_share",
+  "topicPath": "content/topic_backlog.json#info_check_before_share",
+  "selectedAt": "2026-06-27",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "information_hygiene",
+    "label": "Saring Sebelum Sebar"
+  },
+  "templateId": "editorial_steps",
+  "sourceIds": ["bmkg", "project_safety_rules"],
+  "sourceLabels": [
+    { "id": "bmkg", "label": "BMKG / InaTEWS" },
+    { "id": "project_safety_rules", "label": "Palu Earthquake Alerts safety rules" }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Setelah gempa terasa, grup keluarga bisa cepat dipenuhi pesan tanpa sumber yang membuat orang makin cemas.",
+    "localRelevance": "Di Palu dan Sulawesi Tengah, informasi dari grup WhatsApp atau Telegram sering bergerak lebih cepat daripada klarifikasi resmi.",
+    "practicalAction": "Tahan pesan yang belum jelas, cek sumber resmi seperti BMKG atau BPBD, lalu bagikan hanya yang ada sumbernya."
+  },
+  "imageStatus": "missing_educational_renderer",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "pillarId": "information_hygiene",
+    "sourceIds": ["bmkg", "project_safety_rules"],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": ["reference_editorial_steps"]
+    },
+    "content": {
+      "kicker": "Saring Sebelum Sebar",
+      "title": "Sebelum Share Info Gempa",
+      "rows": [
+        { "label": "Berhenti", "body": "Jangan teruskan pesan yang membuat panik." },
+        { "label": "Periksa", "body": "Cari sumber resmi seperti BMKG atau BPBD." },
+        { "label": "Bagikan", "body": "Sebarkan hanya informasi yang jelas sumbernya." }
+      ]
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "information_hygiene",
+      "sourceIds": ["bmkg", "project_safety_rules"],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": ["reference_editorial_steps"]
+    },
+    "content": {
+      "kicker": "Saring Sebelum Sebar",
+      "title": "Sebelum Share Info Gempa",
+      "rows": [
+        { "label": "Berhenti", "body": "Jangan teruskan pesan yang membuat panik." },
+        { "label": "Periksa", "body": "Cari sumber resmi seperti BMKG atau BPBD." },
+        { "label": "Bagikan", "body": "Sebarkan hanya informasi yang jelas sumbernya." }
+      ]
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}
+

@@ -73,6 +73,109 @@ Key boundaries:
 
 Currently manual-mode only: the Graph-API auto-publish path (`--publish`) and image hosting are designed but not the active flow — `STUDIO_DESIGN.md` §11 tracks the phased rollout.
 
+## Design SDK and roadmap status
+
+The design-system roadmap is now tracked in `design/`. Do not re-audit the full
+repository for routine design work; start with the SDK files and then inspect
+only the runtime files touched by the task.
+
+Latest completed commit: **`aa2a9eb` "studio: integrate approved educational
+assets"** — the Asset Bank Sprint 1 assets are now composed into the educational
+templates and the corrected preview batch (Preview 4) is committed. The full
+offline suite **passed 112 tests**. Nothing in the watcher, alerts, severity
+classification, prompts, captions, posting, or external-API behavior changed —
+this remains review-only, manual-post studio work.
+
+Completed design phases:
+
+- **Phase 1 Foundation:** `design/DESIGN_SDK.md`, `VISUAL_LANGUAGE.md`,
+  `RENDERING_CONTRACT.md`, `ILLUSTRATION_BIBLE.md`, `DESIGN_TOKENS.json`,
+  `ASSET_INDEX.json`, and `design/references/`.
+- **Phase 2 Studio integration:** `studio/design-sdk.js` reads
+  `design/DESIGN_TOKENS.json` for core colors, canvas size, and mandatory
+  footer values.
+- **Phase 3 Template registry:** `design/TEMPLATE_REGISTRY.json` and
+  `studio/template-registry.js` define and validate structured render specs.
+- **Phase 4A Asset library foundation:** `design/ASSET_SCHEMA.json`,
+  `design/assets/`, and enriched `ASSET_INDEX.json` define asset taxonomy and
+  intake rules. No new production asset packs have been generated yet.
+- **Asset Bank Sprint 1 (integrated):** eleven local, textless SVG patterns,
+  icons, and one preparedness illustration were approved on 2026-06-27, indexed
+  as `committed` with `approved` safety review, and are **now composed into the
+  educational templates** (no longer intake-only). `studio/asset-library.js`
+  loads them fail-closed, `studio/outbox/asset-bank-review-2/` preserves the
+  approved contact sheet, and four revised assets use locally vendored, adapted
+  CC0 sources with recorded provenance. Approved assets are **available
+  primitives, not a per-batch usage quota** — a render spec may intentionally
+  leave every optional asset slot empty (e.g. Card 4 uses none). The four active
+  slot roles are `ambient_pattern` (one uncropped textless pattern in the
+  template-owned `header_right` region, `contain` fit, opacity ceiling 0.24,
+  below text), `row_icons` (one textless icon per matching row, `contain` in
+  fixed boxes), `focal_illustration` (one textless illustration on a quiet solid
+  surface — never alongside an ambient pattern), and `poster_background` (one
+  background/photo/illustration below a tonal scrim; patterns are not valid
+  here). `design/TEMPLATE_REGISTRY.json` owns each slot's role, region, fit,
+  opacity ceiling, clear-text zone, layer, and cardinality; render specs select
+  asset IDs only.
+- **Phase 5A Content engine foundation:** `content/CONTENT_ENGINE.md`,
+  `content/CONTENT_SCHEMA.json`, `content/SOURCE_INDEX.json`, and
+  `studio/content-engine.js` convert structured content decisions into
+  validated render specs. No AI calls or educational renderers are added.
+- **Phase 5B Topic backlog workflow:** `content/topic_backlog.json`,
+  `content/CALENDAR.md`, `content/TOPIC_BACKLOG_GUIDE.md`, and
+  `studio/topic-backlog.js` add manual long-term topic planning and eligibility
+  selection. It is planning-only: no auto-posting, rendering, external APIs, or
+  alert pipeline changes.
+- **Editorial outbox dry run:** `studio/outbox/editorial-dry-run-1/` contains
+  five review-only evergreen content drafts with render decisions, captions,
+  and missing-image notes. These are explicitly not approved for posting because
+  educational template rendering is not implemented yet.
+- **Approved asset integration (Preview 3 → Preview 4):**
+  `studio/education-template.js` now composes the approved assets into their
+  registry-approved slots, loading each through `studio/asset-library.js`, which
+  **fails closed** — an asset that is not indexed, not `committed`+`approved`,
+  not textless, outside `design/assets/`, path-escaping, or checksum-mismatched
+  throws — while `studio/template-registry.js` rejects incompatible asset types,
+  wrong row cardinality, and unapproved metadata. One invalid assigned asset
+  aborts the entire `studio/render-educational-outbox.js` batch: there is **no
+  partial or silent asset-free fallback**. **Preview 3 was rejected** by human
+  review (badly cropped pattern banners, too many competing teal/purple motifs
+  on Card 4, and the go-bag illustration overlapping the route-grid pattern on
+  Card 5) and is **preserved frozen** under
+  `studio/outbox/educational-render-preview-3/`, with per-file
+  `frozenRenderSha256` hashes asserted by the tests. **Preview 4** added the
+  role-specific fit / clear-space / layering constraints that fixed the
+  cropping, the excessive motif layering, and the illustration overlap; it was
+  **human-approved and committed** in `aa2a9eb` and **preserves all copy, source
+  IDs, captions, the mandatory honest-framing footer, and BMKG positioning**
+  unchanged from the source decisions. It still carries
+  `review_required_not_auto_posted` / `humanApprovalRequired` — approval means
+  the corrected render direction is accepted, not that any card is auto-posted.
+  Covered by `test/approved_asset_integration.test.js`.
+
+## Next session: start here
+
+Do not re-read the entire repository. For the next roadmap sprint, read these
+in order:
+
+1. This `Design SDK and roadmap status` section.
+2. `design/DESIGN_SDK.md` and `design/RENDERING_CONTRACT.md` (especially the
+   "Educational Asset Composition" section).
+3. `design/ASSET_INDEX.json` and `design/TEMPLATE_REGISTRY.json`.
+4. `studio/asset-library.js`, `studio/template-registry.js`,
+   `studio/education-template.js`, and `studio/render-educational-outbox.js`.
+5. `studio/outbox/educational-render-preview-4/manifest.json`, the five
+   per-topic `render-decision.json` files under it, and
+   `test/approved_asset_integration.test.js`.
+
+The next smallest roadmap step is to **generate the first human-approved
+production batch** from the same validated Preview 4 decisions: take the
+approved per-topic decisions, render the production-ready cards from them, and
+record explicit per-card human approval. Do **not** introduce auto-posting, call
+external/Graph APIs, create new assets, alter copy, or touch watcher/alert
+behavior in that sprint. Preserve renderer-owned factual text, numbers, safety
+instructions, mandatory footer placement, and BMKG positioning.
+
 ## Safety-critical invariants — do not regress
 
 These encode hard-won lessons from the 2018 Palu tsunami (which was landslide-generated, unpredicted by standard models, and whose official warning was lifted early). They are deliberate and must be preserved in any change:
@@ -91,7 +194,19 @@ BMKG fields are free-text Indonesian strings whose format occasionally changes (
 
 ## Tests
 
-The suite is four files under `test/`, all discovered and run offline by `npm test` (`node --test`): `offline.test.js` (parsing robustness, cross-source merge/no-merge, the safety-critical classification cases, dedup matching, WITA conversion) plus `priority1.test.js` / `priority2.test.js` / `priority3.test.js` (added coverage, prioritised by safety impact — P1 is the safety-critical cases). They run against the fixtures and synthetic `Event`s. There are no network or integration tests by design (no credentials in CI). The `--test-name-pattern` example above filters by test name across the suite.
+All tests live under `test/` and are discovered offline by `npm test`
+(`node --test`). The core watcher coverage includes `offline.test.js`
+(parsing robustness, cross-source merge/no-merge, safety-critical
+classification cases, dedup matching, WITA conversion) plus
+`priority1.test.js` / `priority2.test.js` / `priority3.test.js` (added
+coverage, prioritised by safety impact; P1 is the safety-critical cases).
+Design-system coverage now also includes Studio/SDK token loading, template
+registry validation, asset index/schema integrity, content engine validation,
+topic backlog eligibility, editorial outbox dry-run validation, and educational
+render preview validation. There are
+no network or integration tests by design (no credentials in CI). The
+`--test-name-pattern` example above filters by test name across the suite. As
+of Asset Bank Sprint 1, `npm.cmd test` passes 101 tests.
 
 ## Deployment
 
@@ -106,6 +221,12 @@ All config is env-driven; see `.env.example` for the full annotated list and `sr
 
 ## Companion docs & public assets
 
+- **`design/DESIGN_SDK.md`** — entry point for the civic design system. Read this before visual, template, asset, renderer, or content-engine work.
+- **`design/TEMPLATE_REGISTRY.json`** — approved template IDs, text zones, asset slots, export targets, and render-spec validation rules.
+- **`design/ASSET_SCHEMA.json`** and **`design/ASSET_INDEX.json`** — asset taxonomy, intake rules, existing committed assets, references, and planned asset categories.
+- **`content/CONTENT_ENGINE.md`**, **`content/CONTENT_SCHEMA.json`**, and **`content/SOURCE_INDEX.json`** — structured content-decision layer and approved source ID vocabulary.
+- **`content/topic_backlog.json`**, **`content/CALENDAR.md`**, and **`content/TOPIC_BACKLOG_GUIDE.md`** — manual topic planning workflow for long-term educational content. Human approval remains required.
+- **`studio/education-template.js`** and **`studio/render-education.js`** — deterministic educational card renderer for validated evergreen render specs. It is Studio-only and never imported by the watcher.
 - **`OUTLOOK_DESIGN.md`** — full spec + safety rules for the Seismic Activity Outlook (aftershock probability). Read before touching any Outlook math or copy.
 - **`TIER2_PRESENTATION.md`** — the trust/presentation work (BotFather copy, pinned post, brand kit rationale).
 - **`studio/STUDIO_DESIGN.md`** — full spec + safety/brand rules for the optional Instagram content studio (branded shakemap cards). Read before touching anything in `studio/`.

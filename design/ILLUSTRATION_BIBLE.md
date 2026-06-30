@@ -95,7 +95,52 @@ Every future illustration/background asset should have:
 - "Textless" confirmation.
 - Intended templates and crops.
 
-Add assets to `ASSET_INDEX.json` before using them in a render spec.
+Add assets to `ASSET_INDEX.json` before using them in a render spec. Metadata
+must satisfy `ASSET_SCHEMA.json`; future production assets live under
+`design/assets/` in the matching category folder.
+
+## Asset Library Intake
+
+Phase 4A creates the library structure without adding new artwork:
+
+- `design/assets/backgrounds/`
+- `design/assets/illustrations/`
+- `design/assets/icons/`
+- `design/assets/objects/`
+- `design/assets/patterns/`
+
+Before committing a new asset:
+
+- Give it an ID that follows `ASSET_SCHEMA.json`.
+- Add source, rights, safety review, text policy, and allowed template metadata.
+- Confirm the file is textless unless it is a reference mock.
+- Confirm committed paths exist and checksums are recorded.
+- Confirm allowed template IDs exist in `TEMPLATE_REGISTRY.json`.
+
+### External Asset Discovery
+
+SVG Repo is an approved discovery source for icons, SVGs, PNGs, and other
+visual assets. Treat every asset page as a separate licensing decision; the
+website contains multiple licenses, so "free" must not be interpreted as
+unlicensed.
+
+For assets sourced from SVG Repo:
+
+- Prefer CC0/Public Domain; MIT and Apache assets are acceptable when their
+  required notices are preserved.
+- Record the exact asset-page URL, original author or collection, license ID,
+  license URL, and any attribution requirement in `ASSET_INDEX.json`.
+- Download and commit the selected file locally. Never hotlink production
+  rendering to SVG Repo or another asset website.
+- Sanitize SVG files before use: reject scripts, external references, embedded
+  raster images, `foreignObject`, and baked-in text.
+- Normalize color and stroke only when the license permits modification, and
+  record that the project adapted the source.
+- Recalculate the checksum after every local modification.
+
+Flaticon and similar libraries may be used only when the selected asset's
+license and attribution obligations fit the publishing workflow. Their free
+tier must not be treated as attribution-free by default.
 
 ## Background Rules
 
@@ -160,19 +205,21 @@ Generated outputs must be curated, reviewed, named, and indexed before use.
 ### P1: Kenali Wilayahmu
 
 Stylized editorial illustration of Palu valley and Palu Bay at dusk, with an
-abstract Palu-Koro fault line and topographic contours. Deep teal and mint
-palette, calm and factual, no text, no people in distress.
+abstract Palu-Koro fault line and topographic contours. Deep teal foundation
+with royal-blue P1 accents (`#4169E1`), calm and factual, no text, no people in
+distress.
 
 ### P2: Siap Sebelum Bencana
 
 Warm practical flat-lay illustration of an emergency go-bag and family
-preparedness items on a simple surface. Green accents, hopeful and useful, no
-text, no dramatic disaster scene.
+preparedness items on a simple surface. Deep-aqua P2 accents (`#148A87`),
+hopeful and useful, no text, no dramatic disaster scene.
 
 ### P3: Saring Sebelum Sebar
 
 Conceptual illustration of a phone message, magnifier, source trail, and check
-mark. Amber accents, calm and smart, no readable text, no panic.
+mark. Indigo-violet P3 accents (`#6B4EFF`), calm and smart, no readable text,
+no panic.
 
 ## Review Checklist
 
@@ -185,4 +232,3 @@ Before adding an asset:
 - Does it work behind deterministic text?
 - Does it have a stable ID and source note?
 - Does it fit one pillar or template clearly?
-

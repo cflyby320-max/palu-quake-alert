@@ -64,6 +64,7 @@ Future render requests should be structured objects, not prose prompts.
 | `language` | Must be `id` for current social/emergency content. |
 | `timezone` | Must be `Asia/Makassar` or WITA-equivalent for quake times. |
 | `knowledge.reviewStatus` | Must be `verified` before publication. |
+| `knowledge.sourceIds` | Required for templates that declare `verified_sources`. |
 | `content` | Structured text payload; no HTML; renderer handles placement. |
 | `footerId` | Must resolve to the mandatory honest-framing footer. |
 
@@ -73,12 +74,15 @@ The v1 SDK defines these template IDs:
 
 - `quake_alert_card`
 - `editorial_steps`
+- `checklist_card`
 - `poster_statement`
+- `story_card`
 - `carousel_cover`
 - `carousel_slide`
 
-Any new template must be added to `DESIGN_TOKENS.json`, documented in
-`VISUAL_LANGUAGE.md`, and covered by a renderer test before production use.
+Any new template must be added to `DESIGN_TOKENS.json`, specified in
+`TEMPLATE_REGISTRY.json`, documented in `VISUAL_LANGUAGE.md`, and covered by a
+renderer or render-spec validation test before production use.
 
 ## Export Targets
 
@@ -104,6 +108,34 @@ Renderers should compose back to front:
 
 The footer should be drawn last or otherwise guaranteed to remain readable.
 
+## Educational Asset Composition
+
+Approved assets are available primitives, not a per-batch usage quota. An
+educational render spec may intentionally leave every optional asset slot empty.
+
+The active educational slot roles are:
+
+- `ambient_pattern`: one textless pattern in the template-owned header-right
+  region. It uses `contain`, preserves the complete source viewBox, sits below
+  text, and never enters the body or footer.
+- `row_icons`: one textless icon for each matching row. Icons use `contain` in
+  fixed renderer-owned boxes.
+- `focal_illustration`: one textless illustration on a quiet solid surface. It
+  may not overlap an ambient pattern.
+- `poster_background`: one background, photo, or illustration below a tonal
+  scrim. Patterns are not valid poster backgrounds.
+
+Render specs select asset IDs only. `TEMPLATE_REGISTRY.json` owns role, region,
+fit, opacity ceiling, clear-text zone, layer, and cardinality. The renderer owns
+the final coordinates. Assigned assets that fail eligibility, compatibility,
+checksum, or safe-local-load validation abort the entire review batch; there is
+no partial or silent asset-free fallback.
+
+Each card has one visual anchor and one pillar motif family. Pillar color may
+serve at most two visual roles: the pillar tag plus either text emphasis or the
+artwork/action-marker family. Ambient patterns replace the default decorative
+header geometry rather than stacking on top of it.
+
 ## Safe Areas
 
 For `instagram_feed`:
@@ -119,6 +151,8 @@ For `instagram_feed`:
 
 The live clone currently renders quake cards through:
 
+- `studio/design-sdk.js`
+- `studio/template-registry.js`
 - `studio/template.js`
 - `studio/render.js`
 - `studio/caption.js`
@@ -126,7 +160,12 @@ The live clone currently renders quake cards through:
 - `studio/hook.js`
 
 The renderer builds SVG strings and rasterizes them to PNG with
-`@resvg/resvg-js`, using bundled DejaVu fonts. This SDK does not change that.
+`@resvg/resvg-js`, using bundled DejaVu fonts. `studio/design-sdk.js` is the
+Phase 2 bridge into `design/DESIGN_TOKENS.json`; it reads core colors, canvas
+dimensions, and mandatory footer copy while falling back to current values if a
+deployment image is missing `design/`. `studio/template-registry.js` is the
+Phase 3 bridge into `design/TEMPLATE_REGISTRY.json`; it validates structured
+render specs but does not render or deliver content.
 
 ## Future Renderer Direction
 
@@ -134,9 +173,10 @@ When implementation resumes, prefer an incremental path:
 
 1. Keep the current SVG-to-PNG renderer.
 2. Extract shared tokens and footer/header helpers from existing studio code.
-3. Add render-spec validation for template IDs, footer IDs, asset IDs, and export
-   targets.
-4. Add educational templates only after the SDK tokens and asset IDs exist.
+3. Keep render-spec validation for template IDs, footer IDs, asset IDs, and
+   export targets in place before rendering new layouts.
+4. Add educational template renderers only after the SDK tokens, template
+   registry, asset schema, and asset IDs exist.
 5. Add image-layer assets as curated, textless inputs.
 
 Do not introduce a model-generated image directly into final publication. If AI
@@ -155,5 +195,5 @@ Before a rendered asset can be published:
 - Contrast is acceptable.
 - Source IDs are traceable.
 - Asset IDs exist in `ASSET_INDEX.json`.
+- Assets satisfy `ASSET_SCHEMA.json`.
 - Export dimensions match the target.
-

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Route toward high ground">
+  <path d="M46 402 184 246l88 82L390 158l76 84" fill="none" stroke="#0F4C5C" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M80 420c72-16 118-2 156-34 44-38 54-94 108-120" fill="none" stroke="#4169E1" stroke-width="24" stroke-linecap="round" stroke-dasharray="18 28"/>
+  <path d="m322 216 62 30-54 42" fill="none" stroke="#4169E1" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="78" cy="420" r="22" fill="#4169E1"/>
+</svg>

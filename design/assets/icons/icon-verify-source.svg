@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Inspect and verify the source">
+  <path d="M102 72h212l92 92v176a52 52 0 0 1-52 52H102a52 52 0 0 1-52-52V124a52 52 0 0 1 52-52Z" fill="none" stroke="#0F4C5C" stroke-width="28" stroke-linejoin="round"/>
+  <path d="M314 72v92h92M116 210h176M116 276h124" fill="none" stroke="#7FB7B8" stroke-width="24" stroke-linecap="round"/>
+  <circle cx="338" cy="342" r="86" fill="#FBFCFB" stroke="#6B4EFF" stroke-width="28"/>
+  <path d="m398 404 58 58M298 342l28 28 58-66" fill="none" stroke="#6B4EFF" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

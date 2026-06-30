@@ -48,13 +48,14 @@ Severity colors are for reactive earthquake alerts only:
 
 Pillar colors are for educational content only:
 
-- P1 Kenali Wilayahmu: `#0F6E56`
-- P2 Siap Sebelum Bencana: `#22A06B`
-- P3 Saring Sebelum Sebar: `#E0951F`
+- P1 Kenali Wilayahmu: `#4169E1`
+- P2 Siap Sebelum Bencana: `#148A87`
+- P3 Saring Sebelum Sebar: `#6B4EFF`
 
-Known tension: pillar colors overlap the severity family. Until a designer
-resolves this, never present a pillar tag where it could be mistaken for alert
-severity. Pair pillar tags with labels and motifs, not color alone.
+These pillar colors are deliberately separated from the severity family. Keep
+them in the education layer and continue pairing them with labels and motifs,
+not color alone. The reference mock PNGs predate this separation, so the JSON
+tokens above supersede their pillar swatches.
 
 ## Typography
 
@@ -116,6 +117,23 @@ Composition:
 - Structured rows with numbers or icons.
 - Mandatory footer.
 
+### `checklist_card`
+
+Purpose: one practical preparedness checklist.
+
+Use for:
+
+- Go-bag items.
+- Before/after shaking routines.
+- Family communication tasks.
+
+Rules:
+
+- Keep items short enough to scan in one pass.
+- Use check marks, step numbers, or icons as renderer-owned marks.
+- Do not imply a checklist guarantees safety.
+- Mandatory footer.
+
 ### `poster_statement`
 
 Purpose: one bold myth-bust, quote, or single civic message.
@@ -150,6 +168,38 @@ Rules:
 - Include a short "Geser" cue.
 - Show progress dots or slide count.
 - Do not overload the cover with details.
+
+### `carousel_slide`
+
+Purpose: body slide inside a multi-slide education carousel.
+
+Use for:
+
+- One concept per slide.
+- One safety habit per slide.
+- Small sets of verified supporting details.
+
+Rules:
+
+- Keep progress visible.
+- Preserve the same pillar and footer rules as the cover.
+- Do not bury a critical action in small body copy.
+
+### `story_card`
+
+Purpose: 9:16 story-format quick tip or announcement.
+
+Use for:
+
+- Short preparedness reminders.
+- Time-sensitive non-emergency updates.
+- Lightweight recaps that point back to official sources.
+
+Rules:
+
+- Respect mobile safe areas.
+- Keep one message per story.
+- Footer remains mandatory and renderer-owned.
 
 ## Imagery Style
 
@@ -212,4 +262,3 @@ The footer must be rendered by the composition layer, not by an image model.
 - Do not put the footer inside generated imagery.
 - Do not crop the logo into illegibility.
 - Do not redesign safety copy for aesthetic balance.
-

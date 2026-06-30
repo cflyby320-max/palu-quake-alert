@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 520" role="img" aria-label="Abstract topographic contours and fault trace">
+  <g fill="none" stroke="#7FB7B8" stroke-width="4" opacity="0.38">
+    <path d="M-70 470C90 310 220 250 390 274s246 98 414 38 238-174 362-252"/>
+    <path d="M-30 530C118 370 248 326 410 346s242 86 396 28 224-162 340-236"/>
+    <path d="M52 556C176 432 286 402 432 414s224 72 364 24 204-134 306-204"/>
+    <path d="M698-42c-86 94-126 190-102 284s112 152 206 142 164-82 180-176S946 26 852-30"/>
+    <path d="M740 16c-58 72-78 142-54 208s88 98 152 80 98-76 94-142S882 42 818 8"/>
+  </g>
+  <path d="M104 510 286 330l122 70 176-238 146 126 244-228" fill="none" stroke="#4169E1" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.9"/>
+  <g fill="#4169E1">
+    <circle cx="286" cy="330" r="12"/>
+    <circle cx="584" cy="162" r="12"/>
+    <circle cx="730" cy="288" r="12"/>
+  </g>
+</svg>

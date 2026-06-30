@@ -6,6 +6,7 @@
 import { fileURLToPath } from 'node:url';
 import { Resvg } from '@resvg/resvg-js';
 import { buildCardSvg } from './template.js';
+import { CORE_COLORS, FEED_CANVAS } from './design-sdk.js';
 
 // Bundled fonts so the card renders identically on Windows AND on the Linux host
 // (Fly), which ships no system fonts — without these the text would come out
@@ -35,9 +36,9 @@ export async function renderCard(m, opts = {}) {
   const shakemapDataUri = m.shakemap ? await fetchAsDataUri(m.shakemap) : null;
   const svg = buildCardSvg(m, { ...opts, shakemapDataUri });
   const resvg = new Resvg(svg, {
-    fitTo: { mode: 'width', value: 1080 },
+    fitTo: { mode: 'width', value: FEED_CANVAS.width },
     font: { fontFiles: FONT_FILES, loadSystemFonts: false, defaultFontFamily: 'DejaVu Sans' },
-    background: '#0F4C5C',
+    background: CORE_COLORS.teal,
   });
   return { png: resvg.render().asPng(), svg, hadShakemap: Boolean(shakemapDataUri) };
 }

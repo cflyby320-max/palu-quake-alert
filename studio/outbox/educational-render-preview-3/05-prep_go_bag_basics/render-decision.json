@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "editorial-dry-run-1",
+  "publicationStatus": "dry_run_not_approved",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "prep_go_bag_basics",
+  "topicPath": "content/topic_backlog.json#prep_go_bag_basics",
+  "selectedAt": "2026-06-27",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "preparedness",
+    "label": "Siap Sebelum Bencana"
+  },
+  "templateId": "checklist_card",
+  "sourceIds": [
+    "bnpb"
+  ],
+  "sourceLabels": [
+    {
+      "id": "bnpb",
+      "label": "BNPB"
+    }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Saat keluarga harus bergerak cepat, barang penting sering tercecer karena belum disiapkan sebelumnya.",
+    "localRelevance": "Keluarga di Palu, Sigi, dan Donggala bisa perlu berpindah sementara setelah guncangan kuat atau arahan petugas.",
+    "practicalAction": "Siapkan satu tas kecil berisi air, obat pribadi, senter, power bank, dokumen, dan nomor kontak keluarga."
+  },
+  "imageStatus": "approved_assets_integrated_review_required",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "checklist_card",
+    "pillarId": "preparedness",
+    "sourceIds": [
+      "bnpb"
+    ],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "background": "pat_preparedness_route_grid",
+        "hero_image": "ill_preparedness_go_bag_flatlay"
+      }
+    },
+    "content": {
+      "kicker": "Siap Sebelum Bencana",
+      "title": "Isi Tas Siaga Keluarga",
+      "items": [
+        {
+          "label": "Air minum dan makanan ringan."
+        },
+        {
+          "label": "Obat pribadi dan P3K sederhana."
+        },
+        {
+          "label": "Senter, peluit, dan power bank."
+        },
+        {
+          "label": "Salinan dokumen penting."
+        },
+        {
+          "label": "Nomor keluarga dan kontak darurat."
+        }
+      ]
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "checklist_card",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "preparedness",
+      "sourceIds": [
+        "bnpb"
+      ],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "background": "pat_preparedness_route_grid",
+        "hero_image": "ill_preparedness_go_bag_flatlay"
+      }
+    },
+    "content": {
+      "kicker": "Siap Sebelum Bencana",
+      "title": "Isi Tas Siaga Keluarga",
+      "items": [
+        {
+          "label": "Air minum dan makanan ringan."
+        },
+        {
+          "label": "Obat pribadi dan P3K sederhana."
+        },
+        {
+          "label": "Senter, peluit, dan power bank."
+        },
+        {
+          "label": "Salinan dokumen penting."
+        },
+        {
+          "label": "Nomor keluarga dan kontak darurat."
+        }
+      ]
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}

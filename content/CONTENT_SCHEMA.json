@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "1.0.0",
+  "updated": "2026-06-26",
+  "purpose": "Defines the structured content-decision object that Phase 5A converts into a validated render spec.",
+  "canonicalFields": {
+    "templateId": "Approved template ID from design/TEMPLATE_REGISTRY.json. Do not use layoutId or layout_id.",
+    "exportTarget": "Approved target from the selected template. Defaults may be applied by the content engine.",
+    "pillarId": "Educational pillar ID from design/DESIGN_TOKENS.json.",
+    "sourceIds": "Approved source IDs from content/SOURCE_INDEX.json.",
+    "reviewStatus": "Must be verified before publication.",
+    "assets": "Approved asset IDs from design/ASSET_INDEX.json.",
+    "content": "Structured text payload shaped by the selected template.",
+    "footerId": "Defaults to mandatory_honest_framing and must not be overridden for social content."
+  },
+  "requiredFields": ["schemaVersion", "templateId", "pillarId", "sourceIds", "reviewStatus", "content"],
+  "optionalFields": ["exportTarget", "assets", "footerId", "language", "timezone"],
+  "defaults": {
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "footerId": "mandatory_honest_framing",
+    "exportTarget": "first export target allowed by the selected template"
+  },
+  "forbiddenFields": ["layoutId", "layout_id", "prompt", "imagePrompt", "footerText", "warningStatus", "quakeFacts"],
+  "reviewStatuses": ["draft", "verified", "rejected"],
+  "safetyRules": [
+    "No AI-rendered factual text.",
+    "No all-clear phrasing.",
+    "No earthquake predictions.",
+    "No override of emergency warning status.",
+    "No override of mandatory footer.",
+    "No asset ID that is absent from ASSET_INDEX.json.",
+    "No source ID that is absent from SOURCE_INDEX.json."
+  ]
+}

@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "1.0.0",
+  "updated": "2026-06-27",
+  "purpose": "Defines metadata rules for assets referenced by ASSET_INDEX.json and future render specs.",
+  "assetTypes": [
+    "logo",
+    "severity_badge",
+    "font",
+    "reference_mock",
+    "background",
+    "illustration",
+    "character",
+    "icon",
+    "object",
+    "pattern",
+    "photo",
+    "official_source_image"
+  ],
+  "statuses": [
+    "planned",
+    "candidate",
+    "committed",
+    "committed_reference",
+    "deprecated"
+  ],
+  "sourceTypes": [
+    "project_original",
+    "project_reference",
+    "official_source",
+    "bundled_open_source",
+    "licensed",
+    "public_domain",
+    "generated_candidate"
+  ],
+  "usageScopes": [
+    "runtime",
+    "reference",
+    "renderer_dependency",
+    "planned_library"
+  ],
+  "safetyReview": [
+    "approved",
+    "reference_only",
+    "pending",
+    "not_applicable"
+  ],
+  "requiredFields": {
+    "allAssets": ["id", "type", "status", "sourceType", "usageScope", "safetyReview", "description"],
+    "committedAssets": ["path", "sha256"],
+    "rasterAssets": ["width", "height"],
+    "templateScopedAssets": ["allowedTemplateIds"],
+    "externalAssets": ["sourceUrl", "licenseId", "licenseUrl", "adaptationNote"]
+  },
+  "externalSourcePolicy": {
+    "appliesToSourceTypes": ["bundled_open_source", "licensed", "public_domain"],
+    "rule": "Vendor the asset locally, preserve its source and license metadata, document adaptations, sanitize external references, and checksum the committed result."
+  },
+  "textPolicy": {
+    "allowedValues": ["textless", "renderer_text_only", "reference_contains_text"],
+    "defaultForNewProductionAssets": "textless",
+    "rule": "Production image assets must not contain factual text, warning copy, map labels, numbers, or footer text. Those belong in deterministic renderer overlays."
+  },
+  "folderConventions": {
+    "background": "design/assets/backgrounds/",
+    "illustration": "design/assets/illustrations/",
+    "character": "design/assets/illustrations/",
+    "icon": "design/assets/icons/",
+    "object": "design/assets/objects/",
+    "pattern": "design/assets/patterns/"
+  },
+  "idConventions": {
+    "background": "bg_<pillar_or_topic>_<short_name>",
+    "illustration": "ill_<pillar_or_topic>_<short_name>",
+    "character": "char_<pillar_or_topic>_<short_name>",
+    "icon": "icon_<topic>_<short_name>",
+    "object": "obj_<topic>_<short_name>",
+    "pattern": "pat_<topic>_<short_name>"
+  },
+  "reviewChecklist": [
+    "Asset has a stable ID before render-spec use.",
+    "Path exists for committed assets.",
+    "Rights and source type are traceable.",
+    "Production imagery is textless.",
+    "Allowed template IDs exist in TEMPLATE_REGISTRY.json.",
+    "Asset cannot be mistaken for a real current disaster photo unless it is an official source image.",
+    "Asset does not imply all-clear, prediction, or official warning status."
+  ]
+}

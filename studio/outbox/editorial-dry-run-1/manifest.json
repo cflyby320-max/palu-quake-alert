@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "editorial-dry-run-1",
+  "batchType": "editorial_outbox_dry_run",
+  "created": "2026-06-27",
+  "publicationStatus": "dry_run_not_approved",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "selection": {
+    "source": "content/topic_backlog.json",
+    "helper": "selectEligibleTopics",
+    "now": "2026-06-27",
+    "topicIds": [
+      "ground_high_ground_route",
+      "prep_drop_cover_hold",
+      "info_check_before_share",
+      "info_no_prediction",
+      "prep_go_bag_basics"
+    ]
+  },
+  "rules": {
+    "noAutoPost": true,
+    "noExternalApis": true,
+    "noWatcherChanges": true,
+    "humanApprovalRequired": true,
+    "mandatoryFooterId": "mandatory_honest_framing",
+    "bmkgPositioning": "Emergency facts and Indonesian public-warning authority remain routed to BMKG first."
+  },
+  "imageStatus": {
+    "status": "missing_educational_renderer",
+    "currentRenderer": "studio/render.js supports quake-alert MergedEvent cards only.",
+    "expectedFiles": "No PNG or JPG files are expected in this dry run."
+  },
+  "nextRendererStep": "Implement a deterministic educational SVG renderer for editorial_steps, checklist_card, and poster_statement using Design SDK tokens, template registry text zones, mandatory footer tokens, and the existing Resvg rasterization path."
+}
+

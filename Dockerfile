@@ -12,6 +12,8 @@ WORKDIR /app
 COPY package.json run.js ./
 COPY src ./src
 COPY fixtures ./fixtures
+COPY design ./design
+COPY content ./content
 # The watcher itself has ZERO dependencies and needs no `npm install`.
 #
 # The Instagram studio (optional, opt-in via STUDIO_ENABLED) is isolated in

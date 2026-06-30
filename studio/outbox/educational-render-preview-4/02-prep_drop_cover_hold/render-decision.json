@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "editorial-dry-run-1",
+  "publicationStatus": "dry_run_not_approved",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "prep_drop_cover_hold",
+  "topicPath": "content/topic_backlog.json#prep_drop_cover_hold",
+  "selectedAt": "2026-06-27",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "preparedness",
+    "label": "Siap Sebelum Bencana"
+  },
+  "templateId": "editorial_steps",
+  "sourceIds": [
+    "bnpb",
+    "project_safety_rules"
+  ],
+  "sourceLabels": [
+    {
+      "id": "bnpb",
+      "label": "BNPB"
+    },
+    {
+      "id": "project_safety_rules",
+      "label": "Palu Earthquake Alerts safety rules"
+    }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Saat guncangan tiba-tiba terasa, banyak orang membeku dan mencari pintu keluar sebelum melindungi diri.",
+    "localRelevance": "Rumah, sekolah, warung, dan tempat kerja di Palu, Sigi, dan sekitarnya perlu punya respons sederhana untuk detik pertama guncangan.",
+    "practicalAction": "Latih tiga kata bersama keluarga: merunduk, lindungi, berpegangan."
+  },
+  "imageStatus": "approved_assets_integrated_review_required",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "pillarId": "preparedness",
+    "sourceIds": [
+      "bnpb",
+      "project_safety_rules"
+    ],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "ambient_pattern": "pat_preparedness_route_grid",
+        "row_icons": [
+          "icon_action_drop",
+          "icon_action_cover",
+          "icon_action_hold"
+        ]
+      }
+    },
+    "content": {
+      "kicker": "Siap Sebelum Bencana",
+      "title": "Saat Gempa: 3 Langkah",
+      "rows": [
+        {
+          "label": "Merunduk",
+          "body": "Turun ke lantai sebelum terjatuh."
+        },
+        {
+          "label": "Lindungi",
+          "body": "Jaga kepala dan leher dari benda jatuh."
+        },
+        {
+          "label": "Berpegangan",
+          "body": "Tahan sampai guncangan berhenti."
+        }
+      ]
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "preparedness",
+      "sourceIds": [
+        "bnpb",
+        "project_safety_rules"
+      ],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "ambient_pattern": "pat_preparedness_route_grid",
+        "row_icons": [
+          "icon_action_drop",
+          "icon_action_cover",
+          "icon_action_hold"
+        ]
+      }
+    },
+    "content": {
+      "kicker": "Siap Sebelum Bencana",
+      "title": "Saat Gempa: 3 Langkah",
+      "rows": [
+        {
+          "label": "Merunduk",
+          "body": "Turun ke lantai sebelum terjatuh."
+        },
+        {
+          "label": "Lindungi",
+          "body": "Jaga kepala dan leher dari benda jatuh."
+        },
+        {
+          "label": "Berpegangan",
+          "body": "Tahan sampai guncangan berhenti."
+        }
+      ]
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}

@@ -1,0 +1,244 @@
+{
+  "schemaVersion": "1.0.0",
+  "updated": "2026-06-26",
+  "renderSpecSchemaVersion": "1.0.0",
+  "rules": {
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "defaultFooterId": "mandatory_honest_framing",
+    "requiresVerifiedReview": true,
+    "textPolicy": "No AI-rendered factual text. The renderer owns all visible text placement.",
+    "assetPolicy": "Referenced asset IDs must exist in ASSET_INDEX.json before production use."
+  },
+  "templates": {
+    "quake_alert_card": {
+      "status": "current",
+      "family": "alert",
+      "contentTypes": ["reactive_quake"],
+      "exportTargets": ["instagram_feed", "telegram_image"],
+      "renderer": "studio/template.js",
+      "requiredFooterId": "mandatory_honest_framing",
+      "requiresVerifiedReview": true,
+      "referenceAssetIds": [],
+      "contentShape": {
+        "source": "MergedEvent from src/core.js",
+        "required": ["magnitude", "time", "depthKm", "lat", "lon"],
+        "rendererOwnedFields": ["severity", "actionBand", "footer", "brandLockup"]
+      },
+      "textZones": [
+        { "id": "brand_lockup", "role": "brand", "required": true, "owner": "renderer" },
+        { "id": "severity_chip", "role": "severity", "required": true, "owner": "renderer" },
+        { "id": "quake_facts", "role": "verified_event_data", "required": true, "owner": "renderer" },
+        { "id": "action_band", "role": "safety_instruction", "required": true, "owner": "renderer" },
+        { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
+      ],
+      "assetSlots": [
+        {
+          "id": "bmkg_shakemap",
+          "allowedTypes": ["official_source_image"],
+          "required": false,
+          "source": "BMKG",
+          "fallback": "renderer_placeholder"
+        }
+      ],
+      "safetyChecks": [
+        "classification_matches_src_core",
+        "wita_time",
+        "mandatory_footer",
+        "no_all_clear",
+        "high_ground_rule"
+      ]
+    },
+    "editorial_steps": {
+      "status": "planned",
+      "family": "editorial",
+      "contentTypes": ["explainer", "carousel_slide", "education_steps"],
+      "exportTargets": ["instagram_feed", "telegram_image"],
+      "requiredFooterId": "mandatory_honest_framing",
+      "requiresVerifiedReview": true,
+      "referenceAssetIds": ["reference_editorial_steps"],
+      "contentShape": {
+        "required": ["kicker", "title", "rows"],
+        "rows": { "min": 2, "max": 4, "requiredFields": ["label", "body"] }
+      },
+      "textZones": [
+        { "id": "pillar_tag", "role": "pillar", "required": true, "owner": "renderer" },
+        { "id": "title", "role": "headline", "required": true, "owner": "renderer" },
+        { "id": "rows", "role": "structured_body", "required": true, "owner": "renderer" },
+        { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
+      ],
+      "assetSlots": [
+        {
+          "id": "ambient_pattern",
+          "allowedTypes": ["pattern"],
+          "required": false,
+          "textless": true,
+          "presentation": {
+            "role": "secondary_header_motif",
+            "region": "header_right",
+            "fit": "contain",
+            "maxOpacity": 0.24,
+            "clearTextZone": "header_left",
+            "layer": "below_text"
+          }
+        },
+        {
+          "id": "row_icons",
+          "allowedTypes": ["icon"],
+          "required": false,
+          "textless": true,
+          "multiple": true,
+          "maxItems": 4,
+          "presentation": {
+            "role": "action_markers",
+            "region": "rows",
+            "fit": "contain",
+            "layer": "with_body"
+          }
+        }
+      ],
+      "safetyChecks": ["verified_sources", "mandatory_footer", "bahasa_indonesia", "no_prediction"]
+    },
+    "checklist_card": {
+      "status": "planned",
+      "family": "editorial",
+      "contentTypes": ["checklist", "preparedness_steps"],
+      "exportTargets": ["instagram_feed", "telegram_image"],
+      "requiredFooterId": "mandatory_honest_framing",
+      "requiresVerifiedReview": true,
+      "referenceAssetIds": ["reference_editorial_steps"],
+      "contentShape": {
+        "required": ["kicker", "title", "items"],
+        "items": { "min": 3, "max": 6, "requiredFields": ["label"] }
+      },
+      "textZones": [
+        { "id": "pillar_tag", "role": "pillar", "required": true, "owner": "renderer" },
+        { "id": "title", "role": "headline", "required": true, "owner": "renderer" },
+        { "id": "items", "role": "checklist", "required": true, "owner": "renderer" },
+        { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
+      ],
+      "assetSlots": [
+        {
+          "id": "focal_illustration",
+          "allowedTypes": ["illustration"],
+          "required": false,
+          "textless": true,
+          "presentation": {
+            "role": "single_visual_anchor",
+            "region": "content_top",
+            "fit": "contain",
+            "surface": "solid_paper",
+            "clearTextZone": "header",
+            "layer": "above_surface"
+          }
+        }
+      ],
+      "safetyChecks": ["verified_sources", "mandatory_footer", "bahasa_indonesia", "practical_action"]
+    },
+    "poster_statement": {
+      "status": "planned",
+      "family": "poster",
+      "contentTypes": ["myth_bust", "quote", "single_takeaway", "anniversary"],
+      "exportTargets": ["instagram_feed", "telegram_image"],
+      "requiredFooterId": "mandatory_honest_framing",
+      "requiresVerifiedReview": true,
+      "referenceAssetIds": ["reference_poster_statement"],
+      "contentShape": {
+        "required": ["kicker", "title"],
+        "optional": ["body", "sourceLabel"]
+      },
+      "textZones": [
+        { "id": "pillar_tag", "role": "pillar", "required": true, "owner": "renderer" },
+        { "id": "statement", "role": "headline", "required": true, "owner": "renderer" },
+        { "id": "source_label", "role": "source_attribution", "required": false, "owner": "renderer" },
+        { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
+      ],
+      "assetSlots": [
+        {
+          "id": "poster_background",
+          "allowedTypes": ["background", "photo", "illustration"],
+          "required": false,
+          "textless": true,
+          "presentation": {
+            "role": "single_visual_anchor",
+            "region": "poster_canvas",
+            "fit": "cover",
+            "clearTextZone": "statement",
+            "layer": "below_scrim"
+          }
+        }
+      ],
+      "safetyChecks": ["verified_sources", "mandatory_footer", "no_alarmist_imagery", "no_prediction"]
+    },
+    "story_card": {
+      "status": "planned",
+      "family": "story",
+      "contentTypes": ["quick_tip", "announcement", "recap_story"],
+      "exportTargets": ["story_9_16"],
+      "requiredFooterId": "mandatory_honest_framing",
+      "requiresVerifiedReview": true,
+      "referenceAssetIds": [],
+      "contentShape": {
+        "required": ["kicker", "title"],
+        "optional": ["body", "progress"]
+      },
+      "textZones": [
+        { "id": "pillar_tag", "role": "pillar", "required": false, "owner": "renderer" },
+        { "id": "title", "role": "headline", "required": true, "owner": "renderer" },
+        { "id": "body", "role": "supporting_copy", "required": false, "owner": "renderer" },
+        { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
+      ],
+      "assetSlots": [
+        { "id": "background", "allowedTypes": ["background", "illustration", "pattern"], "required": false, "textless": true }
+      ],
+      "safetyChecks": ["verified_sources", "mandatory_footer", "mobile_safe_area", "bahasa_indonesia"]
+    },
+    "carousel_cover": {
+      "status": "planned",
+      "family": "carousel",
+      "contentTypes": ["carousel_cover"],
+      "exportTargets": ["instagram_feed", "telegram_image"],
+      "requiredFooterId": "mandatory_honest_framing",
+      "requiresVerifiedReview": true,
+      "referenceAssetIds": ["reference_carousel_cover"],
+      "contentShape": {
+        "required": ["kicker", "title", "slideCount"],
+        "optional": ["subtitle", "swipeCue"]
+      },
+      "textZones": [
+        { "id": "pillar_tag", "role": "pillar", "required": true, "owner": "renderer" },
+        { "id": "title", "role": "headline", "required": true, "owner": "renderer" },
+        { "id": "progress", "role": "carousel_progress", "required": true, "owner": "renderer" },
+        { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
+      ],
+      "assetSlots": [
+        { "id": "cover_background", "allowedTypes": ["background", "illustration"], "required": false, "textless": true }
+      ],
+      "safetyChecks": ["verified_sources", "mandatory_footer", "plain_topic", "not_overloaded"]
+    },
+    "carousel_slide": {
+      "status": "planned",
+      "family": "carousel",
+      "contentTypes": ["carousel_body"],
+      "exportTargets": ["instagram_feed", "telegram_image"],
+      "requiredFooterId": "mandatory_honest_framing",
+      "requiresVerifiedReview": true,
+      "referenceAssetIds": ["reference_editorial_steps"],
+      "contentShape": {
+        "required": ["kicker", "title", "body", "progress"],
+        "optional": ["rows"]
+      },
+      "textZones": [
+        { "id": "pillar_tag", "role": "pillar", "required": true, "owner": "renderer" },
+        { "id": "title", "role": "headline", "required": true, "owner": "renderer" },
+        { "id": "body", "role": "supporting_copy", "required": true, "owner": "renderer" },
+        { "id": "progress", "role": "carousel_progress", "required": true, "owner": "renderer" },
+        { "id": "mandatory_footer", "role": "honest_framing", "required": true, "owner": "renderer" }
+      ],
+      "assetSlots": [
+        { "id": "supporting_art", "allowedTypes": ["illustration", "icon", "object"], "required": false, "textless": true }
+      ],
+      "safetyChecks": ["verified_sources", "mandatory_footer", "single_takeaway", "bahasa_indonesia"]
+    }
+  }
+}

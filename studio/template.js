@@ -6,6 +6,7 @@
 // never disagree with the text alerts. Bahasa Indonesia + WITA only.
 
 import { classify } from '../src/core.js';
+import { CORE_COLORS, FEED_CANVAS, MANDATORY_FOOTER } from './design-sdk.js';
 
 const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
 
@@ -111,46 +112,46 @@ export function buildCardSvg(m, { shakemapDataUri = null } = {}) {
   const bandH = 52 + noteLines.length * 46 + 16;
 
   const hero = shakemapDataUri
-    ? `<image href="${shakemapDataUri}" x="0" y="184" width="1080" height="600" preserveAspectRatio="xMidYMid slice"/>`
-    : T(540, 500, 30, '#7FB7B8', 'Shakemap BMKG tidak tersedia', { anchor: 'middle' });
+    ? `<image href="${shakemapDataUri}" x="0" y="184" width="${FEED_CANVAS.width}" height="600" preserveAspectRatio="xMidYMid slice"/>`
+    : T(540, 500, 30, CORE_COLORS.teal_accent, 'Shakemap BMKG tidak tersedia', { anchor: 'middle' });
 
   const p = [];
-  p.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 1350" width="1080" height="1350" role="img">');
+  p.push(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${FEED_CANVAS.width} ${FEED_CANVAS.height}" width="${FEED_CANVAS.width}" height="${FEED_CANVAS.height}" role="img">`);
   p.push(`<title>${esc(`Palu Earthquake Alerts — ${mag} ${place}`)}</title>`);
-  p.push('<rect x="0" y="0" width="1080" height="1350" fill="#0F4C5C"/>');
+  p.push(`<rect x="0" y="0" width="${FEED_CANVAS.width}" height="${FEED_CANVAS.height}" fill="${CORE_COLORS.teal}"/>`);
 
   // header
-  p.push('<rect x="0" y="0" width="1080" height="184" fill="#0A3742"/>');
-  p.push('<circle cx="96" cy="92" r="58" fill="#0F4C5C" stroke="#7FB7B8" stroke-width="5"/>');
-  p.push('<path d="M40 92 H62 L72 70 84 120 96 56 108 92 H152" fill="none" stroke="#FBFCFB" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>');
-  p.push('<path d="M84 120 96 56 108 92" fill="none" stroke="#C77B0A" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>');
-  p.push(T(184, 80, 40, '#FBFCFB', 'Palu Earthquake Alerts', { weight: 600 }));
-  p.push(T(184, 124, 26, '#7FB7B8', 'Pemantau gempa & tsunami · Sulawesi Tengah'));
+  p.push(`<rect x="0" y="0" width="${FEED_CANVAS.width}" height="184" fill="${CORE_COLORS.teal_deep}"/>`);
+  p.push(`<circle cx="96" cy="92" r="58" fill="${CORE_COLORS.teal}" stroke="${CORE_COLORS.teal_accent}" stroke-width="5"/>`);
+  p.push(`<path d="M40 92 H62 L72 70 84 120 96 56 108 92 H152" fill="none" stroke="${CORE_COLORS.off_white}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`);
+  p.push(`<path d="M84 120 96 56 108 92" fill="none" stroke="${CORE_COLORS.amber}" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`);
+  p.push(T(184, 80, 40, CORE_COLORS.off_white, 'Palu Earthquake Alerts', { weight: 600 }));
+  p.push(T(184, 124, 26, CORE_COLORS.teal_accent, 'Pemantau gempa & tsunami · Sulawesi Tengah'));
   p.push(`<rect x="${chipX}" y="56" width="${chipW}" height="60" rx="30" fill="${sev.bg}"/>`);
   p.push(`<circle cx="${chipX + 34}" cy="86" r="9" fill="${sev.dot}"/>`);
   p.push(T(chipX + 58, 97, 30, sev.ink, sev.label, { weight: 600 }));
 
   // hero (shakemap)
-  p.push('<rect x="0" y="184" width="1080" height="600" fill="#11343d"/>');
+  p.push(`<rect x="0" y="184" width="${FEED_CANVAS.width}" height="600" fill="${CORE_COLORS.teal_mid}"/>`);
   p.push(hero);
-  p.push('<rect x="32" y="716" width="580" height="52" rx="8" fill="#0A3742" fill-opacity="0.82"/>');
-  p.push(T(56, 751, 28, '#9FE1CB', 'Peta guncangan (shakemap) · BMKG'));
+  p.push(`<rect x="32" y="716" width="580" height="52" rx="8" fill="${CORE_COLORS.teal_deep}" fill-opacity="0.82"/>`);
+  p.push(T(56, 751, 28, CORE_COLORS.mint, 'Peta guncangan (shakemap) · BMKG'));
 
   // magnitude + location (place column kept clear of the wide magnitude glyphs)
-  p.push(T(44, 902, 104, '#FBFCFB', mag, { weight: 600 }));
-  p.push(T(384, 866, 40, '#FBFCFB', place, { weight: 600 }));
-  p.push(T(384, 912, 30, '#9FE1CB', sub));
+  p.push(T(44, 902, 104, CORE_COLORS.off_white, mag, { weight: 600 }));
+  p.push(T(384, 866, 40, CORE_COLORS.off_white, place, { weight: 600 }));
+  p.push(T(384, 912, 30, CORE_COLORS.mint, sub));
 
   // caution band
   p.push(`<rect x="44" y="${bandY}" width="992" height="${bandH}" rx="12" fill="${note.bg}"/>`);
   p.push(`<rect x="44" y="${bandY}" width="12" height="${bandH}" fill="${note.bar}"/>`);
   noteLines.forEach((ln, i) => p.push(T(82, bandY + 56 + i * 46, 32, note.ink, ln)));
 
-  // footer (honest framing — carried on every post)
-  p.push('<rect x="0" y="1200" width="1080" height="150" fill="#0A3742"/>');
-  p.push(T(44, 1262, 28, '#7FB7B8', 'Notifikasi cepat — bukan peringatan dini.'));
-  p.push(T(44, 1300, 28, '#7FB7B8', 'Selalu ikuti arahan resmi BMKG.'));
-  p.push(T(1036, 1284, 32, '#FBFCFB', '@infogempapalu', { weight: 600, anchor: 'end' }));
+  // Footer lines come from the Design SDK; the renderer still owns placement.
+  p.push(`<rect x="0" y="1200" width="${FEED_CANVAS.width}" height="150" fill="${CORE_COLORS.teal_deep}"/>`);
+  p.push(T(44, 1262, 28, CORE_COLORS.teal_accent, MANDATORY_FOOTER.currentLines[0]));
+  p.push(T(44, 1300, 28, CORE_COLORS.teal_accent, MANDATORY_FOOTER.currentLines[1]));
+  p.push(T(1036, 1284, 32, CORE_COLORS.off_white, MANDATORY_FOOTER.handle, { weight: 600, anchor: 'end' }));
 
   p.push('</svg>');
   return p.join('');

@@ -5,7 +5,9 @@
   "type": "module",
   "description": "Instagram content studio for Palu Earthquake Alerts — renders branded shakemap cards + Indonesian captions. Deliberately SEPARATE from the zero-dependency watcher in ../src; a failure here must never affect alert delivery.",
   "scripts": {
-    "demo": "node studio.js --demo"
+    "demo": "node studio.js --demo",
+    "render:education": "node render-educational-outbox.js",
+    "render:asset-review": "node render-asset-bank-review.js"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2"

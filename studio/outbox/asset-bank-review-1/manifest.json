@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "asset-bank-review-1",
+  "batchType": "asset_candidate_review",
+  "publicationStatus": "candidate_approval_required",
+  "created": "2026-06-27",
+  "candidateAssetIds": [
+    "pat_ground_contours",
+    "pat_preparedness_route_grid",
+    "pat_information_source_trail",
+    "icon_route_high_ground",
+    "icon_action_drop",
+    "icon_action_cover",
+    "icon_action_hold",
+    "icon_verify_stop",
+    "icon_verify_source",
+    "icon_verify_share",
+    "ill_preparedness_go_bag_flatlay"
+  ],
+  "rules": {
+    "textlessAssets": true,
+    "noProductionIntegration": true,
+    "noAutoPost": true,
+    "humanApprovalRequired": true
+  },
+  "files": [
+    "contact-sheet.png",
+    "contact-sheet.svg"
+  ]
+}
