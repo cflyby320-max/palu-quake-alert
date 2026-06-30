@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "production-batch-1",
+  "batchType": "educational_production_batch",
+  "sourceBatchId": "educational-render-preview-5",
+  "decisionLineage": [
+    "editorial-dry-run-1",
+    "educational-render-preview-4 (approved render direction)",
+    "educational-render-preview-5"
+  ],
+  "created": "2026-06-30",
+  "publicationStatus": "human_approved_ready_to_post",
+  "approval": {
+    "humanApproved": true,
+    "approvedBy": "c.flyby320@gmail.com",
+    "approvedDate": "2026-06-30",
+    "scope": "all 5 cards in this batch"
+  },
+  "postingMode": "manual",
+  "changeFromPreview": "Caption guard header (\"DRAFT / NOT APPROVED / DO NOT POST\") removed for posting. Card images, copy, source IDs, mandatory honest-framing footer, and BMKG positioning are byte-identical to the approved preview.",
+  "rules": {
+    "noAutoPost": true,
+    "noExternalApis": true,
+    "noWatcherChanges": true,
+    "mandatoryFooterId": "mandatory_honest_framing"
+  },
+  "rendered": [
+    {
+      "topicId": "ground_high_ground_route",
+      "folder": "01-ground_high_ground_route",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json"
+      ],
+      "humanApproved": true,
+      "approvedBy": "c.flyby320@gmail.com",
+      "approvedDate": "2026-06-30"
+    },
+    {
+      "topicId": "prep_drop_cover_hold",
+      "folder": "02-prep_drop_cover_hold",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json"
+      ],
+      "humanApproved": true,
+      "approvedBy": "c.flyby320@gmail.com",
+      "approvedDate": "2026-06-30"
+    },
+    {
+      "topicId": "info_check_before_share",
+      "folder": "03-info_check_before_share",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json"
+      ],
+      "humanApproved": true,
+      "approvedBy": "c.flyby320@gmail.com",
+      "approvedDate": "2026-06-30"
+    },
+    {
+      "topicId": "info_no_prediction",
+      "folder": "04-info_no_prediction",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json"
+      ],
+      "humanApproved": true,
+      "approvedBy": "c.flyby320@gmail.com",
+      "approvedDate": "2026-06-30"
+    },
+    {
+      "topicId": "prep_go_bag_basics",
+      "folder": "05-prep_go_bag_basics",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json"
+      ],
+      "humanApproved": true,
+      "approvedBy": "c.flyby320@gmail.com",
+      "approvedDate": "2026-06-30"
+    }
+  ]
+}
