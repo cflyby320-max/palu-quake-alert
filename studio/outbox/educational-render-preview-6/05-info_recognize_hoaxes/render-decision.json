@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "educational-render-preview-6",
+  "publicationStatus": "review_required_not_auto_posted",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "info_recognize_hoaxes",
+  "topicPath": "content/topic_backlog.json#info_recognize_hoaxes",
+  "selectedAt": "2026-07-02",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "information_hygiene",
+    "label": "Saring Sebelum Sebar"
+  },
+  "templateId": "editorial_steps",
+  "sourceIds": [
+    "bmkg",
+    "project_safety_rules"
+  ],
+  "sourceLabels": [
+    {
+      "id": "bmkg",
+      "label": "BMKG / InaTEWS"
+    },
+    {
+      "id": "project_safety_rules",
+      "label": "Palu Earthquake Alerts safety rules"
+    }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Pesan berantai yang menyebut jam atau tanggal gempa membuat panik tanpa dasar.",
+    "localRelevance": "Info belum terverifikasi menyebar cepat di grup keluarga setelah gempa terasa.",
+    "practicalAction": "Berhenti sejenak, cek sumber resmi, lalu bagikan hanya yang terverifikasi."
+  },
+  "imageStatus": "rendered_review_required",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "pillarId": "information_hygiene",
+    "sourceIds": [
+      "bmkg",
+      "project_safety_rules"
+    ],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "ambient_pattern": "pat_information_source_trail",
+        "row_icons": [
+          "icon_verify_stop",
+          "icon_verify_source",
+          "icon_verify_share"
+        ]
+      }
+    },
+    "content": {
+      "kicker": "Saring Sebelum Sebar",
+      "title": "Ciri Pesan Hoaks Gempa",
+      "rows": [
+        {
+          "label": "Berhenti",
+          "body": "Pesan yang menyebut tanggal atau jam gempa secara pasti adalah tanda hoaks."
+        },
+        {
+          "label": "Cek sumber",
+          "body": "Info gempa yang sahih datang dari BMKG/InaTEWS, bukan pesan berantai."
+        },
+        {
+          "label": "Baru bagikan",
+          "body": "Teruskan hanya info yang sudah terverifikasi dan membantu menenangkan."
+        }
+      ]
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "information_hygiene",
+      "sourceIds": [
+        "bmkg",
+        "project_safety_rules"
+      ],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "ambient_pattern": "pat_information_source_trail",
+        "row_icons": [
+          "icon_verify_stop",
+          "icon_verify_source",
+          "icon_verify_share"
+        ]
+      }
+    },
+    "content": {
+      "kicker": "Saring Sebelum Sebar",
+      "title": "Ciri Pesan Hoaks Gempa",
+      "rows": [
+        {
+          "label": "Berhenti",
+          "body": "Pesan yang menyebut tanggal atau jam gempa secara pasti adalah tanda hoaks."
+        },
+        {
+          "label": "Cek sumber",
+          "body": "Info gempa yang sahih datang dari BMKG/InaTEWS, bukan pesan berantai."
+        },
+        {
+          "label": "Baru bagikan",
+          "body": "Teruskan hanya info yang sudah terverifikasi dan membantu menenangkan."
+        }
+      ]
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}

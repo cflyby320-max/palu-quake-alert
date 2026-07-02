@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "educational-render-preview-6",
+  "publicationStatus": "review_required_not_auto_posted",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "ground_tsunami_natural_signs",
+  "topicPath": "content/topic_backlog.json#ground_tsunami_natural_signs",
+  "selectedAt": "2026-07-02",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "know_your_ground",
+    "label": "Kenali Wilayahmu"
+  },
+  "templateId": "poster_statement",
+  "sourceIds": [
+    "bmkg",
+    "project_safety_rules"
+  ],
+  "sourceLabels": [
+    {
+      "id": "bmkg",
+      "label": "BMKG / InaTEWS"
+    },
+    {
+      "id": "project_safety_rules",
+      "label": "Palu Earthquake Alerts safety rules"
+    }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Sebagian orang menunggu sirene atau kabar berantai sebelum menjauh dari pantai.",
+    "localRelevance": "Pada 2018 peringatan sempat dicabut lebih awal; tanda alam tetap penting di pesisir Palu.",
+    "practicalAction": "Setelah guncangan kuat dan lama di dekat pantai, segera ke tempat tinggi tanpa menunggu."
+  },
+  "imageStatus": "rendered_review_required",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "poster_statement",
+    "pillarId": "know_your_ground",
+    "sourceIds": [
+      "bmkg",
+      "project_safety_rules"
+    ],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": [
+        "reference_poster_statement"
+      ]
+    },
+    "content": {
+      "kicker": "Kenali Wilayahmu",
+      "title": "Guncangan Kuat & Lama di Dekat Pantai? Menjauh, Jangan Menunggu.",
+      "body": "Guncangan kuat dan lama, atau air laut yang tiba-tiba surut, adalah tanda untuk segera ke tempat tinggi.",
+      "sourceLabel": "Rujukan: BMKG / InaTEWS."
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "poster_statement",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "know_your_ground",
+      "sourceIds": [
+        "bmkg",
+        "project_safety_rules"
+      ],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": [
+        "reference_poster_statement"
+      ]
+    },
+    "content": {
+      "kicker": "Kenali Wilayahmu",
+      "title": "Guncangan Kuat & Lama di Dekat Pantai? Menjauh, Jangan Menunggu.",
+      "body": "Guncangan kuat dan lama, atau air laut yang tiba-tiba surut, adalah tanda untuk segera ke tempat tinggi.",
+      "sourceLabel": "Rujukan: BMKG / InaTEWS."
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}

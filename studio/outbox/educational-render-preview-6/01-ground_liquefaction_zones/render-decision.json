@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "educational-render-preview-6",
+  "publicationStatus": "review_required_not_auto_posted",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "ground_liquefaction_zones",
+  "topicPath": "content/topic_backlog.json#ground_liquefaction_zones",
+  "selectedAt": "2026-07-02",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "know_your_ground",
+    "label": "Kenali Wilayahmu"
+  },
+  "templateId": "editorial_steps",
+  "sourceIds": [
+    "bmkg",
+    "bpbd_sulteng",
+    "project_safety_rules"
+  ],
+  "sourceLabels": [
+    {
+      "id": "bmkg",
+      "label": "BMKG / InaTEWS"
+    },
+    {
+      "id": "bpbd_sulteng",
+      "label": "BPBD Sulawesi Tengah"
+    },
+    {
+      "id": "project_safety_rules",
+      "label": "Palu Earthquake Alerts safety rules"
+    }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Banyak keluarga belum tahu apakah lingkungannya termasuk tanah yang rawan likuefaksi.",
+    "localRelevance": "Balaroa, Petobo, dan Jono Oge mengalami likuefaksi pada 2018; sebagian wilayah memang lebih rawan.",
+    "practicalAction": "Cari tahu status tanah lingkunganmu dari peta resmi BPBD/BMKG dan ikuti arahan penataan ruang."
+  },
+  "imageStatus": "rendered_review_required",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "pillarId": "know_your_ground",
+    "sourceIds": [
+      "bmkg",
+      "bpbd_sulteng",
+      "project_safety_rules"
+    ],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "ambient_pattern": "pat_ground_contours"
+      }
+    },
+    "content": {
+      "kicker": "Kenali Wilayahmu",
+      "title": "Kenali Tanah Rawan Likuefaksi",
+      "rows": [
+        {
+          "label": "Apa itu",
+          "body": "Guncangan kuat bisa membuat tanah berpasir yang jenuh air kehilangan kekuatan sesaat."
+        },
+        {
+          "label": "Di Palu",
+          "body": "Balaroa, Petobo, dan Jono Oge mengalaminya pada 2018. Sebagian lingkungan lebih rawan."
+        },
+        {
+          "label": "Yang bisa disiapkan",
+          "body": "Cek status tanah lingkunganmu di peta resmi BPBD/BMKG dan ikuti arahan penataan ruang."
+        }
+      ]
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "know_your_ground",
+      "sourceIds": [
+        "bmkg",
+        "bpbd_sulteng",
+        "project_safety_rules"
+      ],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "ambient_pattern": "pat_ground_contours"
+      }
+    },
+    "content": {
+      "kicker": "Kenali Wilayahmu",
+      "title": "Kenali Tanah Rawan Likuefaksi",
+      "rows": [
+        {
+          "label": "Apa itu",
+          "body": "Guncangan kuat bisa membuat tanah berpasir yang jenuh air kehilangan kekuatan sesaat."
+        },
+        {
+          "label": "Di Palu",
+          "body": "Balaroa, Petobo, dan Jono Oge mengalaminya pada 2018. Sebagian lingkungan lebih rawan."
+        },
+        {
+          "label": "Yang bisa disiapkan",
+          "body": "Cek status tanah lingkunganmu di peta resmi BPBD/BMKG dan ikuti arahan penataan ruang."
+        }
+      ]
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}
