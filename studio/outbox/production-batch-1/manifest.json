@@ -12,7 +12,7 @@
   "publicationStatus": "human_approved_ready_to_post",
   "approval": {
     "humanApproved": true,
-    "approvedBy": "c.flyby320@gmail.com",
+    "approvedBy": "owner",
     "approvedDate": "2026-06-30",
     "scope": "all 5 cards in this batch"
   },
@@ -35,7 +35,7 @@
         "render-decision.json"
       ],
       "humanApproved": true,
-      "approvedBy": "c.flyby320@gmail.com",
+      "approvedBy": "owner",
       "approvedDate": "2026-06-30"
     },
     {
@@ -48,7 +48,7 @@
         "render-decision.json"
       ],
       "humanApproved": true,
-      "approvedBy": "c.flyby320@gmail.com",
+      "approvedBy": "owner",
       "approvedDate": "2026-06-30"
     },
     {
@@ -61,7 +61,7 @@
         "render-decision.json"
       ],
       "humanApproved": true,
-      "approvedBy": "c.flyby320@gmail.com",
+      "approvedBy": "owner",
       "approvedDate": "2026-06-30"
     },
     {
@@ -74,7 +74,7 @@
         "render-decision.json"
       ],
       "humanApproved": true,
-      "approvedBy": "c.flyby320@gmail.com",
+      "approvedBy": "owner",
       "approvedDate": "2026-06-30"
     },
     {
@@ -87,7 +87,7 @@
         "render-decision.json"
       ],
       "humanApproved": true,
-      "approvedBy": "c.flyby320@gmail.com",
+      "approvedBy": "owner",
       "approvedDate": "2026-06-30"
     }
   ]
