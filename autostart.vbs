@@ -3,4 +3,4 @@
 ' single-instance lock prevents duplicates if launched twice.
 ' Fly.io is the primary always-on runtime; this PC loop is a backup only.
 Set sh = CreateObject("WScript.Shell")
-sh.Run """C:\dev\palu-quake-alert\start.cmd""", 0, False
+sh.Run """C:\Users\User\MaybeViki\projects\palu-quake-alert\start.cmd""", 0, False
