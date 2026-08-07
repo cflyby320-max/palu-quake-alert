@@ -1,0 +1,15 @@
+# Normalize line endings to LF in the repo, regardless of the OS or cloud-sync
+# folder the working copy lives in. This repo is hosted inside a Google Drive
+# synced folder, which had been rewriting files to CRLF and producing phantom
+# whole-file diffs. `text=auto eol=lf` tells Git to store and check out LF.
+* text=auto eol=lf
+
+# Binary assets: never touch their bytes.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.ttf binary
+*.woff binary
+*.woff2 binary
