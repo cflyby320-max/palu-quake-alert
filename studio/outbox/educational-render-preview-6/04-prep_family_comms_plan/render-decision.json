@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "educational-render-preview-6",
+  "publicationStatus": "review_required_not_auto_posted",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "prep_family_comms_plan",
+  "topicPath": "content/topic_backlog.json#prep_family_comms_plan",
+  "selectedAt": "2026-07-02",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "preparedness",
+    "label": "Siap Sebelum Bencana"
+  },
+  "templateId": "editorial_steps",
+  "sourceIds": [
+    "bnpb",
+    "bpbd_sulteng",
+    "project_safety_rules"
+  ],
+  "sourceLabels": [
+    {
+      "id": "bnpb",
+      "label": "BNPB"
+    },
+    {
+      "id": "bpbd_sulteng",
+      "label": "BPBD Sulawesi Tengah"
+    },
+    {
+      "id": "project_safety_rules",
+      "label": "Palu Earthquake Alerts safety rules"
+    }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Saat jaringan sibuk setelah gempa, keluarga sulit saling mengabari.",
+    "localRelevance": "Sinyal sering padat setelah guncangan di Palu dan sekitarnya.",
+    "practicalAction": "Sepakati titik kumpul, kontak penghubung, dan rencana bila sinyal putus."
+  },
+  "imageStatus": "rendered_review_required",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "pillarId": "preparedness",
+    "sourceIds": [
+      "bnpb",
+      "bpbd_sulteng",
+      "project_safety_rules"
+    ],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "ambient_pattern": "pat_preparedness_route_grid"
+      }
+    },
+    "content": {
+      "kicker": "Siap Sebelum Bencana",
+      "title": "Rencana Komunikasi Keluarga",
+      "rows": [
+        {
+          "label": "Titik kumpul",
+          "body": "Sepakati satu titik kumpul dekat rumah dan satu cadangan di luar lingkungan."
+        },
+        {
+          "label": "Kontak penghubung",
+          "body": "Pilih satu kerabat di luar kota sebagai penghubung jika jaringan lokal padat."
+        },
+        {
+          "label": "Bila sinyal putus",
+          "body": "Tetap tenang, menuju titik kumpul, dan ikuti info resmi BMKG/BPBD."
+        }
+      ]
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "editorial_steps",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "preparedness",
+      "sourceIds": [
+        "bnpb",
+        "bpbd_sulteng",
+        "project_safety_rules"
+      ],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ],
+      "slots": {
+        "ambient_pattern": "pat_preparedness_route_grid"
+      }
+    },
+    "content": {
+      "kicker": "Siap Sebelum Bencana",
+      "title": "Rencana Komunikasi Keluarga",
+      "rows": [
+        {
+          "label": "Titik kumpul",
+          "body": "Sepakati satu titik kumpul dekat rumah dan satu cadangan di luar lingkungan."
+        },
+        {
+          "label": "Kontak penghubung",
+          "body": "Pilih satu kerabat di luar kota sebagai penghubung jika jaringan lokal padat."
+        },
+        {
+          "label": "Bila sinyal putus",
+          "body": "Tetap tenang, menuju titik kumpul, dan ikuti info resmi BMKG/BPBD."
+        }
+      ]
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}

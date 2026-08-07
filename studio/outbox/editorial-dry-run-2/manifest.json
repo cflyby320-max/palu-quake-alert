@@ -1,0 +1,28 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "editorial-dry-run-2",
+  "batchType": "editorial_outbox_dry_run",
+  "created": "2026-07-02",
+  "publicationStatus": "dry_run_not_approved",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "selection": {
+    "source": "newly authored (topic backlog exhausted for fresh topics)",
+    "note": "New civic-education subjects across all three pillars; human approval required before publish.",
+    "topicIds": [
+      "ground_liquefaction_zones",
+      "ground_tsunami_natural_signs",
+      "prep_secure_furniture",
+      "prep_family_comms_plan",
+      "info_recognize_hoaxes"
+    ]
+  },
+  "rules": {
+    "noAutoPost": true,
+    "noExternalApis": true,
+    "noWatcherChanges": true,
+    "humanApprovalRequired": true,
+    "mandatoryFooterId": "mandatory_honest_framing",
+    "bmkgPositioning": "Emergency facts and Indonesian public-warning authority remain routed to BMKG first."
+  },
+  "validation": "Every renderSpec validated by buildRenderSpecFromContentDecision (content-engine + template-registry)."
+}

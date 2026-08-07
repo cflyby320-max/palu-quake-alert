@@ -1,0 +1,121 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "educational-render-preview-6",
+  "publicationStatus": "review_required_not_auto_posted",
+  "reviewWarning": "DRAFT / NOT APPROVED / DO NOT POST",
+  "topicId": "prep_secure_furniture",
+  "topicPath": "content/topic_backlog.json#prep_secure_furniture",
+  "selectedAt": "2026-07-02",
+  "humanApproval": "required_before_publish",
+  "pillar": {
+    "id": "preparedness",
+    "label": "Siap Sebelum Bencana"
+  },
+  "templateId": "checklist_card",
+  "sourceIds": [
+    "bnpb",
+    "project_safety_rules"
+  ],
+  "sourceLabels": [
+    {
+      "id": "bnpb",
+      "label": "BNPB"
+    },
+    {
+      "id": "project_safety_rules",
+      "label": "Palu Earthquake Alerts safety rules"
+    }
+  ],
+  "mandatoryFooter": {
+    "id": "mandatory_honest_framing",
+    "lines": [
+      "Notifikasi cepat — bukan peringatan dini.",
+      "Selalu ikuti arahan resmi BMKG."
+    ],
+    "handle": "@infogempapalu"
+  },
+  "editorialBrief": {
+    "audiencePainPoint": "Perabot berat dan benda gantung sering luput diamankan sebelum gempa.",
+    "localRelevance": "Cedera saat gempa sering berasal dari benda jatuh di dalam rumah.",
+    "practicalAction": "Amankan lemari, rak, dan benda berat sebelum guncangan datang."
+  },
+  "imageStatus": "rendered_review_required",
+  "backlogDecision": {
+    "schemaVersion": "1.0.0",
+    "templateId": "checklist_card",
+    "pillarId": "preparedness",
+    "sourceIds": [
+      "bnpb",
+      "project_safety_rules"
+    ],
+    "reviewStatus": "verified",
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ]
+    },
+    "content": {
+      "kicker": "Siap Sebelum Bencana",
+      "title": "Amankan Perabot & Benda Berat",
+      "items": [
+        {
+          "label": "Tempelkan lemari dan rak tinggi ke dinding."
+        },
+        {
+          "label": "Pindahkan benda berat dari rak paling atas."
+        },
+        {
+          "label": "Kunci roda pada perabot beroda."
+        },
+        {
+          "label": "Jauhkan tempat tidur dari kaca dan benda gantung."
+        },
+        {
+          "label": "Simpan barang pecah belah di rak bawah."
+        }
+      ]
+    }
+  },
+  "renderSpec": {
+    "schemaVersion": "1.0.0",
+    "templateId": "checklist_card",
+    "exportTarget": "instagram_feed",
+    "language": "id",
+    "timezone": "Asia/Makassar",
+    "knowledge": {
+      "pillarId": "preparedness",
+      "sourceIds": [
+        "bnpb",
+        "project_safety_rules"
+      ],
+      "reviewStatus": "verified"
+    },
+    "assets": {
+      "referenceAssetIds": [
+        "reference_editorial_steps"
+      ]
+    },
+    "content": {
+      "kicker": "Siap Sebelum Bencana",
+      "title": "Amankan Perabot & Benda Berat",
+      "items": [
+        {
+          "label": "Tempelkan lemari dan rak tinggi ke dinding."
+        },
+        {
+          "label": "Pindahkan benda berat dari rak paling atas."
+        },
+        {
+          "label": "Kunci roda pada perabot beroda."
+        },
+        {
+          "label": "Jauhkan tempat tidur dari kaca dan benda gantung."
+        },
+        {
+          "label": "Simpan barang pecah belah di rak bawah."
+        }
+      ]
+    },
+    "footerId": "mandatory_honest_framing"
+  }
+}

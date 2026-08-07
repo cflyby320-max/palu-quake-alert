@@ -1,0 +1,83 @@
+{
+  "schemaVersion": "1.0.0",
+  "batchId": "educational-render-preview-6",
+  "sourceBatchId": "editorial-dry-run-2",
+  "batchType": "educational_render_preview",
+  "publicationStatus": "review_required_not_auto_posted",
+  "created": "2026-07-02",
+  "renderer": "studio/render-education.js",
+  "sourceRendererInput": "studio/outbox/editorial-dry-run-2",
+  "reviewArtifacts": [
+    "contact-sheet.png",
+    "contact-sheet.svg"
+  ],
+  "rules": {
+    "noAutoPost": true,
+    "noExternalApis": true,
+    "noWatcherChanges": true,
+    "humanApprovalRequired": true,
+    "mandatoryFooterId": "mandatory_honest_framing"
+  },
+  "rendered": [
+    {
+      "topicId": "ground_liquefaction_zones",
+      "folder": "01-ground_liquefaction_zones",
+      "templateId": "editorial_steps",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "ground_tsunami_natural_signs",
+      "folder": "02-ground_tsunami_natural_signs",
+      "templateId": "poster_statement",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "prep_secure_furniture",
+      "folder": "03-prep_secure_furniture",
+      "templateId": "checklist_card",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "prep_family_comms_plan",
+      "folder": "04-prep_family_comms_plan",
+      "templateId": "editorial_steps",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    },
+    {
+      "topicId": "info_recognize_hoaxes",
+      "folder": "05-info_recognize_hoaxes",
+      "templateId": "editorial_steps",
+      "files": [
+        "card.png",
+        "card.svg",
+        "caption.txt",
+        "render-decision.json",
+        "review-note.md"
+      ]
+    }
+  ]
+}
