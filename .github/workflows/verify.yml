@@ -25,13 +25,22 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # This project has zero runtime and dev dependencies, so there is
-      # deliberately no install step and no dependency cache. If a dependency
-      # is ever added, add `npm ci` here and a lockfile to the repo.
+      # The repo ROOT is deliberately dependency-free — it deploys as a Fly.io
+      # cron and carries no runtime deps. But studio/ is its own dependency
+      # island (see studio/render.js: "the ONE place the studio uses a
+      # dependency"), and the test suite imports through it. Installing it is
+      # not optional: without this step the suite dies at import with
+      # ERR_MODULE_NOT_FOUND and silently runs 102 tests instead of 112.
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 24
+          cache: npm
+          cache-dependency-path: studio/package-lock.json
+
+      - name: Install studio dependencies
+        working-directory: studio
+        run: npm ci
 
       # `node --test` exits 0 when it matches no files, so a green tick would
       # otherwise be indistinguishable from having run no tests at all.
