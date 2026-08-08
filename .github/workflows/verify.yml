@@ -11,7 +11,9 @@ permissions:
 
 concurrency:
   group: verify-${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Only cancel superseded PR runs; a cancelled main run would leave a
+  # commit with no completed verification.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   verify:
@@ -30,6 +32,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 24
+
+      # `node --test` exits 0 when it matches no files, so a green tick would
+      # otherwise be indistinguishable from having run no tests at all.
+      - name: Guard against an empty test run
+        run: |
+          count=$(ls test/*.test.js 2>/dev/null | wc -l)
+          echo "test files matched: $count"
+          test "$count" -gt 0
 
       - name: Run tests
         run: npm test
