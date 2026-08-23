@@ -1,5 +1,12 @@
 # CLAUDE.md
 
+> **First thing, every session: read `context/state-of-play.md`.** It is the live
+> state and the routing table for everything else in `context/`. This file holds
+> the rules; that one holds what is actually happening right now, including a
+> dated `## Latest` block of what changed since you last pulled. Update it before
+> you finish.
+
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What this is
