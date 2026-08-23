@@ -35,10 +35,10 @@ comment says it must.
 
 ### Fly.io liveness confirmed, 2026-08-22
 
-Via `fly auth login` (as `c.flyby320@gmail.com`) then
-`fly status -a palu-quake-alert`: machine `080e091f3e3278` is `started`, running
-image `palu-quake-alert:deployment-01KVNCJT6QYE47BBFSEC9W9PWT` at
-`palu-quake-alert.fly.dev`. A control-plane check, not an HTTP probe.
+Via an authenticated `fly auth login` (operator account, not recorded here --
+this repo is public) then `fly status -a palu-quake-alert`: the single machine reported `started`, running the current deployment image at
+`palu-quake-alert.fly.dev` (machine and image IDs deliberately not recorded --
+public repo). A control-plane check, not an HTTP probe.
 
 ### Shipped
 
@@ -237,8 +237,9 @@ Fly.io deploy's liveness was a stale 2026-08-07 claim citing ephemeral logs
 that no longer existed. Alief approved the browser-based Fly OAuth flow;
 ran `fly auth login` (background, since it just opens a browser and polls a
 callback — no TTY interaction needed), confirmed via `fly auth whoami`
-(`c.flyby320@gmail.com`), then `fly status -a palu-quake-alert`: machine
-`080e091f3e3278` is `started`, serving from `palu-quake-alert.fly.dev`.
+(operator account — not recorded here, this repo is public), then
+`fly status -a palu-quake-alert`: the single machine reported `started`, serving
+from `palu-quake-alert.fly.dev`.
 Recorded in the dossier and `work-desk.md`; that open loop is closed.
 
 **Scope note:** this confirms the machine is running, not that alerts are

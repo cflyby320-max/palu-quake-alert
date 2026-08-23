@@ -1,7 +1,8 @@
 # Palu quake alert — state of play
 
-Updated: 2026-08-23. **DORMANT** — real, shipped, no current attention. Both
-reliability defects closed 2026-08-22.
+**DORMANT** — real, shipped, no current attention. Both reliability defects
+closed 2026-08-22. (No `Updated:` stamp here on purpose — see the keepalive rule
+below. `## Latest` carries the dates that mean something.)
 
 > **Handover test:** someone else should be able to work this for two weeks from
 > this file alone. Pulse, not archive — history lives in `context/archive.md`.
@@ -32,8 +33,10 @@ been committed. Being public makes that boundary matter **more**, not less.
 pushes an empty commit every Monday, so any date recorded is guaranteed wrong
 within a week by design. `git fetch` and read the log.
 
-**A green `Verify` is offline tests only.** What it runs and what green actually
-proves live in this repo's own `CLAUDE.md` Verify table. **Unreceipted:** the
+**A green `Verify` is offline tests only.** What it runs is `.github/workflows/verify.yml`;
+what the suite covers is this repo's `CLAUDE.md` → `## Tests`. (There is no
+"Verify table" in that file — that table lived in the Nalar OS brain and was
+retired 2026-08-23.) **Unreceipted:** the
 only observed pass was local, 2026-08-07. No CI run has been checked since, so
 "green" is a memory here, not a receipt.
 
